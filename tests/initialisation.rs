@@ -1,7 +1,9 @@
+use std::path::PathBuf;
+
 use img::Img;
 
-// fn initialisers(){
-//   Img::from_url(url);
-//   Img::from_bytes(bytes);
-//   Img::from_path(path);
-// }
+fn initialisers() {
+    let path = PathBuf::from("tests/assets/test.webp");
+
+    let img: Img = path.try_into().unwrap();
+}

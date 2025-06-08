@@ -32,7 +32,7 @@ mod tests {
         fs::copy("tests/assets/test.png", &source_path).unwrap();
 
         // Load and redirect
-        let mut img = Img::open(&source_path).unwrap();
+        let mut img = Img::from_file(&source_path).unwrap();
         img.target_path = target_path.clone();
 
         img.save().expect("Save should succeed");
@@ -57,7 +57,7 @@ mod tests {
         fs::create_dir_all(&output_dir).unwrap();
         fs::copy("tests/assets/test.png", &source_path).unwrap();
 
-        let img = Img::open(&source_path).unwrap();
+        let img = Img::from_file(&source_path).unwrap();
         let metadata_before = fs::metadata(&source_path).unwrap();
         let modified_time_before = metadata_before.modified().unwrap();
 

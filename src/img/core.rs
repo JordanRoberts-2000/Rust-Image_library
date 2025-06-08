@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use crate::enums::ImgSrc;
 
+#[derive(Debug)]
 pub struct Img {
     pub(super) img: image::DynamicImage,
     pub(super) src: ImgSrc,

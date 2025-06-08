@@ -71,11 +71,8 @@ pub enum ImgError {
     #[error("Path does not have a file name: {0:?}")]
     MissingFileName(PathBuf),
 
-    #[error("failed to parse url '{url}', {source}")]
-    UrlParseFailed {
-        url: String,
-        source: url::ParseError,
-    },
+    #[error("failed to parse url '{1}', {0}")]
+    UrlParse(#[source] url::ParseError, String),
 
     #[error("'{url}' response returned status code '{status_code}'")]
     FailedRequest {
