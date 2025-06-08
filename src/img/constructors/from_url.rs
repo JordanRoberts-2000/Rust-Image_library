@@ -1,23 +1,22 @@
-use std::path::PathBuf;
-
-use image::{guess_format, GenericImageView};
-use reqwest::blocking;
-use url::Url;
+use {
+    image::{guess_format, GenericImageView},
+    reqwest::blocking,
+    std::path::PathBuf,
+    url::Url,
+};
 
 use crate::{constants::DEFAULT_FILENAME, enums::ImgSrc, Img, ImgError, Result};
 
 impl Img {
-    pub fn download<T: AsRef<str>>(url: T) -> Result<Self> {
-        let raw = url.as_ref();
+    pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
+        let url_str = url.as_ref();
 
-        let parsed_url = Url::parse(raw).map_err(|e| ImgError::UrlParseFailed {
-            url: raw.to_string(),
-            source: e,
-        })?;
+        let url: Url =
+            Url::parse(url_str).map_err(|e| ImgError::UrlParse(e, url_str.to_string()))?;
 
-        let response = blocking::get(parsed_url.clone()).map_err(|e| ImgError::DownloadFailed {
+        let response = blocking::get(url.clone()).map_err(|e| ImgError::DownloadFailed {
             source: e,
-            url: raw.to_string(),
+            url: url_str.to_string(),
         })?;
 
         if !response.status().is_success() {
@@ -29,20 +28,20 @@ impl Img {
             return Err(ImgError::FailedRequest {
                 message,
                 status_code,
-                url: raw.to_string(),
+                url: url_str.to_string(),
             });
         }
 
         let bytes = response.bytes().map_err(|e| ImgError::ResponseReadFailed {
             source: e,
-            url: raw.to_string(),
+            url: url_str.to_string(),
         })?;
 
         let format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
         let size_bytes = bytes.len();
 
         let img = image::load_from_memory(&bytes).map_err(|e| ImgError::Decoding {
-            id: raw.to_string(),
+            id: url_str.to_string(),
             source: e,
             format,
         })?;
@@ -60,7 +59,7 @@ impl Img {
 
         Ok(Self {
             img,
-            src: ImgSrc::Remote { url: parsed_url },
+            src: ImgSrc::Remote { url: url },
             target_path: target,
             height,
             width,
@@ -93,7 +92,7 @@ mod tests {
 
         let url = format!("{}/test.png", server.url());
 
-        let img = Img::download(&url).expect("Should download from mock server");
+        let img = Img::from_url(&url).expect("Should download from mock server");
 
         assert_eq!(
             img.format,
@@ -127,7 +126,7 @@ mod tests {
                 .create();
 
             let url = format!("{}{}", server.url(), route);
-            let img = Img::download(&url).expect("Should download from mock server");
+            let img = Img::from_url(&url).expect("Should download from mock server");
 
             assert_eq!(
                 img.format, expected_format,
@@ -154,25 +153,25 @@ mod tests {
         let url_obj = Url::parse(&string_url).unwrap();
 
         // String
-        Img::download(string_url.clone()).expect("String URL should work");
+        Img::from_url(string_url.clone()).expect("String URL should work");
 
         // &str
-        Img::download(str_url).expect("&str URL should work");
+        Img::from_url(str_url).expect("&str URL should work");
 
         // Url object
-        Img::download(url_obj).expect("Url object should work");
+        Img::from_url(url_obj).expect("Url object should work");
     }
 
     #[test]
     fn test_img_download_invalid_url_should_fail() {
         let bad_url = "ht^tp://[::invalid-url"; // clearly invalid
 
-        let result = Img::download(bad_url);
+        let result = Img::from_url(bad_url);
         match result {
-            Err(ImgError::UrlParseFailed { url, .. }) => {
+            Err(ImgError::UrlParse(_, url)) => {
                 assert_eq!(url, bad_url);
             }
-            _ => panic!("Expected UrlParseFailed error"),
+            _ => panic!("Expected UrlParse error"),
         }
     }
 
@@ -182,7 +181,7 @@ mod tests {
 
         // No mock for this route = 404
         let url = format!("{}/not-found.png", server.url());
-        let result = Img::download(&url);
+        let result = Img::from_url(&url);
 
         match result {
             Err(ImgError::FailedRequest {
