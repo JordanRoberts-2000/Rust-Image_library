@@ -1,0 +1,19 @@
+[package]
+name = "img"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+base64 = "0.22.1"
+blurhash = "0.2.3"
+color-thief = "0.2.2"
+image = "0.25.6"
+log = "0.4.27"
+mockito = "1.7.0"
+reqwest = { version = "0.12.15", features = ["blocking"]}
+serde = { version = "1.0.218", features = ["derive"] }
+thiserror = "2.0.12"
+trash = "5.2.2"
+url = "2.5.4"
+uuid = { version = "1.17.0", features = ["v4"] }
+webp = "0.3.0"
