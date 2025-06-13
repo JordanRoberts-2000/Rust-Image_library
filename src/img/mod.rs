@@ -1,8 +1,9 @@
-pub mod constructors;
-pub mod conversions;
 pub mod core;
-pub mod extractors;
-pub mod modifiers;
-pub mod save;
+pub mod impls {
+    pub mod constructors;
+    pub mod internal;
+    pub mod metadata;
+    pub mod serialization;
+    pub mod transformations;
+}
 pub mod traits;
-pub mod transformations;
