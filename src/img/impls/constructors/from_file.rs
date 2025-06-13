@@ -2,7 +2,8 @@ use image::{guess_format, GenericImageView};
 use std::{fs, path::Path};
 
 use crate::{
-    enums::ImgSrc, utils::validation::ensure_existing_image_file, Img, ImgError, IoError, Result,
+    enums::ImgSrc, utils::validation::ensure_existing_image_file, ImageFormat, Img, ImgError,
+    IoError, Result,
 };
 
 impl Img {
@@ -21,14 +22,15 @@ impl Img {
         let bytes = fs::read(path).map_err(|e| IoError::ReadFile(e, path.to_path_buf()))?;
 
         let size_bytes = bytes.len();
-        let format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
+
+        let guessed_format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
+        let format = ImageFormat::try_from(guessed_format)?;
 
         Ok(Self {
             img,
-            src: ImgSrc::Local {
+            src: ImgSrc::File {
                 path: path.to_path_buf(),
             },
-            target_path: path.to_path_buf(),
             height,
             width,
             aspect_ratio: width as f32 / height as f32,
@@ -40,7 +42,6 @@ impl Img {
 
 #[cfg(test)]
 mod tests {
-    use image::ImageFormat;
     use tempfile::TempDir;
 
     use crate::ValidationError;
@@ -53,14 +54,6 @@ mod tests {
         let path = PathBuf::from("tests/assets/test.png");
         let img = Img::from_file(&path).expect("Image should open successfully");
 
-        assert_eq!(img.target_path, path);
-        if let ImgSrc::Local { path: src_path } = &img.src {
-            assert_eq!(src_path, &img.target_path);
-        } else {
-            panic!("Expected ImgSrc::Local");
-        }
-
-        assert_eq!(img.file_name().unwrap(), "test.png");
         assert_eq!(img.format, ImageFormat::Png);
         assert!(img.width > 0 && img.height > 0 && img.size_bytes > 0);
 
@@ -79,7 +72,6 @@ mod tests {
         for (file, fmt) in cases {
             let path = PathBuf::from(format!("tests/assets/{}", file));
             let img = Img::from_file(&path).expect(&format!("Should open {}", file));
-            assert_eq!(img.file_name().unwrap(), file);
             assert_eq!(img.format, fmt);
         }
     }

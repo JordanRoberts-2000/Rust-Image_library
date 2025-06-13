@@ -1,6 +1,4 @@
-use crate::{Img, ImgError};
-
-use image::ImageFormat;
+use crate::{ImageFormat, Img, ImgError};
 
 impl Img {
     pub fn extention(&self) -> Result<&'static str, ImgError> {
@@ -8,7 +6,6 @@ impl Img {
             ImageFormat::Jpeg => Ok("jpg"),
             ImageFormat::WebP => Ok("webp"),
             ImageFormat::Png => Ok("png"),
-            _ => Err(ImgError::ExtensionInvalid),
         }
     }
 }

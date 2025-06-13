@@ -6,13 +6,13 @@ use {
 use crate::{Img, ImgError, Result};
 
 impl Img {
-    pub fn data_url(&mut self) -> Result<String> {
+    pub fn to_data_url(&mut self) -> Result<String> {
         let mut buffer = Cursor::new(Vec::new());
         self.img
-            .write_to(&mut buffer, self.format)
+            .write_to(&mut buffer, self.format.into())
             .map_err(|e| ImgError::Conversion {
                 source: e,
-                id: self.id(),
+                id: self.describe_source(),
                 format: self.format,
             })?;
 

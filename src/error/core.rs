@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use super::{io::IoError, validation::ValidationError};
 
+use crate::ImageFormat;
+
 #[derive(thiserror::Error, Debug)]
 pub enum ImgError {
     #[error(transparent)]
@@ -14,7 +16,7 @@ pub enum ImgError {
     Conversion {
         source: image::ImageError,
         id: String,
-        format: image::ImageFormat,
+        format: ImageFormat,
     },
 
     #[error("failed to convert img '{id}' to format 'webp'")]
@@ -32,7 +34,7 @@ pub enum ImgError {
     Decoding {
         id: String,
         source: image::ImageError,
-        format: image::ImageFormat,
+        format: ImageFormat,
     },
 
     #[error("failed to open img '{:?}', err: {}", path, source)]
@@ -46,6 +48,9 @@ pub enum ImgError {
 
     #[error("Failed to read bytes from response for '{url}': {source}")]
     ResponseReadFailed { url: String, source: reqwest::Error },
+
+    #[error("{}", format_unsupported_error(.0))]
+    UnsupportedFormat(image::ImageFormat),
 
     #[error("failed to retrieve file format")]
     GuessFormat,
@@ -80,4 +85,9 @@ pub enum ImgError {
         status_code: u16,
         message: String,
     },
+}
+
+pub fn format_unsupported_error(format: &image::ImageFormat) -> String {
+    let supported = ImageFormat::supported().join(",");
+    format!("unsupported image format: '{format:?}'; supported formats are: {supported}")
 }

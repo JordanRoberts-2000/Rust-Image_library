@@ -1,37 +1,25 @@
-use std::path::PathBuf;
-
 use image::{guess_format, GenericImageView};
-use uuid::Uuid;
 
-use crate::{enums::ImgSrc, Img, ImgError, Result};
+use crate::{ImageFormat, Img, ImgError, ImgSrc, Result};
 
 impl Img {
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
-        let id = Uuid::new_v4().to_string();
-        let format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
+        let guessed_format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
+        let format = ImageFormat::try_from(guessed_format)?;
+
         let size_bytes = bytes.len();
 
         let img = image::load_from_memory(&bytes).map_err(|e| ImgError::Decoding {
-            id: id.clone(),
+            id: "raw bytes".to_string(),
             source: e,
             format,
         })?;
 
         let (width, height) = img.dimensions();
 
-        let ext = match format.extensions_str().first() {
-            Some(ext) => ext,
-            None => return Err(ImgError::ExtensionInvalid),
-        };
-        let file_name = format!("{}.{}", id, ext);
-
-        let cwd = PathBuf::from(".");
-        let target = cwd.join(&file_name);
-
         Ok(Self {
             img,
-            src: ImgSrc::Bytes { id: id.clone() },
-            target_path: target,
+            src: ImgSrc::Bytes,
             height,
             width,
             aspect_ratio: width as f32 / height as f32,
@@ -57,27 +45,15 @@ mod tests {
         assert_eq!(img.aspect_ratio, img.width as f32 / img.height as f32);
 
         assert!(
-            img.file_name().unwrap().ends_with(".png"),
-            "Expected file_name to end with .png, got: {}",
-            img.file_name().unwrap()
-        );
-
-        assert!(
             matches!(img.src, ImgSrc::Bytes { .. }),
             "Expected ImgSrc::Bytes"
         );
 
-        assert_eq!(
-            img.format,
-            image::ImageFormat::Png,
-            "Image format should be PNG"
-        );
+        assert_eq!(img.format, ImageFormat::Png, "Image format should be PNG");
     }
 
     #[test]
     fn test_img_from_valid_bytes_multiple_formats() {
-        use image::ImageFormat;
-
         let test_cases = vec![
             ("test.png", ImageFormat::Png),
             ("test.jpg", ImageFormat::Jpeg),
@@ -89,16 +65,6 @@ mod tests {
             let bytes = fs::read(&path).expect(&format!("Image file {} should exist", filename));
 
             let img = Img::from_bytes(bytes).expect("Image should be loaded from bytes");
-
-            assert!(
-                img.file_name()
-                    .unwrap()
-                    .ends_with(expected_format.extensions_str()[0]),
-                "File name should end with .{} for {}, got: {}",
-                expected_format.extensions_str()[0],
-                filename,
-                img.file_name().unwrap()
-            );
 
             assert_eq!(
                 img.format, expected_format,

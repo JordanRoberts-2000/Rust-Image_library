@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::{enums::ValidImageFormat, ValidationError};
+use crate::{ImageFormat, ValidationError};
 
 pub fn ensure_existing_image_file(path: impl AsRef<Path>) -> Result<(), ValidationError> {
     let path = path.as_ref();
@@ -17,7 +17,7 @@ pub fn ensure_existing_image_file(path: impl AsRef<Path>) -> Result<(), Validati
         .and_then(|e| e.to_str())
         .ok_or_else(|| ValidationError::MissingExtension(path.to_path_buf()))?;
 
-    ValidImageFormat::try_from(ext)
+    ImageFormat::try_from(ext)
         .map(|_| path.to_path_buf())
         .map_err(|_| ValidationError::NotAnImageFile(path.to_path_buf()))?;
 

@@ -1,11 +1,10 @@
 use {
     image::{guess_format, GenericImageView},
     reqwest::blocking,
-    std::path::PathBuf,
     url::Url,
 };
 
-use crate::{constants::DEFAULT_FILENAME, enums::ImgSrc, Img, ImgError, Result};
+use crate::{enums::ImgSrc, ImageFormat, Img, ImgError, Result};
 
 impl Img {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
@@ -37,7 +36,9 @@ impl Img {
             url: url_str.to_string(),
         })?;
 
-        let format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
+        let guessed_format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
+        let format = ImageFormat::try_from(guessed_format)?;
+
         let size_bytes = bytes.len();
 
         let img = image::load_from_memory(&bytes).map_err(|e| ImgError::Decoding {
@@ -48,19 +49,9 @@ impl Img {
 
         let (width, height) = img.dimensions();
 
-        let ext = match format.extensions_str().first() {
-            Some(ext) => ext,
-            None => return Err(ImgError::ExtensionInvalid),
-        };
-        let file_name = format!("{}.{}", DEFAULT_FILENAME, ext);
-
-        let cwd = PathBuf::from(".");
-        let target = cwd.join(&file_name);
-
         Ok(Self {
             img,
-            src: ImgSrc::Remote { url: url },
-            target_path: target,
+            src: ImgSrc::Url { url },
             height,
             width,
             aspect_ratio: width as f32 / height as f32,
@@ -94,17 +85,11 @@ mod tests {
 
         let img = Img::from_url(&url).expect("Should download from mock server");
 
-        assert_eq!(
-            img.format,
-            image::ImageFormat::Png,
-            "Image format should be PNG"
-        );
+        assert_eq!(img.format, ImageFormat::Png, "Image format should be PNG");
     }
 
     #[test]
     fn test_img_download_multiple_formats() {
-        use image::ImageFormat;
-
         let formats = vec![
             ("test.png", "image/png", ImageFormat::Png),
             ("test.webp", "image/webp", ImageFormat::WebP),

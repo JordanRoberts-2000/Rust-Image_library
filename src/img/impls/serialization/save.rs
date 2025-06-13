@@ -1,83 +1,91 @@
-use crate::{enums::ImgSrc, utils, Img, Result};
+// use std::path::Path;
 
-impl Img {
-    pub fn save(&self) -> Result<()> {
-        if let ImgSrc::Local { path } = &self.src {
-            if *path != self.target_path {
-                utils::fs::trash_file(&path)?;
-            }
-        }
+// use crate::{Img, Result};
 
-        self.atomic_save(&self.target_path)?;
+// impl Img {
+//     pub fn save<P: AsRef<Path>>(&self, folder_path: P) -> Result<()> {
+//         let folder_path = folder_path.as_ref();
 
-        Ok(())
-    }
-}
+//         let file_name = self.file_name()?;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::fs;
-    use std::path::PathBuf;
+//         let stem = Path::new(&file_name)
+//             .file_stem()
+//             .unwrap_or_default()
+//             .to_string_lossy();
 
-    #[test]
-    fn test_img_save_replaces_original_file() {
-        let output_dir = PathBuf::from("tests/tmp_save");
-        let source_path = output_dir.join("input.png");
-        let target_path = output_dir.join("output.png");
+//         let ext = self.extention()?;
 
-        // Setup clean state
-        let _ = fs::remove_dir_all(&output_dir);
-        fs::create_dir_all(&output_dir).unwrap();
-        fs::copy("tests/assets/test.png", &source_path).unwrap();
+//         let mut count = 0;
+//         let mut output_path;
 
-        // Load and redirect
-        let mut img = Img::from_file(&source_path).unwrap();
-        img.target_path = target_path.clone();
+//         loop {
+//             let candidate_name = if count == 0 {
+//                 format!("{}.{}", stem, ext)
+//             } else {
+//                 format!("{}({}).{}", stem, count, ext)
+//             };
 
-        img.save().expect("Save should succeed");
+//             output_path = folder_path.join(&candidate_name);
 
-        assert!(
-            !source_path.exists(),
-            "Original file should be deleted when target differs"
-        );
+//             if !output_path.exists() {
+//                 break;
+//             }
 
-        assert!(target_path.exists(), "Image should be saved to target path");
+//             count += 1;
+//         }
 
-        let _ = fs::remove_dir_all(&output_dir);
-    }
+//         self.atomic_save(&output_path)?;
 
-    #[test]
-    fn test_img_save_preserves_original_file_if_same_path() {
-        let output_dir = PathBuf::from("tests/tmp_save_same");
-        let source_path = output_dir.join("same.png");
+//         Ok(())
+//     }
+// }
 
-        // Setup clean state
-        let _ = fs::remove_dir_all(&output_dir);
-        fs::create_dir_all(&output_dir).unwrap();
-        fs::copy("tests/assets/test.png", &source_path).unwrap();
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use std::fs;
+//     use std::path::PathBuf;
 
-        let img = Img::from_file(&source_path).unwrap();
-        let metadata_before = fs::metadata(&source_path).unwrap();
-        let modified_time_before = metadata_before.modified().unwrap();
+//     #[test]
+//     fn test_img_save_to_generates_unique_filenames() {
+//         // Arrange
+//         let bytes = fs::read("tests/assets/test.png").expect("test image should exist");
+//         let img = Img::from_bytes(bytes).expect("Image should load from bytes");
 
-        // Save to the same path (should not delete)
-        img.save().expect("Save should succeed");
+//         // Create a temporary directory for output
+//         let output_dir = PathBuf::from("tests/tmp_save_to");
 
-        // File should still exist
-        assert!(
-            source_path.exists(),
-            "File should still exist if path matches"
-        );
+//         if output_dir.exists() {
+//             fs::remove_dir_all(&output_dir).expect("Failed to clear test output folder");
+//         }
+//         fs::create_dir_all(&output_dir).expect("Failed to create test output folder");
 
-        let metadata_after = fs::metadata(&source_path).unwrap();
-        let modified_time_after = metadata_after.modified().unwrap();
+//         // Save the same image 3 times
+//         img.save(&output_dir).expect("1st save should succeed");
+//         img.save(&output_dir).expect("2nd save should succeed");
+//         img.save(&output_dir).expect("3rd save should succeed");
 
-        assert!(
-            modified_time_after >= modified_time_before,
-            "File should be updated or at least still present"
-        );
+//         // Get expected filenames
+//         let ext = img.extention().unwrap();
+//         let file_name_1 = img.file_name().unwrap();
+//         let stem = Path::new(&file_name_1)
+//             .file_stem()
+//             .unwrap()
+//             .to_string_lossy();
 
-        let _ = fs::remove_dir_all(&output_dir);
-    }
-}
+//         let path_1 = output_dir.join(&file_name_1);
+//         let path_2 = output_dir.join(format!("{}(1).{}", stem, ext));
+//         let path_3 = output_dir.join(format!("{}(2).{}", stem, ext));
+
+//         // Assert files exist
+//         assert!(path_1.exists(), "Expected first image to be saved");
+//         assert!(
+//             path_2.exists(),
+//             "Expected second image to be saved with (1)"
+//         );
+//         assert!(path_3.exists(), "Expected third image to be saved with (2)");
+
+//         // cleanup
+//         fs::remove_dir_all(&output_dir).expect("Failed to clear test output folder");
+//     }
+// }
