@@ -1,30 +1,28 @@
-use image::{guess_format, GenericImageView};
-use std::{fs, path::Path};
+use image::{GenericImageView, ImageReader};
+use std::path::Path;
 
 use crate::{
-    enums::ImgSrc, utils::validation::ensure_existing_image_file, ImageFormat, Img, ImgError,
-    IoError, Result,
+    utils::validation::ensure_existing_image_file, ImageFormat, Img, ImgError, ImgSrc, Result,
 };
 
 impl Img {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
-
         ensure_existing_image_file(&path)?;
 
-        let img = image::open(path).map_err(|e| ImgError::Open {
+        let reader = ImageReader::open(path).map_err(|e| ImgError::Open {
+            source: e,
+            path: path.to_path_buf(),
+        })?;
+
+        let format = ImageFormat::try_from(reader.format().ok_or_else(|| ImgError::GuessFormat)?)?;
+
+        let img = reader.decode().map_err(|e| ImgError::DecodeFile {
             source: e,
             path: path.to_path_buf(),
         })?;
 
         let (width, height) = img.dimensions();
-
-        let bytes = fs::read(path).map_err(|e| IoError::ReadFile(e, path.to_path_buf()))?;
-
-        let size_bytes = bytes.len();
-
-        let guessed_format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
-        let format = ImageFormat::try_from(guessed_format)?;
 
         Ok(Self {
             img,
@@ -35,7 +33,6 @@ impl Img {
             width,
             aspect_ratio: width as f32 / height as f32,
             format,
-            size_bytes,
         })
     }
 }
@@ -55,7 +52,6 @@ mod tests {
         let img = Img::from_file(&path).expect("Image should open successfully");
 
         assert_eq!(img.format, ImageFormat::Png);
-        assert!(img.width > 0 && img.height > 0 && img.size_bytes > 0);
 
         let expected_ratio = img.width as f32 / img.height as f32;
         assert!((img.aspect_ratio - expected_ratio).abs() < 0.01);
