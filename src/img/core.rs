@@ -8,5 +8,4 @@ pub struct Img {
     pub width: u32,
     pub aspect_ratio: f32,
     pub format: ImageFormat,
-    pub(super) size_bytes: usize,
 }

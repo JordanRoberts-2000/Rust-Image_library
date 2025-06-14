@@ -7,8 +7,6 @@ impl Img {
         let guessed_format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
         let format = ImageFormat::try_from(guessed_format)?;
 
-        let size_bytes = bytes.len();
-
         let img = image::load_from_memory(&bytes).map_err(|e| ImgError::Decoding {
             id: "raw bytes".to_string(),
             source: e,
@@ -24,7 +22,6 @@ impl Img {
             width,
             aspect_ratio: width as f32 / height as f32,
             format,
-            size_bytes,
         })
     }
 }
@@ -41,7 +38,6 @@ mod tests {
 
         assert!(img.width > 0);
         assert!(img.height > 0);
-        assert!(img.size_bytes > 0);
         assert_eq!(img.aspect_ratio, img.width as f32 / img.height as f32);
 
         assert!(

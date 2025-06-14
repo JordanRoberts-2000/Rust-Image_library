@@ -39,9 +39,18 @@ pub enum ImgError {
 
     #[error("failed to open img '{:?}', err: {}", path, source)]
     Open {
+        source: std::io::Error,
+        path: PathBuf,
+    },
+
+    #[error("failed to decode image file '{:?}', err: {}", path, source)]
+    DecodeFile {
         source: image::ImageError,
         path: PathBuf,
     },
+
+    #[error("failed to decode image from reader, err: {0}")]
+    DecodeReader(image::ImageError),
 
     #[error("Failed to download image from '{url}': {source}")]
     DownloadFailed { url: String, source: reqwest::Error },

@@ -9,7 +9,6 @@ use crate::{enums::ImgSrc, ImageFormat, Img, ImgError, Result};
 impl Img {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
         let url_str = url.as_ref();
-
         let url: Url =
             Url::parse(url_str).map_err(|e| ImgError::UrlParse(e, url_str.to_string()))?;
 
@@ -39,8 +38,6 @@ impl Img {
         let guessed_format = guess_format(&bytes).map_err(|_| ImgError::GuessFormat)?;
         let format = ImageFormat::try_from(guessed_format)?;
 
-        let size_bytes = bytes.len();
-
         let img = image::load_from_memory(&bytes).map_err(|e| ImgError::Decoding {
             id: url_str.to_string(),
             source: e,
@@ -56,7 +53,6 @@ impl Img {
             width,
             aspect_ratio: width as f32 / height as f32,
             format,
-            size_bytes,
         })
     }
 }
