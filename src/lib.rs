@@ -12,4 +12,5 @@ pub use {
 pub(crate) use {
     enums::ImgSrc,
     error::{IoError, Result, ValidationError},
+    img::transform_pipeline::TransformPipeline,
 };

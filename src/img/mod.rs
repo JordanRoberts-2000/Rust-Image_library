@@ -7,3 +7,4 @@ pub mod impls {
     pub mod transformations;
 }
 pub mod traits;
+pub mod transform_pipeline;

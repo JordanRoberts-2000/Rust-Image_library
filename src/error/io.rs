@@ -13,4 +13,10 @@ pub enum IoError {
 
     #[error("Failed to read file at `{1}`: {0}")]
     ReadFile(#[source] io::Error, PathBuf),
+
+    #[error("Failed to create temporary file in directory: {1}")]
+    CreateTempFile(#[source] std::io::Error, PathBuf),
+
+    #[error("Failed to persist temporary file to: {1}")]
+    PersistTempFile(#[source] std::io::Error, PathBuf),
 }

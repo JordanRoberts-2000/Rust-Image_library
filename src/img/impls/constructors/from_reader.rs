@@ -1,7 +1,7 @@
 use image::{GenericImageView, ImageReader};
 use std::io::{BufRead, Seek};
 
-use crate::{ImageFormat, Img, ImgError, ImgSrc};
+use crate::{ImageFormat, Img, ImgError, ImgSrc, TransformPipeline};
 
 impl Img {
     pub fn from_reader(reader: impl BufRead + Seek) -> Result<Self, ImgError> {
@@ -17,6 +17,7 @@ impl Img {
         Ok(Self {
             src: ImgSrc::Reader,
             img,
+            transform_pipeline: TransformPipeline::default(),
             format,
             width,
             height,

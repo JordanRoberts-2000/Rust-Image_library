@@ -4,7 +4,7 @@ use {
     url::Url,
 };
 
-use crate::{enums::ImgSrc, ImageFormat, Img, ImgError, Result};
+use crate::{enums::ImgSrc, ImageFormat, Img, ImgError, Result, TransformPipeline};
 
 impl Img {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
@@ -49,6 +49,7 @@ impl Img {
         Ok(Self {
             img,
             src: ImgSrc::Url { url },
+            transform_pipeline: TransformPipeline::default(),
             height,
             width,
             aspect_ratio: width as f32 / height as f32,

@@ -1,3 +1,4 @@
-pub mod apply_transforms;
-pub mod atomic;
-pub mod describe_source;
+mod apply_transforms;
+mod atomic;
+mod clamp_ratio;
+mod describe_source;

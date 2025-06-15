@@ -61,16 +61,19 @@ pub enum ImgError {
     #[error("{}", format_unsupported_error(.0))]
     UnsupportedFormat(image::ImageFormat),
 
+    #[error("{}", ext_unsupported_error(.0))]
+    InvalidExtension(String),
+
     #[error("failed to retrieve file format")]
     GuessFormat,
 
-    #[error("No valid extentions found")]
-    ExtensionInvalid,
+    #[error("Extention required on path '{0}'")]
+    ExtensionMissing(PathBuf),
 
-    #[error("failed to create new image {:?}, err: {}", output, source)]
+    #[error("failed to create new image {:?}, err: {}", path, source)]
     Save {
         source: image::ImageError,
-        output: PathBuf,
+        path: PathBuf,
     },
 
     #[error("Could not retrieve palette: {0}")]
@@ -94,9 +97,17 @@ pub enum ImgError {
         status_code: u16,
         message: String,
     },
+
+    #[error("output path `{0}` has no parent directory")]
+    MissingParent(PathBuf),
 }
 
 pub fn format_unsupported_error(format: &image::ImageFormat) -> String {
     let supported = ImageFormat::supported().join(",");
     format!("unsupported image format: '{format:?}'; supported formats are: {supported}")
+}
+
+pub fn ext_unsupported_error(ext: &String) -> String {
+    let supported = ImageFormat::supported().join(",");
+    format!("unsupported ext: '{ext}'; supported extentions are: {supported}")
 }

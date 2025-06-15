@@ -1,6 +1,6 @@
 use image::{guess_format, GenericImageView};
 
-use crate::{ImageFormat, Img, ImgError, ImgSrc, Result};
+use crate::{ImageFormat, Img, ImgError, ImgSrc, Result, TransformPipeline};
 
 impl Img {
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
@@ -18,6 +18,7 @@ impl Img {
         Ok(Self {
             img,
             src: ImgSrc::Bytes,
+            transform_pipeline: TransformPipeline::default(),
             height,
             width,
             aspect_ratio: width as f32 / height as f32,

@@ -3,6 +3,7 @@ use std::path::Path;
 
 use crate::{
     utils::validation::ensure_existing_image_file, ImageFormat, Img, ImgError, ImgSrc, Result,
+    TransformPipeline,
 };
 
 impl Img {
@@ -29,6 +30,7 @@ impl Img {
             src: ImgSrc::File {
                 path: path.to_path_buf(),
             },
+            transform_pipeline: TransformPipeline::default(),
             height,
             width,
             aspect_ratio: width as f32 / height as f32,
