@@ -14,5 +14,17 @@ impl TransformPipeline {
             270 => *img = img.rotate270(),
             _ => {}
         }
+
+        if self.grayscale {
+            *img = img.grayscale();
+        }
+
+        if let Some(c) = self.contrast {
+            *img = img.adjust_contrast(c);
+        }
+
+        if let Some(sigma) = self.blur_intensity {
+            *img = img.blur(sigma);
+        }
     }
 }

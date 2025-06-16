@@ -5,7 +5,9 @@ mod encoding {
     mod webp_lossy;
 }
 mod filters {
+    mod adjust_contrast;
     mod blur;
+    mod grayscale;
 }
 mod geometry {
     mod rotation;
