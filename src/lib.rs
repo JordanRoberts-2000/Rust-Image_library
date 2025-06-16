@@ -4,7 +4,7 @@ mod img;
 pub(crate) mod utils;
 
 pub use {
-    enums::{CompressionType, ImageFormat},
+    enums::{CompressionType, CropEdge, ImageFormat},
     error::ImgError,
     img::core::Img,
 };

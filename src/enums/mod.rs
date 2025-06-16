@@ -1,5 +1,6 @@
-pub mod compression;
-pub mod format;
-pub mod src;
+mod compression;
+mod crop_edge;
+mod format;
+mod src;
 
-pub use {compression::CompressionType, format::ImageFormat, src::ImgSrc};
+pub use {compression::CompressionType, crop_edge::CropEdge, format::ImageFormat, src::ImgSrc};
