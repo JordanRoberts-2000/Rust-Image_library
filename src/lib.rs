@@ -1,16 +1,16 @@
 mod enums;
 mod error;
-mod img;
+mod image;
 pub(crate) mod utils;
 
 pub use {
     enums::{CompressionType, CropEdge, ImageFormat},
-    error::ImgError,
-    img::core::Img,
+    error::ImageError,
+    image::core::Image,
 };
 
 pub(crate) use {
-    enums::ImgSrc,
+    enums::ImageSrc,
     error::{IoError, Result, ValidationError},
-    img::transform_pipeline::TransformPipeline,
+    image::config::ImageConfig,
 };

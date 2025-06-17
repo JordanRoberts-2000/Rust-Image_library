@@ -28,7 +28,7 @@ pub fn trash_file(path: impl AsRef<Path>) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ImgError;
+    use crate::ImageError;
 
     use super::*;
     use std::{fs::File, path::PathBuf};
@@ -39,7 +39,7 @@ mod tests {
         let path = PathBuf::from("does_not_exist.foo");
         let err = trash_file(&path).unwrap_err();
         match err {
-            ImgError::Validation(ValidationError::PathNotFound(p)) => {
+            ImageError::Validation(ValidationError::PathNotFound(p)) => {
                 assert_eq!(p, path);
             }
             _ => panic!("expected PathNotFound, got {:?}", err),
@@ -52,7 +52,7 @@ mod tests {
         let dir = tmp.path();
         let err = trash_file(dir).unwrap_err();
         match err {
-            ImgError::Validation(ValidationError::NotAFile(p)) => {
+            ImageError::Validation(ValidationError::NotAFile(p)) => {
                 assert_eq!(p, dir.to_path_buf());
             }
             _ => panic!("expected NotAFile, got {:?}", err),

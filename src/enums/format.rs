@@ -1,4 +1,4 @@
-use crate::ImgError;
+use crate::ImageError;
 
 use {
     strum::VariantNames,
@@ -41,14 +41,14 @@ impl TryFrom<&str> for ImageFormat {
 }
 
 impl TryFrom<image::ImageFormat> for ImageFormat {
-    type Error = ImgError;
+    type Error = ImageError;
 
     fn try_from(fmt: image::ImageFormat) -> Result<Self, Self::Error> {
         match fmt {
             image::ImageFormat::Png => Ok(ImageFormat::Png),
             image::ImageFormat::Jpeg => Ok(ImageFormat::Jpeg),
             image::ImageFormat::WebP => Ok(ImageFormat::WebP),
-            other => Err(ImgError::UnsupportedFormat(other)),
+            other => Err(ImageError::UnsupportedFormat(other)),
         }
     }
 }

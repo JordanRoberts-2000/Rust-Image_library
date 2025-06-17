@@ -5,7 +5,7 @@ use super::{io::IoError, validation::ValidationError};
 use crate::ImageFormat;
 
 #[derive(thiserror::Error, Debug)]
-pub enum ImgError {
+pub enum ImageError {
     #[error(transparent)]
     Io(#[from] IoError),
 
