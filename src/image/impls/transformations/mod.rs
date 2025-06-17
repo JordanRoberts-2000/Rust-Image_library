@@ -16,6 +16,4 @@ mod geometry {
         mod inset_ratio;
     }
 }
-mod resizing {
-    mod resize;
-}
+mod resizing;

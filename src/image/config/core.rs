@@ -1,14 +1,14 @@
-use crate::ImageFormat;
-
 #[derive(Default, Debug)]
 pub struct ImageConfig {
-    pub(super) crop_rect: Option<(u32, u32, u32, u32)>,
-    pub(super) rotation_deg: u32,
-    pub(super) target_dimentions: Option<(u32, u32)>,
-    pub(super) grayscale: bool,
-    pub(super) blur_intensity: Option<f32>,
-    pub(super) contrast: Option<f32>,
-    pub(super) format: Option<ImageFormat>,
+    pub crop_rect: Option<(u32, u32, u32, u32)>,
+    pub rotation_deg: u32,
+    pub grayscale: bool,
+    pub blur_intensity: Option<f32>,
+    pub contrast: Option<f32>,
+    pub resize_dimensions: Option<(u32, u32)>,
+    pub resize_exact_dimensions: Option<(u32, u32)>,
+    pub resize_fill_dimensions: Option<(u32, u32)>,
+    pub max_size: Option<u32>,
 }
 
 impl ImageConfig {
@@ -27,8 +27,23 @@ impl ImageConfig {
         self
     }
 
-    pub fn format(&mut self, fmt: ImageFormat) -> &mut Self {
-        self.format = Some(fmt);
+    pub fn resize(&mut self, w: u32, h: u32) -> &mut Self {
+        self.resize_dimensions = Some((w, h));
+        self
+    }
+
+    pub fn resize_exact(&mut self, w: u32, h: u32) -> &mut Self {
+        self.resize_exact_dimensions = Some((w, h));
+        self
+    }
+
+    pub fn resize_fill(&mut self, w: u32, h: u32) -> &mut Self {
+        self.resize_fill_dimensions = Some((w, h));
+        self
+    }
+
+    pub fn max_size(&mut self, max: u32) -> &mut Self {
+        self.max_size = Some(max);
         self
     }
 }
