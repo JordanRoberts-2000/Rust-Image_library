@@ -16,4 +16,5 @@ mod geometry {
         mod inset_ratio;
     }
 }
+mod quality;
 mod resizing;

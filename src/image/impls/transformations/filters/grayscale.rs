@@ -1,8 +1,8 @@
 use crate::Image;
 
 impl Image {
-    pub fn greyscale(&mut self) -> &mut Self {
-        self.config.greyscale();
+    pub fn grayscale(&mut self) -> &mut Self {
+        self.config.grayscale();
         self
     }
 }

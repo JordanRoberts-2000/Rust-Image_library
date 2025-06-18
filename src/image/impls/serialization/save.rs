@@ -13,9 +13,10 @@ impl Image {
 
         let format = ImageFormat::try_from(ext)
             .map_err(|_| ImageError::InvalidExtension(ext.to_string()))?;
+        self.format = format;
 
         self.apply_transforms();
-        self.atomic_save(path, format)?;
+        self.atomic_save(path)?;
 
         Ok(())
     }

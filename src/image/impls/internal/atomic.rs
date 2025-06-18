@@ -3,10 +3,10 @@ use {
     tempfile::{Builder, NamedTempFile},
 };
 
-use crate::{Image, ImageError, ImageFormat, IoError, Result};
+use crate::{Image, ImageError, IoError, Result};
 
 impl Image {
-    pub fn atomic_save(&self, path: &Path, format: ImageFormat) -> Result<()> {
+    pub fn atomic_save(&self, path: &Path) -> Result<()> {
         let parent = path
             .parent()
             .ok_or_else(|| ImageError::MissingParent(path.to_path_buf()))?;
@@ -23,7 +23,7 @@ impl Image {
             .map_err(|e| IoError::CreateTempFile(e, parent.to_path_buf()))?;
 
         self.raw
-            .save_with_format(temp_file.path(), format.into())
+            .save_with_format(temp_file.path(), self.format.into())
             .map_err(|e| ImageError::Save {
                 source: e,
                 path: temp_file.path().to_path_buf(),
