@@ -1,4 +1,4 @@
-use crate::Image;
+use crate::{Image, TransformOp};
 
 impl Image {
     pub fn crop(&mut self, x: u32, y: u32, w: u32, h: u32) -> &mut Self {
@@ -14,7 +14,7 @@ impl Image {
             .min(orig_h.saturating_sub(y)) // can’t be taller than “rest of column”
             .max(1); // but at least 1px
 
-        self.config.crop(x, y, w, h);
+        self.config.pipeline.push(TransformOp::Crop(x, y, w, h));
 
         self.width = w;
         self.height = h;

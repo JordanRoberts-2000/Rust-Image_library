@@ -1,4 +1,3 @@
-mod encoding;
 mod filters {
     mod adjust_contrast;
     mod blur;
@@ -16,5 +15,4 @@ mod geometry {
         mod inset_ratio;
     }
 }
-mod quality;
 mod resizing;

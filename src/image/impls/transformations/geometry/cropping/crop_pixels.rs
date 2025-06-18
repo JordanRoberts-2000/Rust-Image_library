@@ -1,4 +1,4 @@
-use crate::{CropEdge, Image};
+use crate::{CropEdge, Image, TransformOp};
 
 impl Image {
     pub fn crop_pixels(&mut self, edge: CropEdge, pixels: u32) -> &mut Self {
@@ -26,7 +26,10 @@ impl Image {
             }
         };
 
-        self.config.crop(x, y, new_w, new_h);
+        self.config
+            .pipeline
+            .push(TransformOp::Crop(x, y, new_w, new_h));
+
         self.width = new_w;
         self.height = new_h;
         self.aspect_ratio = new_w as f32 / new_h as f32;

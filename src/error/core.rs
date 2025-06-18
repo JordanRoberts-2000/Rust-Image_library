@@ -12,15 +12,15 @@ pub enum ImageError {
     #[error(transparent)]
     Validation(#[from] ValidationError),
 
-    #[error("failed to convert img '{id}' to format '{format:?}'")]
-    Conversion {
+    #[error("failed to encode img '{id}' to format '{format:?}'")]
+    Encoding {
         source: image::ImageError,
         id: String,
         format: ImageFormat,
     },
 
-    #[error("failed to convert img '{id}' to format 'webp'")]
-    WebPConversion {
+    #[error("failed to encode img '{id}' to format 'webp'")]
+    WebPEncoding {
         err: webp::WebPEncodingError,
         id: String,
     },

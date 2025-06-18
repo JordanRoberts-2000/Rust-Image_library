@@ -1,4 +1,4 @@
-use crate::Image;
+use crate::{Image, TransformOp};
 
 impl Image {
     pub fn inset(&mut self, pixels: u32) -> &mut Self {
@@ -11,7 +11,9 @@ impl Image {
         let new_w = w - 2 * dx;
         let new_h = h - 2 * dy;
 
-        self.config.crop(dx, dy, new_w, new_h);
+        self.config
+            .pipeline
+            .push(TransformOp::Crop(dx, dy, new_w, new_h));
 
         self.width = new_w;
         self.height = new_h;

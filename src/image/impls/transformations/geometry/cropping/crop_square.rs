@@ -1,4 +1,4 @@
-use crate::Image;
+use crate::{Image, TransformOp};
 
 impl Image {
     // takes the largest possible square from the center
@@ -9,7 +9,9 @@ impl Image {
         let x0 = (w - side) / 2;
         let y0 = (h - side) / 2;
 
-        self.config.crop(x0, y0, side, side);
+        self.config
+            .pipeline
+            .push(TransformOp::Crop(x0, y0, side, side));
 
         self.width = side;
         self.height = side;

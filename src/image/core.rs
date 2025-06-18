@@ -1,4 +1,4 @@
-use crate::{ImageConfig, ImageFormat, ImageSrc};
+use crate::{CompressionType, ImageFormat, ImageSrc, TransformOp};
 
 #[derive(Debug)]
 pub struct Image {
@@ -9,4 +9,11 @@ pub struct Image {
     pub width: u32,
     pub aspect_ratio: f32,
     pub format: ImageFormat,
+}
+
+#[derive(Default, Debug)]
+pub struct ImageConfig {
+    pub pipeline: Vec<TransformOp>,
+    pub quality: Option<u32>,
+    pub compression: CompressionType,
 }

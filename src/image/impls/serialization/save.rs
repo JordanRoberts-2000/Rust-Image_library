@@ -3,7 +3,7 @@ use std::path::Path;
 use crate::{Image, ImageError, ImageFormat, Result};
 
 impl Image {
-    pub fn save(&mut self, path: impl AsRef<Path>) -> Result<()> {
+    pub fn save_as(&mut self, path: impl AsRef<Path>) -> Result<()> {
         let path = path.as_ref();
 
         let ext = path

@@ -5,6 +5,12 @@ pub enum IoError {
     #[error("Failed to create directory at `{1}`: {0}")]
     CreateDir(#[source] io::Error, PathBuf),
 
+    #[error("Failed to create file at `{1}`: {0}")]
+    CreateFile(#[source] io::Error, PathBuf),
+
+    #[error("Failed to write file at `{1}`: {0}")]
+    WriteFile(#[source] io::Error, PathBuf),
+
     #[error("Failed to delete file at `{1}`: {0}")]
     DeleteFile(#[source] io::Error, PathBuf),
 

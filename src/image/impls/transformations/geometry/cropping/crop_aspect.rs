@@ -1,4 +1,4 @@
-use crate::Image;
+use crate::{Image, TransformOp};
 
 impl Image {
     pub fn crop_aspect(&mut self, ratio: f32) -> &mut Self {
@@ -18,7 +18,9 @@ impl Image {
         let x0 = (w - new_w) / 2;
         let y0 = (h - new_h) / 2;
 
-        self.config.crop(x0, y0, new_w, new_h);
+        self.config
+            .pipeline
+            .push(TransformOp::Crop(x0, y0, new_w, new_h));
 
         self.width = new_w;
         self.height = new_h;
