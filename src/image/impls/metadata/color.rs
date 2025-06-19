@@ -4,9 +4,9 @@ use color_thief::{get_palette, ColorFormat};
 
 #[derive(Debug)]
 pub struct Rgb {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
+    r: u8,
+    g: u8,
+    b: u8,
 }
 
 impl Rgb {
@@ -20,7 +20,7 @@ impl Rgb {
 }
 
 impl Image {
-    pub fn color(&mut self) -> Result<Rgb> {
+    pub fn dominant_color(&mut self) -> Result<Rgb> {
         let rgb_pixels = self.raw.to_rgb8().into_raw();
 
         let palette =
