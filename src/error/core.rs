@@ -64,8 +64,14 @@ pub enum ImageError {
     #[error("{}", ext_unsupported_error(.0))]
     InvalidExtension(String),
 
-    #[error("failed to retrieve file format")]
-    GuessFormat,
+    #[error("Failed to detect image format from byte stream")]
+    FormatDetectionFailed,
+
+    #[error("Unknown or unsupported image format")]
+    UnknownFormat,
+
+    #[error("Failed to read image dimensions: {0:?}")]
+    DimensionsFailed(image::ImageError),
 
     #[error("Extention required on path '{0}'")]
     ExtensionMissing(PathBuf),

@@ -1,4 +1,4 @@
-use image::{GenericImageView, ImageReader};
+use image::ImageReader;
 use std::io::{BufRead, Seek};
 
 use crate::{Image, ImageConfig, ImageError, ImageFormat, ImageSrc};
@@ -7,16 +7,15 @@ impl Image {
     pub fn from_reader(reader: impl BufRead + Seek) -> Result<Self, ImageError> {
         let reader = ImageReader::new(reader);
 
-        let reader_fmt = reader.format().ok_or(ImageError::GuessFormat)?;
-        let format = ImageFormat::try_from(reader_fmt)?;
+        let format =
+            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::UnknownFormat)?)?;
 
-        let raw = reader.decode().map_err(ImageError::DecodeReader)?;
-
-        let (width, height) = raw.dimensions();
+        let (width, height) = reader
+            .into_dimensions()
+            .map_err(ImageError::DimensionsFailed)?;
 
         Ok(Self {
             src: ImageSrc::Reader,
-            raw,
             config: ImageConfig::default(),
             format,
             width,

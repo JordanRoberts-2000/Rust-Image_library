@@ -1,8 +1,8 @@
-use {
-    image::{guess_format, GenericImageView},
-    reqwest::blocking,
-    url::Url,
-};
+use std::io::Cursor;
+
+use image::ImageReader;
+
+use {reqwest::blocking, url::Url};
 
 use crate::{Image, ImageConfig, ImageError, ImageFormat, ImageSrc, Result};
 
@@ -35,22 +35,22 @@ impl Image {
             .map_err(|e| ImageError::ResponseReadFailed {
                 source: e,
                 url: url_str.to_string(),
-            })?;
+            })?
+            .to_vec();
 
-        let guessed_format = guess_format(&bytes).map_err(|_| ImageError::GuessFormat)?;
-        let format = ImageFormat::try_from(guessed_format)?;
+        let reader = ImageReader::new(Cursor::new(&bytes))
+            .with_guessed_format()
+            .map_err(|_| ImageError::FormatDetectionFailed)?;
 
-        let raw = image::load_from_memory(&bytes).map_err(|e| ImageError::Decoding {
-            id: url_str.to_string(),
-            source: e,
-            format,
-        })?;
+        let format =
+            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::UnknownFormat)?)?;
 
-        let (width, height) = raw.dimensions();
+        let (width, height) = reader
+            .into_dimensions()
+            .map_err(ImageError::DimensionsFailed)?;
 
         Ok(Self {
-            raw,
-            src: ImageSrc::Url { url },
+            src: ImageSrc::Url { url, bytes },
             config: ImageConfig::default(),
             height,
             width,

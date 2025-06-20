@@ -1,7 +1,4 @@
-use {
-    image::{GenericImageView, ImageReader},
-    std::path::Path,
-};
+use {image::ImageReader, std::path::Path};
 
 use crate::{
     utils::validation::ensure_existing_image_file, Image, ImageConfig, ImageError, ImageFormat,
@@ -19,17 +16,13 @@ impl Image {
         })?;
 
         let format =
-            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::GuessFormat)?)?;
+            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::UnknownFormat)?)?;
 
-        let raw = reader.decode().map_err(|e| ImageError::DecodeFile {
-            source: e,
-            path: path.to_path_buf(),
-        })?;
-
-        let (width, height) = raw.dimensions();
+        let (width, height) = reader
+            .into_dimensions()
+            .map_err(ImageError::DimensionsFailed)?;
 
         Ok(Self {
-            raw,
             src: ImageSrc::File {
                 path: path.to_path_buf(),
             },

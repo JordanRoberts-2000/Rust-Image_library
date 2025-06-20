@@ -2,9 +2,9 @@ use crate::{CompressionType, ImageFormat, ImageSrc, TransformOp};
 
 #[derive(Debug)]
 pub struct Image {
-    pub(super) raw: image::DynamicImage,
     pub(super) src: ImageSrc,
     pub(super) config: ImageConfig,
+
     pub height: u32,
     pub width: u32,
     pub aspect_ratio: f32,
