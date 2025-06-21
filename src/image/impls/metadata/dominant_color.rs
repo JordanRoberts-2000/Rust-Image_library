@@ -21,8 +21,9 @@ impl Rgb {
 
 impl Image {
     pub fn dominant_color(&mut self) -> Result<Rgb> {
-        let rgb_pixels = self.get_decoded()?.to_rgb8().into_raw();
+        self.apply_transforms()?;
 
+        let rgb_pixels = self.get_decoded()?.to_rgb8().into_raw();
         let palette =
             get_palette(&rgb_pixels, ColorFormat::Rgb, 5, 5).map_err(ImageError::GetColors)?;
 

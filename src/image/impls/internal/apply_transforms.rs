@@ -1,9 +1,12 @@
 use image::imageops::FilterType;
 
-use crate::{Image, ImageError, TransformOp};
+use crate::{Image, Result, TransformOp};
 
 impl Image {
-    pub fn apply_transforms(&mut self) -> Result<(), ImageError> {
+    pub fn apply_transforms(&mut self) -> Result<()> {
+        if self.config.pipeline.is_empty() {
+            return Ok(());
+        }
         // Take pipeline before mutable borrow, reset to empty vec
         let pipeline = std::mem::take(&mut self.config.pipeline);
 
