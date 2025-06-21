@@ -25,7 +25,7 @@ impl Image {
 
         let rgb_pixels = self.get_decoded()?.to_rgb8().into_raw();
         let palette =
-            get_palette(&rgb_pixels, ColorFormat::Rgb, 5, 5).map_err(ImageError::GetColors)?;
+            get_palette(&rgb_pixels, ColorFormat::Rgb, 5, 1).map_err(ImageError::GetColors)?;
 
         let dominant_color = palette.get(0).ok_or_else(|| ImageError::EmptyPalette)?;
 
@@ -34,5 +34,23 @@ impl Image {
             g: dominant_color.g,
             b: dominant_color.b,
         })
+    }
+
+    pub fn palette(&mut self) -> Result<Vec<Rgb>> {
+        self.apply_transforms()?;
+
+        let rgb_pixels = self.get_decoded()?.to_rgb8().into_raw();
+
+        let palette = get_palette(&rgb_pixels, ColorFormat::Rgb, 5, 5)
+            .map_err(ImageError::GetColors)?
+            .into_iter()
+            .map(|color| Rgb {
+                r: color.r,
+                g: color.g,
+                b: color.b,
+            })
+            .collect();
+
+        Ok(palette)
     }
 }
