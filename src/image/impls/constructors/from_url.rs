@@ -4,7 +4,7 @@ use image::ImageReader;
 
 use {reqwest::blocking, url::Url};
 
-use crate::{Image, ImageConfig, ImageError, ImageFormat, ImageSrc, Result};
+use crate::{Image, ImageConfig, ImageData, ImageError, ImageFormat, ImageSrc, Result};
 
 impl Image {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
@@ -50,7 +50,8 @@ impl Image {
             .map_err(ImageError::DimensionsFailed)?;
 
         Ok(Self {
-            src: ImageSrc::Url { url, bytes },
+            src: ImageSrc::Url(url),
+            data: ImageData::Bytes(bytes),
             config: ImageConfig::default(),
             height,
             width,

@@ -1,13 +1,16 @@
 use image::imageops::FilterType;
 
-use crate::{Image, TransformOp};
+use crate::{Image, ImageError, TransformOp};
 
 impl Image {
-    pub fn apply_transforms(&mut self) {
-        let img = &mut self.raw;
+    pub fn apply_transforms(&mut self) -> Result<(), ImageError> {
+        // Take pipeline before mutable borrow, reset to empty vec
+        let pipeline = std::mem::take(&mut self.config.pipeline);
 
-        for transform in &self.config.pipeline {
-            match *transform {
+        let img = self.get_decoded()?;
+
+        for transform in pipeline {
+            match transform {
                 TransformOp::Crop(x, y, w, h) => {
                     *img = img.crop_imm(x, y, w, h);
                 }
@@ -42,5 +45,7 @@ impl Image {
                 }
             }
         }
+
+        Ok(())
     }
 }

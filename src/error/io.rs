@@ -25,4 +25,7 @@ pub enum IoError {
 
     #[error("Failed to persist temporary file to: {1}")]
     PersistTempFile(#[source] std::io::Error, PathBuf),
+
+    #[error("Failed to read from reader: {0}")]
+    ReadStream(#[source] io::Error),
 }

@@ -10,7 +10,9 @@ pub use {
 };
 
 pub(crate) use {
-    enums::{ImageSrc, TransformOp},
-    error::{IoError, Result, ValidationError},
-    image::core::ImageConfig,
+    error::{InternalError, IoError, Result, ValidationError},
+    image::{
+        core::ImageConfig,
+        enums::{ImageData, ImageSrc, TransformOp},
+    },
 };

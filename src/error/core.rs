@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use super::{io::IoError, validation::ValidationError};
 
-use crate::ImageFormat;
+use crate::{error::internal::InternalError, ImageFormat};
 
 #[derive(thiserror::Error, Debug)]
 pub enum ImageError {
@@ -11,6 +11,9 @@ pub enum ImageError {
 
     #[error(transparent)]
     Validation(#[from] ValidationError),
+
+    #[error(transparent)]
+    Internal(#[from] InternalError),
 
     #[error("failed to encode img '{id}' to format '{format:?}'")]
     Encoding {

@@ -5,10 +5,10 @@ use crate::{Image, ImageError, ImageFormat, IoError, Result};
 use image::{codecs::jpeg::JpegEncoder, ExtendedColorType};
 
 impl Image {
-    pub fn encode_jpeg(&self, path: impl AsRef<Path>) -> Result<()> {
+    pub fn encode_jpeg(&mut self, path: impl AsRef<Path>) -> Result<()> {
         let path = path.as_ref();
 
-        let rgb8 = self.raw.to_rgb8();
+        let rgb8 = &self.get_decoded()?.to_rgb8();
         let (width, height) = rgb8.dimensions();
 
         let file = File::create(path).map_err(|e| IoError::CreateFile(e, path.to_path_buf()))?;

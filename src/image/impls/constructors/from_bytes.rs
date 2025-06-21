@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 use image::ImageReader;
 
-use crate::{Image, ImageConfig, ImageError, ImageFormat, ImageSrc, Result};
+use crate::{Image, ImageConfig, ImageData, ImageError, ImageFormat, ImageSrc, Result};
 
 impl Image {
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
@@ -18,7 +18,8 @@ impl Image {
             .map_err(ImageError::DimensionsFailed)?;
 
         Ok(Self {
-            src: ImageSrc::Bytes(bytes),
+            src: ImageSrc::Bytes,
+            data: ImageData::Bytes(bytes),
             config: ImageConfig::default(),
             height,
             width,

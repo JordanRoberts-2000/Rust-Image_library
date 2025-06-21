@@ -11,10 +11,10 @@ const DEFAULT_WEBP_QUALITY: f32 = 75.0;
 const DEFAULT_WEBP_COMPRESSION: CompressionType = CompressionType::Lossy;
 
 impl Image {
-    pub fn encode_webp(&self, path: impl AsRef<Path>) -> Result<()> {
+    pub fn encode_webp(&mut self, path: impl AsRef<Path>) -> Result<()> {
         let path = path.as_ref();
 
-        let rgba_image = self.raw.to_rgba8();
+        let rgba_image = &self.get_decoded()?.to_rgba8();
         let (width, height) = rgba_image.dimensions();
 
         let webp_data = match self.config.compression {

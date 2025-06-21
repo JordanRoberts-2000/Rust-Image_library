@@ -7,4 +7,5 @@ pub mod impls {
     mod serialization;
     mod transformations;
 }
+pub mod enums;
 pub mod traits;

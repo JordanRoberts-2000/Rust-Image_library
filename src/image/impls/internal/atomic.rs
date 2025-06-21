@@ -6,7 +6,7 @@ use {
 use crate::{Image, ImageError, ImageFormat, IoError, Result};
 
 impl Image {
-    pub fn atomic_save(&self, path: &Path) -> Result<()> {
+    pub fn atomic_save(&mut self, path: &Path) -> Result<()> {
         let parent = path
             .parent()
             .ok_or_else(|| ImageError::MissingParent(path.to_path_buf()))?;

@@ -1,8 +1,8 @@
 use {image::ImageReader, std::path::Path};
 
 use crate::{
-    utils::validation::ensure_existing_image_file, Image, ImageConfig, ImageError, ImageFormat,
-    ImageSrc, Result,
+    utils::validation::ensure_existing_image_file, Image, ImageConfig, ImageData, ImageError,
+    ImageFormat, ImageSrc, Result,
 };
 
 impl Image {
@@ -23,9 +23,8 @@ impl Image {
             .map_err(ImageError::DimensionsFailed)?;
 
         Ok(Self {
-            src: ImageSrc::File {
-                path: path.to_path_buf(),
-            },
+            src: ImageSrc::File(path.to_path_buf()),
+            data: ImageData::File(path.to_path_buf()),
             config: ImageConfig::default(),
             height,
             width,
