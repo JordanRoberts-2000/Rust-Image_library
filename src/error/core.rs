@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{io, path::PathBuf};
 
 use super::{io::IoError, validation::ValidationError};
 
@@ -25,6 +25,13 @@ pub enum ImageError {
     #[error("failed to encode img '{id}' to format 'webp'")]
     WebPEncoding {
         err: webp::WebPEncodingError,
+        id: String,
+    },
+
+    #[error("Failed to write WebP data (source: {id})")]
+    WriteWebP {
+        #[source]
+        source: io::Error,
         id: String,
     },
 

@@ -4,7 +4,9 @@ pub mod impls {
     mod encoding;
     mod internal;
     mod metadata;
+    mod output;
     mod serialization;
+    mod source;
     mod transformations;
 }
 pub mod enums;

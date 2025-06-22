@@ -3,7 +3,7 @@ use {
     tempfile::{Builder, NamedTempFile},
 };
 
-use crate::{Image, ImageError, ImageFormat, IoError, Result};
+use crate::{Image, ImageError, IoError, Result};
 
 impl Image {
     pub fn atomic_save(&mut self, path: &Path) -> Result<()> {
@@ -22,11 +22,7 @@ impl Image {
             })
             .map_err(|e| IoError::CreateTempFile(e, parent.to_path_buf()))?;
 
-        match self.format {
-            ImageFormat::Jpeg => self.encode_jpeg(temp_file.path()),
-            ImageFormat::Png => self.encode_png(temp_file.path()),
-            ImageFormat::WebP => self.encode_webp(temp_file.path()),
-        }?;
+        self.encode(&temp_file)?;
 
         temp_file
             .persist(path)

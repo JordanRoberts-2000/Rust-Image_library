@@ -1,3 +1,3 @@
-pub mod blurhash;
-pub mod dominant_color;
-pub mod source;
+mod blurhash;
+mod color;
+mod size;

@@ -1,19 +1,14 @@
-use std::{
-    fs::File,
-    io::{BufWriter, Write},
-    path::Path,
+use {
+    std::io::{BufWriter, Write},
+    webp::{Encoder, PixelLayout},
 };
-use webp::{Encoder, PixelLayout};
 
-use crate::{CompressionType, Image, ImageError, IoError, Result};
+use crate::{CompressionType, Image, ImageError, Result};
 
 const DEFAULT_WEBP_QUALITY: f32 = 75.0;
-const DEFAULT_WEBP_COMPRESSION: CompressionType = CompressionType::Lossy;
 
 impl Image {
-    pub fn encode_webp(&mut self, path: impl AsRef<Path>) -> Result<()> {
-        let path = path.as_ref();
-
+    pub fn encode_webp(&mut self, writer: impl Write) -> Result<()> {
         let rgba_image = &self.get_decoded()?.to_rgba8();
         let (width, height) = rgba_image.dimensions();
 
@@ -30,12 +25,13 @@ impl Image {
             }
         };
 
-        let file = File::create(path).map_err(|e| IoError::CreateFile(e, path.to_path_buf()))?;
-        let mut writer = BufWriter::new(file);
-
-        writer
+        let mut buf_writer = BufWriter::new(writer);
+        buf_writer
             .write_all(&webp_data)
-            .map_err(|e| IoError::WriteFile(e, path.to_path_buf()))?;
+            .map_err(|e| ImageError::WriteWebP {
+                source: e,
+                id: self.describe_source(),
+            })?;
 
         Ok(())
     }
@@ -47,9 +43,7 @@ impl Image {
         height: u32,
     ) -> Result<Vec<u8>> {
         let encoder = Encoder::new(rgba_image.as_raw(), PixelLayout::Rgba, width, height);
-
         let webp_data = encoder.encode_lossless();
-
         Ok(webp_data.to_vec())
     }
 
