@@ -1,8 +1,10 @@
+use std::path::PathBuf;
+
 use {image::ImageReader, std::path::Path};
 
 use crate::{
     utils::validation::ensure_existing_image_file, Image, ImageConfig, ImageData, ImageError,
-    ImageFormat, ImageSrc, Result,
+    ImageFormat, ImageSrc, Result, DEFAULT_IMAGE_FILE_NAME,
 };
 
 impl Image {
@@ -22,10 +24,25 @@ impl Image {
             .into_dimensions()
             .map_err(ImageError::DimensionsFailed)?;
 
+        let file_name = path
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .unwrap_or(DEFAULT_IMAGE_FILE_NAME)
+            .to_string();
+
+        let parent_dir = path
+            .parent()
+            .map(|p| p.to_path_buf())
+            .unwrap_or_else(|| PathBuf::from("."));
+
         Ok(Self {
             src: ImageSrc::File(path.to_path_buf()),
             data: ImageData::File(path.to_path_buf()),
-            config: ImageConfig::default(),
+            config: ImageConfig {
+                file_name,
+                output_dir: parent_dir,
+                ..Default::default()
+            },
             height,
             width,
             aspect_ratio: width as f32 / height as f32,

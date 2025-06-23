@@ -1,6 +1,6 @@
 mod enums;
 mod error;
-mod image;
+pub(crate) mod image;
 pub(crate) mod utils;
 
 pub use {
@@ -12,6 +12,7 @@ pub use {
 pub(crate) use {
     error::{InternalError, IoError, Result, ValidationError},
     image::{
+        constants::DEFAULT_IMAGE_FILE_NAME,
         core::ImageConfig,
         enums::{ImageData, ImageSrc, TransformOp},
     },

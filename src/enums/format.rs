@@ -25,6 +25,14 @@ impl ImageFormat {
             ImageFormat::Jpeg => "image/jpeg",
         }
     }
+
+    pub fn extention(&self) -> &'static str {
+        match self {
+            ImageFormat::WebP => "webp",
+            ImageFormat::Png => "png",
+            ImageFormat::Jpeg => "jpg",
+        }
+    }
 }
 
 impl TryFrom<&str> for ImageFormat {

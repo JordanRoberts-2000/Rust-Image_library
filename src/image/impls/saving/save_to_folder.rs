@@ -1,0 +1,17 @@
+use std::path::Path;
+
+use crate::{Image, Result};
+
+impl Image {
+    pub fn save_to_folder(&mut self, folder_path: impl AsRef<Path>) -> Result<()> {
+        let ext = self.format.extention();
+        let path = folder_path
+            .as_ref()
+            .join(format!("{}.{}", self.config.file_name, ext));
+
+        self.apply_transforms()?;
+        self.atomic_save(&path)?;
+
+        Ok(())
+    }
+}
