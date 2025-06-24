@@ -8,6 +8,7 @@ impl Image {
             ImageFormat::Jpeg => self.encode_jpeg(writer),
             ImageFormat::Png => self.encode_png(writer),
             ImageFormat::WebP => self.encode_webp(writer),
+            ImageFormat::Avif => self.encode_avif(writer),
         }?;
 
         Ok(())

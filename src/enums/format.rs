@@ -11,6 +11,7 @@ pub enum ImageFormat {
     WebP,
     Png,
     Jpeg,
+    Avif,
 }
 
 impl ImageFormat {
@@ -23,6 +24,7 @@ impl ImageFormat {
             ImageFormat::WebP => "image/webp",
             ImageFormat::Png => "image/png",
             ImageFormat::Jpeg => "image/jpeg",
+            ImageFormat::Avif => "image/avif",
         }
     }
 
@@ -31,6 +33,7 @@ impl ImageFormat {
             ImageFormat::WebP => "webp",
             ImageFormat::Png => "png",
             ImageFormat::Jpeg => "jpg",
+            ImageFormat::Avif => "avif",
         }
     }
 }
@@ -43,6 +46,7 @@ impl TryFrom<&str> for ImageFormat {
             "webp" => Ok(ImageFormat::WebP),
             "png" => Ok(ImageFormat::Png),
             "jpg" | "jpeg" => Ok(ImageFormat::Jpeg),
+            "avif" => Ok(ImageFormat::Avif),
             _ => Err(()),
         }
     }
@@ -56,6 +60,7 @@ impl TryFrom<image::ImageFormat> for ImageFormat {
             image::ImageFormat::Png => Ok(ImageFormat::Png),
             image::ImageFormat::Jpeg => Ok(ImageFormat::Jpeg),
             image::ImageFormat::WebP => Ok(ImageFormat::WebP),
+            image::ImageFormat::Avif => Ok(ImageFormat::Avif),
             other => Err(ImageError::UnsupportedFormat(other)),
         }
     }
@@ -67,6 +72,7 @@ impl From<ImageFormat> for image::ImageFormat {
             ImageFormat::WebP => image::ImageFormat::WebP,
             ImageFormat::Png => image::ImageFormat::Png,
             ImageFormat::Jpeg => image::ImageFormat::Jpeg,
+            ImageFormat::Avif => image::ImageFormat::Avif,
         }
     }
 }

@@ -10,6 +10,7 @@ color-thief = "0.2.2"
 image = "0.25.6"
 log = "0.4.27"
 mockito = "1.7.0"
+ravif = { version = "0.12.0", default-features = false }
 reqwest = { version = "0.12.15", features = ["blocking"]}
 serde = { version = "1.0.218", features = ["derive"] }
 strum = "0.27.1"
@@ -19,3 +20,4 @@ thiserror = "2.0.12"
 trash = "5.2.2"
 url = "2.5.4"
 webp = "0.3.0"
+

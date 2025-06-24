@@ -21,6 +21,11 @@ impl Image {
         self
     }
 
+    pub fn avif(&mut self) -> &mut Self {
+        self.format = ImageFormat::Avif;
+        self
+    }
+
     pub fn quality(&mut self, quality: u32) -> &mut Self {
         self.config.quality = Some(quality.clamp(1, 100));
         self

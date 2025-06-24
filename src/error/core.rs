@@ -28,8 +28,18 @@ pub enum ImageError {
         id: String,
     },
 
+    #[error("failed to encode img '{id}' to format 'avif'")]
+    AvifEncoding { err: ravif::Error, id: String },
+
     #[error("Failed to write WebP data (source: {id})")]
     WriteWebP {
+        #[source]
+        source: io::Error,
+        id: String,
+    },
+
+    #[error("Failed to write Avif data (source: {id})")]
+    WriteAvif {
         #[source]
         source: io::Error,
         id: String,
