@@ -6,14 +6,17 @@ pub(crate) mod utils;
 pub use {
     enums::{CompressionType, CropEdge, ImageFormat},
     error::ImageError,
-    image::core::Image,
+    image::{
+        config::{AvifConfig, JpegConfig, WebpConfig},
+        core::Image,
+    },
 };
 
 pub(crate) use {
     error::{InternalError, IoError, Result, ValidationError},
     image::{
-        constants::DEFAULT_IMAGE_FILE_NAME,
-        core::ImageConfig,
+        config::ImageConfig,
+        constants,
         enums::{ImageData, ImageSrc, TransformOp},
     },
 };

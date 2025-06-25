@@ -1,0 +1,34 @@
+use std::path::PathBuf;
+
+use crate::{
+    constants::DEFAULT_IMAGE_FILE_NAME, AvifConfig, CompressionType, JpegConfig, TransformOp,
+    WebpConfig,
+};
+
+#[derive(Debug)]
+pub struct ImageConfig {
+    pub pipeline: Vec<TransformOp>,
+    pub quality: Option<u32>,
+    pub compression: CompressionType,
+    pub file_name: String,
+    pub output_dir: PathBuf,
+
+    pub jpeg: Option<JpegConfig>,
+    pub avif: Option<AvifConfig>,
+    pub webp: Option<WebpConfig>,
+}
+
+impl Default for ImageConfig {
+    fn default() -> Self {
+        Self {
+            pipeline: Vec::new(),
+            quality: None,
+            compression: CompressionType::Lossy,
+            file_name: DEFAULT_IMAGE_FILE_NAME.to_string(),
+            output_dir: PathBuf::from("."),
+            jpeg: None,
+            avif: None,
+            webp: None,
+        }
+    }
+}

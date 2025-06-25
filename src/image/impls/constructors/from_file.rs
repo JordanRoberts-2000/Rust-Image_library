@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use {image::ImageReader, std::path::Path};
 
 use crate::{
-    utils::validation::ensure_existing_image_file, Image, ImageConfig, ImageData, ImageError,
-    ImageFormat, ImageSrc, Result, DEFAULT_IMAGE_FILE_NAME,
+    constants::DEFAULT_IMAGE_FILE_NAME, utils::validation::ensure_existing_image_file, Image,
+    ImageConfig, ImageData, ImageError, ImageFormat, ImageSrc, Result,
 };
 
 impl Image {

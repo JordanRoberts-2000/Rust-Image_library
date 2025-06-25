@@ -1,5 +1,6 @@
 pub mod core;
 pub mod impls {
+    mod configure;
     mod constructors;
     mod encoding;
     mod internal;
@@ -10,9 +11,7 @@ pub mod impls {
     mod source;
     mod transformations;
 }
+pub mod config;
+pub mod constants;
 pub mod enums;
 pub mod traits;
-
-pub mod constants {
-    pub const DEFAULT_IMAGE_FILE_NAME: &str = "image";
-}

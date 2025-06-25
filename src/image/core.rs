@@ -1,8 +1,4 @@
-use std::path::PathBuf;
-
-use crate::{
-    CompressionType, ImageData, ImageFormat, ImageSrc, TransformOp, DEFAULT_IMAGE_FILE_NAME,
-};
+use crate::{ImageConfig, ImageData, ImageFormat, ImageSrc};
 
 #[derive(Debug)]
 pub struct Image {
@@ -14,25 +10,4 @@ pub struct Image {
     pub width: u32,
     pub aspect_ratio: f32,
     pub format: ImageFormat,
-}
-
-#[derive(Debug)]
-pub struct ImageConfig {
-    pub pipeline: Vec<TransformOp>,
-    pub quality: Option<u32>,
-    pub compression: CompressionType,
-    pub file_name: String,
-    pub output_dir: PathBuf,
-}
-
-impl Default for ImageConfig {
-    fn default() -> Self {
-        Self {
-            pipeline: Vec::new(),
-            quality: None,
-            compression: CompressionType::Lossy,
-            file_name: DEFAULT_IMAGE_FILE_NAME.to_string(),
-            output_dir: PathBuf::from("."),
-        }
-    }
 }

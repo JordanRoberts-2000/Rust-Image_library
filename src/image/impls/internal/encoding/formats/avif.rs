@@ -1,4 +1,7 @@
-use crate::{Image, ImageError, Result};
+use crate::{
+    constants::{DEFAULT_AVIF_QUALITY, DEFAULT_AVIF_SPEED},
+    CompressionType, Image, ImageError, Result,
+};
 
 use {
     ravif::{EncodedImage, Encoder, Img, RGBA8},
@@ -7,14 +10,27 @@ use {
 
 impl Image {
     pub fn encode_avif(&mut self, writer: impl Write) -> Result<()> {
+        if self.config.compression == CompressionType::Lossless {
+            log::warn!("Lossless AVIF compression is not supported; falling back to lossy.");
+        }
+
         let img_buffer = self.get_decoded()?.to_rgba8();
         let (width, height) = img_buffer.dimensions();
 
-        let quality = self
-            .config
-            .quality
-            .map(|q| q.clamp(1, 100) as f32)
-            .unwrap_or(75.0);
+        let (quality, speed, alpha_quality) = if let Some(cfg) = &self.config.avif {
+            (
+                cfg.quality.clamp(1, 100) as f32,
+                cfg.speed.clamp(1, 10),
+                cfg.alpha_quality.clamp(1, 100) as f32,
+            )
+        } else {
+            let fallback_quality = self
+                .config
+                .quality
+                .map(|q| q.clamp(1, 100) as f32)
+                .unwrap_or(DEFAULT_AVIF_QUALITY as f32);
+            (fallback_quality, DEFAULT_AVIF_SPEED, fallback_quality)
+        };
 
         let pixels: Vec<RGBA8> = img_buffer
             .pixels()
@@ -30,10 +46,10 @@ impl Image {
 
         let encoder = Encoder::new()
             .with_quality(quality)
-            .with_speed(6)
-            .with_alpha_quality(quality);
+            .with_speed(speed)
+            .with_alpha_quality(alpha_quality);
 
-        let EncodedImage { avif_file, .. } =
+        let encoded: EncodedImage =
             encoder
                 .encode_rgba(img_ref)
                 .map_err(|e| ImageError::AvifEncoding {
@@ -43,7 +59,7 @@ impl Image {
 
         let mut buf_writer = BufWriter::new(writer);
         buf_writer
-            .write_all(&avif_file)
+            .write_all(&encoded.avif_file)
             .map_err(|e| ImageError::WriteAvif {
                 source: e,
                 id: self.describe_source(),
