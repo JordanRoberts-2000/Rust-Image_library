@@ -142,6 +142,9 @@ pub enum ImageError {
 
     #[error("output path `{0}` has no parent directory")]
     MissingParent(PathBuf),
+
+    #[error("source file size is only available for local file sources")]
+    SourceFileSizeUnavailable,
 }
 
 pub fn format_unsupported_error(format: &image::ImageFormat) -> String {
