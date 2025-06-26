@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::{Image, ImageError, ImageFormat, Result};
+use crate::{utils::fs::trash_file, Image, ImageError, ImageFormat, ImageSrc, Result};
 
 impl Image {
     pub fn save_as(&mut self, path: impl AsRef<Path>) -> Result<()> {
@@ -25,10 +25,17 @@ impl Image {
         let result = (|| {
             self.apply_transforms()?;
             self.atomic_save(&path)?;
+            if self.config.remove_source {
+                if let ImageSrc::File(path) = &self.src {
+                    trash_file(path)?;
+                }
+            }
+
             Ok(())
         })();
 
         self.format = original_format;
+
         result
     }
 }

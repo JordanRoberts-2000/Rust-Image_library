@@ -8,6 +8,8 @@ use crate::{
 #[derive(Debug)]
 pub struct ImageConfig {
     pub pipeline: Vec<TransformOp>,
+    pub remove_source: bool,
+
     pub quality: Option<u32>,
     pub compression: CompressionType,
     pub file_name: String,
@@ -24,6 +26,7 @@ impl Default for ImageConfig {
     fn default() -> Self {
         Self {
             pipeline: Vec::new(),
+            remove_source: false,
             quality: None,
             compression: CompressionType::Lossy,
             file_name: DEFAULT_IMAGE_FILE_NAME.to_string(),

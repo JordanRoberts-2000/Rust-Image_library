@@ -1,4 +1,4 @@
-use crate::{Image, Result};
+use crate::{utils::fs::trash_file, Image, ImageSrc, Result};
 
 impl Image {
     pub fn save(&mut self) -> Result<()> {
@@ -10,6 +10,12 @@ impl Image {
 
         self.apply_transforms()?;
         self.atomic_save(&path)?;
+
+        if self.config.remove_source {
+            if let ImageSrc::File(path) = &self.src {
+                trash_file(path)?;
+            }
+        }
 
         Ok(())
     }

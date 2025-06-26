@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use crate::{utils::validation::existing_dir, Image, Result};
+use crate::{
+    utils::{fs::trash_file, validation::existing_dir},
+    Image, ImageSrc, Result,
+};
 
 impl Image {
     pub fn save_to_folder(&mut self, folder_path: impl AsRef<Path>) -> Result<()> {
@@ -13,6 +16,12 @@ impl Image {
 
         self.apply_transforms()?;
         self.atomic_save(&path)?;
+
+        if self.config.remove_source {
+            if let ImageSrc::File(path) = &self.src {
+                trash_file(path)?;
+            }
+        }
 
         Ok(())
     }
