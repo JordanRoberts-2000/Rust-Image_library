@@ -5,6 +5,9 @@ pub enum ValidationError {
     #[error("path does not exist: {0}")]
     PathNotFound(PathBuf),
 
+    #[error("path doesn't lead to a directory: {0}")]
+    NotADirectory(PathBuf),
+
     #[error("missing file extension: `{0}`")]
     MissingExtension(PathBuf),
 

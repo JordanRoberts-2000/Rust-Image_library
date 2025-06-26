@@ -1,9 +1,11 @@
 use std::path::Path;
 
-use crate::{Image, Result};
+use crate::{utils::validation::existing_dir, Image, Result};
 
 impl Image {
     pub fn save_to_folder(&mut self, folder_path: impl AsRef<Path>) -> Result<()> {
+        existing_dir(&folder_path)?;
+
         let ext = self.format.extention();
         let path = folder_path
             .as_ref()
