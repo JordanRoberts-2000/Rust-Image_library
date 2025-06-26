@@ -12,6 +12,8 @@ pub struct ImageConfig {
     pub compression: CompressionType,
     pub file_name: String,
     pub output_dir: PathBuf,
+    pub prefix: Option<String>,
+    pub suffix: Option<String>,
 
     pub jpeg: Option<JpegConfig>,
     pub avif: Option<AvifConfig>,
@@ -26,6 +28,8 @@ impl Default for ImageConfig {
             compression: CompressionType::Lossy,
             file_name: DEFAULT_IMAGE_FILE_NAME.to_string(),
             output_dir: PathBuf::from("."),
+            prefix: None,
+            suffix: None,
             jpeg: None,
             avif: None,
             webp: None,

@@ -9,7 +9,7 @@ impl Image {
         let ext = self.format.extention();
         let path = folder_path
             .as_ref()
-            .join(format!("{}.{}", self.config.file_name, ext));
+            .join(format!("{}.{}", self.build_file_name(), ext));
 
         self.apply_transforms()?;
         self.atomic_save(&path)?;
