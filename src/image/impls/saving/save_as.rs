@@ -4,7 +4,12 @@ use crate::{Image, ImageError, ImageFormat, Result};
 
 impl Image {
     pub fn save_as(&mut self, path: impl AsRef<Path>) -> Result<()> {
-        let path = path.as_ref();
+        let mut path = path.as_ref().to_path_buf();
+
+        if path.extension().is_none() {
+            let ext = self.format.extention();
+            path.set_extension(ext);
+        }
 
         let ext = path
             .extension()
@@ -19,7 +24,7 @@ impl Image {
 
         let result = (|| {
             self.apply_transforms()?;
-            self.atomic_save(path)?;
+            self.atomic_save(&path)?;
             Ok(())
         })();
 
