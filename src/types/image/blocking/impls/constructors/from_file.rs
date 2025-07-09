@@ -37,158 +37,104 @@ impl Image {
             },
             height,
             width,
-            aspect_ratio: width as f32 / height as f32,
             format,
         })
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use mockall::predicate;
+#[cfg(test)]
+mod tests {
+    use {
+        crate::{
+            blocking::Image,
+            image::{
+                blocking::{
+                    dependencies::MockImageDeps,
+                    traits::{MockFsOps, MockMetadataOps},
+                },
+                enums::{ImageData, ImageSrc},
+            },
+            ImageError, ImageFormat, ValidationError,
+        },
+        std::{num::NonZeroU32, path::PathBuf},
+    };
 
-//     use crate::{
-//         BlockingImage, ImageData, ImageFormat, ImageSrc, MockSyncMetadataRepo,
-//         MockSyncValidationRepo, SyncImageService,
-//     };
+    #[test]
+    fn test_from_file_internal_success() {
+        let path = PathBuf::from("test_image.jpg");
 
-//     #[test]
-//     fn test_from_file_internal_with_mocks() {
-//         use std::path::PathBuf;
+        let mut fs_mock = MockFsOps::new();
+        fs_mock.expect_ensure_existing_file().returning(|_| Ok(()));
 
-//         let path = PathBuf::from("fake_image.png");
+        let mut metadata_mock = MockMetadataOps::new();
+        metadata_mock.expect_from_path().returning(|_| {
+            Ok((
+                ImageFormat::Jpeg,
+                NonZeroU32::new(1920).unwrap(),
+                NonZeroU32::new(1080).unwrap(),
+            ))
+        });
 
-//         let mut mock_validation = MockSyncValidationRepo::new();
-//         mock_validation
-//             .expect_ensure_existing_image_file()
-//             .with(predicate::eq(path.clone()))
-//             .returning(|_| Ok(()));
+        let mock_deps = MockImageDeps {
+            fs: fs_mock,
+            metadata: metadata_mock,
+            ..Default::default()
+        };
 
-//         let mut mock_metadata = MockSyncMetadataRepo::new();
-//         mock_metadata
-//             .expect_from_path()
-//             .with(predicate::eq(path.clone()))
-//             .returning(|_| Ok((ImageFormat::Png, 800, 600)));
+        let image = Image::from_file_internal(&path, &mock_deps).unwrap();
 
-//         let service = SyncImageService {
-//             validation: mock_validation,
-//             metadata: mock_metadata,
-//         };
+        assert_eq!(image.width(), 1920);
+        assert_eq!(image.height(), 1080);
+        assert_eq!(image.aspect_ratio(), 1920.0 / 1080.0);
+        assert_eq!(image.format, ImageFormat::Jpeg);
+        assert_eq!(image.src, ImageSrc::File(path.clone()));
+        assert_eq!(image.data, ImageData::File(path.clone()));
+    }
 
-//         let result = BlockingImage::from_file_internal(&path, service).unwrap();
+    #[test]
+    fn test_from_file_internal_fails_when_file_missing() {
+        let path = PathBuf::from("missing.jpg");
 
-//         assert_eq!(result.height, 600);
-//         assert_eq!(result.width, 800);
-//         assert_eq!(result.format, ImageFormat::Png);
-//         assert_eq!(result.src, ImageSrc::File(path.clone()));
-//         assert_eq!(result.data, ImageData::File(path.clone()));
-//     }
-// }
+        let mut fs_mock = MockFsOps::new();
+        fs_mock.expect_ensure_existing_file().returning(|path| {
+            Err(ImageError::Validation(ValidationError::PathNotFound(
+                path.to_path_buf(),
+            )))
+        });
 
-// #[cfg(test)]
-// mod tests {
-//     use {mockall::predicate::*, std::path::Path};
+        let mock_deps = MockImageDeps {
+            fs: fs_mock,
+            ..Default::default()
+        };
 
-//     use crate::{blocking::MockImageOps, MockRepo, SyncImageOpsInternal};
+        let result = Image::from_file_internal(&path, &mock_deps);
 
-//     #[test]
-//     fn test_mock_from_file_success() {
-//         let ctx = MockImageOps::<MockRepo>::from_file_internal_context();
+        assert!(matches!(
+            result,
+            Err(ImageError::Validation(ValidationError::PathNotFound(_)))
+        ));
+    }
 
-//         ctx.expect()
-//             .with(eq(Path::new("test.jpg")), always())
-//             .times(1)
-//             .returning(|_, _| Ok(MockImageOps::new()));
+    #[test]
+    fn test_from_file_internal_fails_when_metadata_fails() {
+        let path = PathBuf::from("corrupt.jpg");
 
-//         let repo = MockRepo::new();
-//         let result = MockImageOps::from_file_internal(Path::new("test.jpg"), repo);
-//         assert!(result.is_ok());
-//     }
-// }
-// #[cfg(test)]
-// mod tests {
-//     use tempfile::TempDir;
+        let mut fs_mock = MockFsOps::new();
+        fs_mock.expect_ensure_existing_file().returning(|_| Ok(()));
 
-//     use crate::ValidationError;
+        let mut metadata_mock = MockMetadataOps::new();
+        metadata_mock
+            .expect_from_path()
+            .returning(|_| Err(ImageError::UnknownFormat));
 
-//     use super::*;
-//     use std::{fs::File, path::PathBuf};
+        let mock_deps = MockImageDeps {
+            fs: fs_mock,
+            metadata: metadata_mock,
+            ..Default::default()
+        };
 
-//     #[test]
-//     fn test_img_from_file_success() {
-//         let path = PathBuf::from("tests/assets/test.png");
-//         let img = Img::from_file(&path).expect("Image should open successfully");
+        let result = Image::from_file_internal(&path, &mock_deps);
 
-//         assert_eq!(img.format, ImageFormat::Png);
-
-//         let expected_ratio = img.width as f32 / img.height as f32;
-//         assert!((img.aspect_ratio - expected_ratio).abs() < 0.01);
-//     }
-
-//     #[test]
-//     fn test_img_from_file_multiple_formats() {
-//         let cases = [
-//             ("test.png", ImageFormat::Png),
-//             ("test.jpg", ImageFormat::Jpeg),
-//             ("test.webp", ImageFormat::WebP),
-//         ];
-
-//         for (file, fmt) in cases {
-//             let path = PathBuf::from(format!("tests/assets/{}", file));
-//             let img = Img::from_file(&path).expect(&format!("Should open {}", file));
-//             assert_eq!(img.format, fmt);
-//         }
-//     }
-
-//     #[test]
-//     fn test_img_from_file_nonexistent_path() {
-//         let path = PathBuf::from("tests/assets/does_not_exist.png");
-//         let err = Img::from_file(&path).unwrap_err();
-//         match err {
-//             ImgError::Validation(ValidationError::PathNotFound(p)) => assert_eq!(p, path),
-//             _ => panic!("Expected ImgError::Validation(PathNotFound), got {:?}", err),
-//         }
-//     }
-
-//     #[test]
-//     fn test_img_from_file_directory() {
-//         let dir = Path::new("tests/assets");
-//         let err = Img::from_file(dir).unwrap_err();
-//         match err {
-//             ImgError::Validation(ValidationError::NotAFile(p)) => assert_eq!(p, dir.to_path_buf()),
-//             _ => panic!("Expected ImgError::Validation(NotAFile), got {:?}", err),
-//         }
-//     }
-
-//     #[test]
-//     fn test_img_from_file_missing_extension() {
-//         let tmp = TempDir::new().unwrap();
-//         let file = tmp.path().join("no_ext");
-//         File::create(&file).unwrap();
-
-//         let err = Img::from_file(&file).unwrap_err();
-//         match err {
-//             ImgError::Validation(ValidationError::MissingExtension(p)) => assert_eq!(p, file),
-//             _ => panic!(
-//                 "Expected ImgError::Validation(MissingExtension), got {:?}",
-//                 err
-//             ),
-//         }
-//     }
-
-//     #[test]
-//     fn test_img_from_file_unsupported_extension() {
-//         let tmp = TempDir::new().unwrap();
-//         let file = tmp.path().join("foo.txt");
-//         File::create(&file).unwrap();
-
-//         let err = Img::from_file(&file).unwrap_err();
-//         match err {
-//             ImgError::Validation(ValidationError::NotAnImageFile(p)) => assert_eq!(p, file),
-//             _ => panic!(
-//                 "Expected ImgError::Validation(NotAnImageFile), got {:?}",
-//                 err
-//             ),
-//         }
-//     }
-// }
+        assert!(matches!(result, Err(ImageError::UnknownFormat)));
+    }
+}
