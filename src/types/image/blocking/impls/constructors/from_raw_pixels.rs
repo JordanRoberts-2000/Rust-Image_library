@@ -1,10 +1,17 @@
-use image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba};
-
-use crate::{
-    BlockingImage, ColorType, ImageConfig, ImageData, ImageError, ImageFormat, ImageSrc, Result,
+use {
+    crate::{
+        blocking::Image,
+        image::{
+            enums::{ImageData, ImageSrc},
+            ImageConfig,
+        },
+        ColorType, ImageError, ImageFormat, Result, ValidationError,
+    },
+    image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
+    std::num::NonZeroU32,
 };
 
-impl BlockingImage {
+impl Image {
     pub fn from_raw_pixels(
         pixels: Vec<u8>,
         width: u32,
@@ -26,14 +33,84 @@ impl BlockingImage {
                 .ok_or_else(|| ImageError::InvalidBuffer(color_type))?,
         };
 
+        let width =
+            NonZeroU32::new(width).ok_or(ValidationError::InvalidDimensions(width, height))?;
+        let height = NonZeroU32::new(height)
+            .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
+
         Ok(Self {
             src: ImageSrc::RawPixels,
             data: ImageData::Decoded(img),
             config: ImageConfig::default(),
             height,
             width,
-            aspect_ratio: width as f32 / height as f32,
             format: ImageFormat::default(),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        blocking::Image,
+        image::{
+            enums::{ImageData, ImageSrc},
+            ImageConfig,
+        },
+        ColorType, ImageError, ValidationError,
+    };
+
+    fn test_color_type_ok(color_type: ColorType, pixel_size: usize) {
+        let width = 2;
+        let height = 2;
+        let num_pixels = (width * height) as usize;
+        let pixels = vec![1u8; pixel_size * num_pixels];
+
+        let img =
+            Image::from_raw_pixels(pixels.clone(), width, height, color_type.clone()).unwrap();
+
+        assert_eq!(img.width(), width);
+        assert_eq!(img.height(), height);
+        assert_eq!(img.src, ImageSrc::RawPixels);
+        assert_eq!(img.config, ImageConfig::default());
+        assert!(matches!(img.data, ImageData::Decoded(_)));
+    }
+
+    #[test]
+    fn test_from_raw_pixels_valid_variants() {
+        test_color_type_ok(ColorType::Rgb8, 3);
+        test_color_type_ok(ColorType::Rgba8, 4);
+        test_color_type_ok(ColorType::L8, 1);
+        test_color_type_ok(ColorType::La8, 2);
+    }
+
+    fn test_invalid_buffer(color_type: ColorType, pixel_size: usize) {
+        let width: u32 = 2;
+        let height: u32 = 2;
+        let too_short = vec![1u8; (width as usize * height as usize * pixel_size) - 1];
+
+        let result = Image::from_raw_pixels(too_short, width, height, color_type.clone());
+        assert!(matches!(result, Err(ImageError::InvalidBuffer(ct)) if ct == color_type));
+    }
+
+    #[test]
+    fn test_from_raw_pixels_invalid_buffer_variants() {
+        test_invalid_buffer(ColorType::Rgb8, 3);
+        test_invalid_buffer(ColorType::Rgba8, 4);
+        test_invalid_buffer(ColorType::L8, 1);
+        test_invalid_buffer(ColorType::La8, 2);
+    }
+
+    #[test]
+    fn test_from_raw_pixels_zero_dimensions() {
+        let pixels = vec![255, 0, 0];
+        let result = Image::from_raw_pixels(pixels, 0, 10, ColorType::Rgb8);
+
+        assert!(matches!(
+            result,
+            Err(ImageError::Validation(ValidationError::InvalidDimensions(
+                0, 10
+            )))
+        ));
     }
 }
