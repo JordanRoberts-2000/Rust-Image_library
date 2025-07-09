@@ -25,66 +25,68 @@ impl Image {
             config: ImageConfig::default(),
             height,
             width,
-            aspect_ratio: width as f32 / height as f32,
             format,
         })
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use std::fs;
+#[cfg(test)]
+mod tests {
+    use {
+        crate::{
+            blocking::Image,
+            image::{
+                blocking::{dependencies::MockImageDeps, traits::MockMetadataOps},
+                enums::{ImageData, ImageSrc},
+            },
+            ImageError, ImageFormat,
+        },
+        std::num::NonZeroU32,
+    };
 
-//     #[test]
-//     fn test_img_from_valid_bytes() {
-//         let bytes = fs::read("tests/assets/test.png").expect("test image should exist");
-//         let img = Image::from_bytes(bytes).expect("Image should be loaded from bytes");
+    #[test]
+    fn test_from_bytes_internal_success() {
+        let bytes = vec![137, 80, 78, 71]; // e.g., partial PNG header
 
-//         assert!(img.width > 0);
-//         assert!(img.height > 0);
-//         assert_eq!(img.aspect_ratio, img.width as f32 / img.height as f32);
+        let mut metadata_mock = MockMetadataOps::new();
+        metadata_mock.expect_from_bytes().returning(|_| {
+            Ok((
+                ImageFormat::Png,
+                NonZeroU32::new(800).unwrap(),
+                NonZeroU32::new(600).unwrap(),
+            ))
+        });
 
-//         assert!(
-//             matches!(img.src, ImageSrc::Bytes { .. }),
-//             "Expected ImgSrc::Bytes"
-//         );
+        let mock_deps = MockImageDeps {
+            metadata: metadata_mock,
+            ..Default::default()
+        };
 
-//         assert_eq!(img.format, ImageFormat::Png, "Image format should be PNG");
-//     }
+        let image = Image::from_bytes_internal(bytes.clone(), &mock_deps).unwrap();
 
-//     #[test]
-//     fn test_img_from_valid_bytes_multiple_formats() {
-//         let test_cases = vec![
-//             ("test.png", ImageFormat::Png),
-//             ("test.jpg", ImageFormat::Jpeg),
-//             ("test.webp", ImageFormat::WebP),
-//         ];
+        assert_eq!(image.format, ImageFormat::Png);
+        assert_eq!(image.width(), 800);
+        assert_eq!(image.height(), 600);
+        assert_eq!(image.data, ImageData::EncodedBytes(bytes));
+        assert_eq!(image.src, ImageSrc::Bytes);
+    }
 
-//         for (filename, expected_format) in test_cases {
-//             let path = format!("tests/assets/{}", filename);
-//             let bytes = fs::read(&path).expect(&format!("Image file {} should exist", filename));
+    #[test]
+    fn test_from_bytes_internal_metadata_failure() {
+        let bytes = vec![0, 1, 2, 3]; // invalid image data
 
-//             let img = Image::from_bytes(bytes).expect("Image should be loaded from bytes");
+        let mut metadata_mock = MockMetadataOps::new();
+        metadata_mock
+            .expect_from_bytes()
+            .returning(|_| Err(ImageError::UnknownFormat));
 
-//             assert_eq!(
-//                 img.format, expected_format,
-//                 "Image format mismatch for {}",
-//                 filename
-//             );
-//         }
-//     }
+        let mock_deps = MockImageDeps {
+            metadata: metadata_mock,
+            ..Default::default()
+        };
 
-//     #[test]
-//     fn test_img_from_invalid_bytes_should_error() {
-//         let fake_bytes = b"this is not an image".to_vec();
+        let result = Image::from_bytes_internal(bytes, &mock_deps);
 
-//         let result = Image::from_bytes(fake_bytes);
-
-//         match result {
-//             Err(ImageError::GuessFormat) => {}
-//             Err(ImageError::Decoding { .. }) => {}
-//             _ => panic!("Expected GuessFormat or Decoding error"),
-//         }
-//     }
-// }
+        assert!(matches!(result, Err(ImageError::UnknownFormat)));
+    }
+}

@@ -35,7 +35,6 @@ impl Image {
             config: ImageConfig::default(),
             height,
             width,
-            aspect_ratio: width as f32 / height as f32,
             format,
         })
     }
