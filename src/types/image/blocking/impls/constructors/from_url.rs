@@ -1,63 +1,26 @@
-use std::io::Cursor;
-
-use image::ImageReader;
-
-use {reqwest::blocking, url::Url};
-
-use crate::{Image, ImageConfig, ImageData, ImageError, ImageFormat, ImageSrc, Result};
+use {
+    crate::{
+        image::blocking::{
+            dependencies::ImageDeps,
+            traits::{ImageDepsOps, UrlDownloaderOp},
+            Image,
+        },
+        ImageError, Result,
+    },
+    url::Url,
+};
 
 impl Image {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
-        let url_str = url.as_ref();
-        let url: Url =
-            Url::parse(url_str).map_err(|e| ImageError::UrlParse(e, url_str.to_string()))?;
+        let url = Url::parse(url.as_ref())
+            .map_err(|e| ImageError::UrlParse(e, url.as_ref().to_string()))?;
 
-        let response = blocking::get(url.clone()).map_err(|e| ImageError::DownloadFailed {
-            source: e,
-            url: url_str.to_string(),
-        })?;
+        Self::from_url_internal(url, &ImageDeps::default())
+    }
 
-        if !response.status().is_success() {
-            let status_code = response.status().as_u16();
-            let message = response
-                .text()
-                .unwrap_or_else(|_| "response couldn't be read".to_string());
-
-            return Err(ImageError::FailedRequest {
-                message,
-                status_code,
-                url: url_str.to_string(),
-            });
-        }
-
-        let bytes = response
-            .bytes()
-            .map_err(|e| ImageError::ResponseReadFailed {
-                source: e,
-                url: url_str.to_string(),
-            })?
-            .to_vec();
-
-        let reader = ImageReader::new(Cursor::new(&bytes))
-            .with_guessed_format()
-            .map_err(|_| ImageError::FormatDetectionFailed)?;
-
-        let format =
-            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::UnknownFormat)?)?;
-
-        let (width, height) = reader
-            .into_dimensions()
-            .map_err(ImageError::DimensionsFailed)?;
-
-        Ok(Self {
-            src: ImageSrc::Url(url),
-            data: ImageData::Bytes(bytes),
-            config: ImageConfig::default(),
-            height,
-            width,
-            aspect_ratio: width as f32 / height as f32,
-            format,
-        })
+    pub fn from_url_internal(url: Url, image_deps: &impl ImageDepsOps) -> Result<Self> {
+        let response = image_deps.download().url(url)?;
+        Self::from_http_response_internal(response, image_deps)
     }
 }
 

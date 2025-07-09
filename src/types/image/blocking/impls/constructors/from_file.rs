@@ -1,39 +1,31 @@
-use std::path::PathBuf;
-
-use {image::ImageReader, std::path::Path};
-
-use crate::{
-    constants::DEFAULT_IMAGE_FILE_NAME, utils::validation::ensure_existing_image_file, Image,
-    ImageConfig, ImageData, ImageError, ImageFormat, ImageSrc, Result,
+use {
+    crate::{
+        image::{
+            blocking::{
+                dependencies::ImageDeps,
+                traits::{FsOps, ImageDepsOps, MetadataOps},
+                Image,
+            },
+            enums::{ImageData, ImageSrc},
+            helpers::file_info,
+            ImageConfig,
+        },
+        Result,
+    },
+    std::path::Path,
 };
 
 impl Image {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
-        ensure_existing_image_file(&path)?;
+        Self::from_file_internal(path, &ImageDeps::default())
+    }
 
-        let reader = ImageReader::open(path).map_err(|e| ImageError::Open {
-            source: e,
-            path: path.to_path_buf(),
-        })?;
+    fn from_file_internal(path: &Path, image_deps: &impl ImageDepsOps) -> Result<Self> {
+        image_deps.fs().ensure_existing_file(path)?;
 
-        let format =
-            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::UnknownFormat)?)?;
-
-        let (width, height) = reader
-            .into_dimensions()
-            .map_err(ImageError::DimensionsFailed)?;
-
-        let file_name = path
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .unwrap_or(DEFAULT_IMAGE_FILE_NAME)
-            .to_string();
-
-        let parent_dir = path
-            .parent()
-            .map(|p| p.to_path_buf())
-            .unwrap_or_else(|| PathBuf::from("."));
+        let (format, width, height) = image_deps.metadata().from_path(path)?;
+        let (file_name, parent_dir) = file_info(path);
 
         Ok(Self {
             src: ImageSrc::File(path.to_path_buf()),
@@ -51,6 +43,68 @@ impl Image {
     }
 }
 
+// #[cfg(test)]
+// mod tests {
+//     use mockall::predicate;
+
+//     use crate::{
+//         BlockingImage, ImageData, ImageFormat, ImageSrc, MockSyncMetadataRepo,
+//         MockSyncValidationRepo, SyncImageService,
+//     };
+
+//     #[test]
+//     fn test_from_file_internal_with_mocks() {
+//         use std::path::PathBuf;
+
+//         let path = PathBuf::from("fake_image.png");
+
+//         let mut mock_validation = MockSyncValidationRepo::new();
+//         mock_validation
+//             .expect_ensure_existing_image_file()
+//             .with(predicate::eq(path.clone()))
+//             .returning(|_| Ok(()));
+
+//         let mut mock_metadata = MockSyncMetadataRepo::new();
+//         mock_metadata
+//             .expect_from_path()
+//             .with(predicate::eq(path.clone()))
+//             .returning(|_| Ok((ImageFormat::Png, 800, 600)));
+
+//         let service = SyncImageService {
+//             validation: mock_validation,
+//             metadata: mock_metadata,
+//         };
+
+//         let result = BlockingImage::from_file_internal(&path, service).unwrap();
+
+//         assert_eq!(result.height, 600);
+//         assert_eq!(result.width, 800);
+//         assert_eq!(result.format, ImageFormat::Png);
+//         assert_eq!(result.src, ImageSrc::File(path.clone()));
+//         assert_eq!(result.data, ImageData::File(path.clone()));
+//     }
+// }
+
+// #[cfg(test)]
+// mod tests {
+//     use {mockall::predicate::*, std::path::Path};
+
+//     use crate::{blocking::MockImageOps, MockRepo, SyncImageOpsInternal};
+
+//     #[test]
+//     fn test_mock_from_file_success() {
+//         let ctx = MockImageOps::<MockRepo>::from_file_internal_context();
+
+//         ctx.expect()
+//             .with(eq(Path::new("test.jpg")), always())
+//             .times(1)
+//             .returning(|_, _| Ok(MockImageOps::new()));
+
+//         let repo = MockRepo::new();
+//         let result = MockImageOps::from_file_internal(Path::new("test.jpg"), repo);
+//         assert!(result.is_ok());
+//     }
+// }
 // #[cfg(test)]
 // mod tests {
 //     use tempfile::TempDir;

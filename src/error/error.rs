@@ -1,8 +1,9 @@
 use std::{io, path::PathBuf};
 
-use super::{io::IoError, validation::ValidationError};
+use tokio::task::JoinError;
+use url::Url;
 
-use crate::{error::internal::InternalError, ImageFormat};
+use crate::{ColorType, ImageFormat, InternalError, IoError, ValidationError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum ImageError {
@@ -44,6 +45,15 @@ pub enum ImageError {
         source: io::Error,
         id: String,
     },
+
+    #[error("failed to join a blocking task: {0}")]
+    TaskJoinError(JoinError),
+
+    #[error("Could not read raw pixels. Pixels invalid for color type: {0:?}")]
+    InvalidBuffer(ColorType),
+
+    #[error("failed to decode base64: {0}")]
+    Base64DecodeFailed(base64::DecodeError, String),
 
     #[cfg(feature = "progressive-jpeg")]
     #[error("Failed to start progressive JPEG compression for {id}: {source}")]
@@ -88,8 +98,8 @@ pub enum ImageError {
     #[error("failed to decode image from reader, err: {0}")]
     DecodeReader(image::ImageError),
 
-    #[error("Failed to download image from '{url}': {source}")]
-    DownloadFailed { url: String, source: reqwest::Error },
+    #[error("Failed to download image from '{url:?}': {source}")]
+    DownloadFailed { url: Url, source: reqwest::Error },
 
     #[error("Failed to read bytes from response for '{url}': {source}")]
     ResponseReadFailed { url: String, source: reqwest::Error },

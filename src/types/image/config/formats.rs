@@ -2,7 +2,7 @@ use crate::constants::{
     DEFAULT_AVIF_QUALITY, DEFAULT_AVIF_SPEED, DEFAULT_JPEG_QUALITY, DEFAULT_WEBP_QUALITY,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct JpegConfig {
     pub quality: u8,
     pub progressive: bool,
@@ -17,7 +17,7 @@ impl Default for JpegConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AvifConfig {
     pub quality: u8,
     pub speed: u8,
@@ -34,7 +34,7 @@ impl Default for AvifConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WebpConfig {
     pub quality: u8,
     pub lossless: bool,

@@ -5,11 +5,12 @@ use {
     strum_macros::{Display, VariantNames},
 };
 
-#[derive(Display, Debug, Clone, Copy, VariantNames, PartialEq)]
+#[derive(Display, Debug, Clone, Copy, VariantNames, PartialEq, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum ImageFormat {
     WebP,
     Png,
+    #[default]
     Jpeg,
     Avif,
 }

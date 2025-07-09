@@ -1,9 +1,9 @@
-mod core;
+mod error;
 mod internal;
 mod io;
 mod validation;
 
-pub use {core::ImageError, io::IoError, validation::ValidationError};
+pub use {error::ImageError, io::IoError, validation::ValidationError};
 
 pub(crate) use internal::InternalError;
 

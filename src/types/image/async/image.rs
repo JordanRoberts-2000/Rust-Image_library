@@ -1,7 +1,7 @@
 use crate::{ImageConfig, ImageData, ImageFormat, ImageSrc};
 
-#[derive(Debug)]
-pub struct Image {
+#[derive(Debug, Clone, PartialEq)]
+pub struct AsyncImage {
     pub(super) src: ImageSrc,
     pub(super) config: ImageConfig,
     pub(super) data: ImageData,

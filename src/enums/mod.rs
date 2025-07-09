@@ -1,5 +1,8 @@
+mod color_type;
 mod compression;
 mod crop_edge;
 mod format;
 
-pub use {compression::CompressionType, crop_edge::CropEdge, format::ImageFormat};
+pub use {
+    color_type::ColorType, compression::CompressionType, crop_edge::CropEdge, format::ImageFormat,
+};

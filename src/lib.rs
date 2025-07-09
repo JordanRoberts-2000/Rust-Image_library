@@ -1,28 +1,19 @@
 mod enums;
 mod error;
-mod models {
+mod types {
     pub mod image;
-    pub mod size;
+    pub mod image_size;
 }
+pub(crate) mod constants;
 pub(crate) mod utils;
 
+pub mod blocking {
+    pub use super::types::image::blocking::Image;
+}
+
 pub use {
-    enums::{CompressionType, CropEdge, ImageFormat},
+    enums::{ColorType, CompressionType, CropEdge, ImageFormat},
     error::ImageError,
-    models::{
-        image::{
-            config::{AvifConfig, JpegConfig, WebpConfig},
-            core::Image,
-        },
-        size::ImageSize,
-    },
 };
 
-pub(crate) use {
-    error::{InternalError, IoError, Result, ValidationError},
-    models::image::{
-        config::ImageConfig,
-        constants,
-        enums::{ImageData, ImageSrc, TransformOp},
-    },
-};
+pub(crate) use {error::*, types::image};

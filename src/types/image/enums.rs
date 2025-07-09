@@ -1,13 +1,13 @@
 use {std::path::PathBuf, url::Url};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ImageData {
-    Bytes(Vec<u8>),
+    EncodedBytes(Vec<u8>),
     Decoded(image::DynamicImage),
     File(PathBuf),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TransformOp {
     Crop(u32, u32, u32, u32),
     Rotate(u32),
@@ -20,10 +20,12 @@ pub enum TransformOp {
     Blur(f32),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ImageSrc {
     File(PathBuf),
     Url(Url),
+    Base64(String),
     Bytes,
+    RawPixels,
     Reader,
 }

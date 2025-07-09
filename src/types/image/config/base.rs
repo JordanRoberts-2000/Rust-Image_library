@@ -1,11 +1,10 @@
 use std::path::PathBuf;
 
-use crate::{
-    constants::DEFAULT_IMAGE_FILE_NAME, AvifConfig, CompressionType, JpegConfig, TransformOp,
-    WebpConfig,
-};
+use crate::{constants::DEFAULT_IMAGE_FILE_NAME, image::enums::TransformOp, CompressionType};
 
-#[derive(Debug)]
+use super::{AvifConfig, JpegConfig, WebpConfig};
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ImageConfig {
     pub pipeline: Vec<TransformOp>,
     pub remove_source: bool,

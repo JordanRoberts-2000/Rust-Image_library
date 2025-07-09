@@ -1,25 +1,27 @@
-use std::io::Cursor;
-
-use image::ImageReader;
-
-use crate::{Image, ImageConfig, ImageData, ImageError, ImageFormat, ImageSrc, Result};
+use crate::{
+    image::{
+        blocking::{
+            dependencies::ImageDeps,
+            traits::{ImageDepsOps, MetadataOps},
+            Image,
+        },
+        enums::{ImageData, ImageSrc},
+        ImageConfig,
+    },
+    Result,
+};
 
 impl Image {
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
-        let reader = ImageReader::new(Cursor::new(&bytes))
-            .with_guessed_format()
-            .map_err(|_| ImageError::FormatDetectionFailed)?;
+        Self::from_bytes_internal(bytes, &ImageDeps::default())
+    }
 
-        let format =
-            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::UnknownFormat)?)?;
-
-        let (width, height) = reader
-            .into_dimensions()
-            .map_err(ImageError::DimensionsFailed)?;
+    fn from_bytes_internal(bytes: Vec<u8>, image_deps: &impl ImageDepsOps) -> Result<Self> {
+        let (format, width, height) = image_deps.metadata().from_bytes(&bytes)?;
 
         Ok(Self {
             src: ImageSrc::Bytes,
-            data: ImageData::Bytes(bytes),
+            data: ImageData::EncodedBytes(bytes),
             config: ImageConfig::default(),
             height,
             width,
