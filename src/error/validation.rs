@@ -16,4 +16,7 @@ pub enum ValidationError {
 
     #[error("path leads to a file but isn't an image file: {0}")]
     NotAnImageFile(PathBuf),
+
+    #[error("Invalid image dimensions: width={0}, height={1}")]
+    InvalidDimensions(u32, u32),
 }

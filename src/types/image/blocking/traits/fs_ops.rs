@@ -1,7 +1,6 @@
-use std::path::Path;
+use {crate::ImageError, mockall::automock, std::path::Path};
 
-use crate::ImageError;
-
+#[automock]
 pub trait FsOps {
     fn ensure_existing_file(&self, path: &Path) -> Result<(), ImageError>;
 }

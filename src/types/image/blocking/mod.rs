@@ -5,7 +5,11 @@ mod repositories {
 }
 mod impls;
 pub mod dependencies {
-    pub use {image::ImageDeps, metadata::Metadata, url_downloader::UrlDownloader};
+    pub use {
+        image::{ImageDeps, MockImageDeps},
+        metadata::Metadata,
+        url_downloader::UrlDownloader,
+    };
 
     mod image;
     mod metadata;

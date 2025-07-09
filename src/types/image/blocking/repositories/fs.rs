@@ -1,6 +1,7 @@
-use std::path::Path;
-
-use crate::{image::blocking::traits::FsOps, ImageError, ValidationError};
+use {
+    crate::{image::blocking::traits::FsOps, ImageError, ValidationError},
+    std::path::Path,
+};
 
 pub struct FsRepo;
 

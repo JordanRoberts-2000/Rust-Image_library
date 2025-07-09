@@ -1,14 +1,17 @@
 use {
-    crate::{image::blocking::traits::MetadataOps, ImageError, ImageFormat},
+    crate::{image::blocking::traits::MetadataOps, ImageError, ImageFormat, ValidationError},
     image::ImageReader,
-    std::io::{BufRead, Cursor, Seek},
-    std::path::Path,
+    std::{
+        io::{BufRead, Cursor, Seek},
+        num::NonZeroU32,
+        path::Path,
+    },
 };
 
 pub struct Metadata;
 
 impl MetadataOps for Metadata {
-    fn from_path(&self, path: &Path) -> Result<(ImageFormat, u32, u32), ImageError> {
+    fn from_path(&self, path: &Path) -> Result<(ImageFormat, NonZeroU32, NonZeroU32), ImageError> {
         let reader = ImageReader::open(path).map_err(|e| ImageError::Open {
             source: e,
             path: path.to_path_buf(),
@@ -23,10 +26,18 @@ impl MetadataOps for Metadata {
             .into_dimensions()
             .map_err(ImageError::DimensionsFailed)?;
 
+        let width =
+            NonZeroU32::new(width).ok_or(ValidationError::InvalidDimensions(width, height))?;
+        let height = NonZeroU32::new(height)
+            .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
+
         Ok((format, width, height))
     }
 
-    fn from_bytes(&self, bytes: &Vec<u8>) -> Result<(ImageFormat, u32, u32), ImageError> {
+    fn from_bytes(
+        &self,
+        bytes: &Vec<u8>,
+    ) -> Result<(ImageFormat, NonZeroU32, NonZeroU32), ImageError> {
         let reader = ImageReader::new(Cursor::new(bytes))
             .with_guessed_format()
             .map_err(|_| ImageError::FormatDetectionFailed)?;
@@ -38,10 +49,18 @@ impl MetadataOps for Metadata {
             .into_dimensions()
             .map_err(ImageError::DimensionsFailed)?;
 
+        let width =
+            NonZeroU32::new(width).ok_or(ValidationError::InvalidDimensions(width, height))?;
+        let height = NonZeroU32::new(height)
+            .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
+
         Ok((format, width, height))
     }
 
-    fn from_reader<R>(&self, reader: &mut R) -> Result<(ImageFormat, u32, u32), ImageError>
+    fn from_reader<R>(
+        &self,
+        reader: &mut R,
+    ) -> Result<(ImageFormat, NonZeroU32, NonZeroU32), ImageError>
     where
         R: BufRead + Seek + 'static,
     {
@@ -58,6 +77,11 @@ impl MetadataOps for Metadata {
         let (width, height) = image_reader
             .into_dimensions()
             .map_err(ImageError::DimensionsFailed)?;
+
+        let width =
+            NonZeroU32::new(width).ok_or(ValidationError::InvalidDimensions(width, height))?;
+        let height = NonZeroU32::new(height)
+            .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
 
         Ok((format, width, height))
     }

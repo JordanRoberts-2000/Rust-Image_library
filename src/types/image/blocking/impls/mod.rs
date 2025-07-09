@@ -4,3 +4,6 @@ mod constructors {
     mod from_http_response;
     mod from_url;
 }
+mod metadata {
+    mod dimensions;
+}
