@@ -101,8 +101,8 @@ pub enum ImageError {
     #[error("Failed to download image from '{url:?}': {source}")]
     DownloadFailed { url: Url, source: reqwest::Error },
 
-    #[error("Failed to read bytes from response for '{url}': {source}")]
-    ResponseReadFailed { url: String, source: reqwest::Error },
+    #[error("Failed to read bytes from response for '{url:?}': {source}")]
+    ResponseReadFailed { url: Url, source: reqwest::Error },
 
     #[error("{}", format_unsupported_error(.0))]
     UnsupportedFormat(image::ImageFormat),
@@ -145,7 +145,7 @@ pub enum ImageError {
 
     #[error("'{url}' response returned status code '{status_code}'")]
     FailedRequest {
-        url: String,
+        url: Url,
         status_code: u16,
         message: String,
     },

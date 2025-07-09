@@ -3,16 +3,15 @@ use {
         image::{
             blocking::{
                 dependencies::ImageDeps,
-                traits::{ImageDepsOps, MetadataOps},
+                traits::{ImageDepsOps, MetadataOps, UrlDownloaderOp},
                 Image,
             },
             enums::{ImageData, ImageSrc},
             ImageConfig,
         },
-        ImageError, Result,
+        Result,
     },
     reqwest::blocking::Response,
-    url::Url,
 };
 
 impl Image {
@@ -24,9 +23,7 @@ impl Image {
         response: Response,
         image_deps: &impl ImageDepsOps,
     ) -> Result<Self> {
-        let url = response.url().to_owned();
-        let bytes = Self::read_and_validate_response(response, &url)?;
-
+        let (bytes, url) = image_deps.downloader().parse_response(response)?;
         let (format, width, height) = image_deps.metadata().from_bytes(&bytes)?;
 
         Ok(Self {
@@ -38,29 +35,118 @@ impl Image {
             format,
         })
     }
+}
 
-    fn read_and_validate_response(response: Response, url: &Url) -> Result<Vec<u8>> {
-        if !response.status().is_success() {
-            let status_code = response.status().as_u16();
-            let message = response
-                .text()
-                .unwrap_or_else(|_| "response couldn't be read".to_string());
+#[cfg(test)]
+mod tests {
+    use {
+        crate::{
+            blocking::Image,
+            image::{
+                blocking::{
+                    dependencies::MockImageDeps,
+                    traits::{MockMetadataOps, MockUrlDownloaderOp},
+                },
+                enums::{ImageData, ImageSrc},
+            },
+            ImageError, ImageFormat,
+        },
+        http::Response as HttpResponse,
+        reqwest::blocking::Response,
+        std::num::NonZeroU32,
+        url::Url,
+    };
 
-            return Err(ImageError::FailedRequest {
-                message,
-                status_code,
-                url: url.to_string(),
-            });
-        }
+    #[test]
+    fn test_from_http_response_internal_success() {
+        let dummy_url = Url::parse("http://example.com/image.jpg").unwrap();
+        let dummy_bytes = vec![1, 2, 3];
 
-        let bytes = response
-            .bytes()
-            .map_err(|e| ImageError::ResponseReadFailed {
-                source: e,
-                url: url.to_string(),
-            })?
-            .to_vec();
+        let mut downloader_mock = MockUrlDownloaderOp::new();
+        downloader_mock.expect_parse_response().returning(move |_| {
+            Ok((
+                vec![1, 2, 3],
+                Url::parse("http://example.com/image.jpg").unwrap(),
+            ))
+        });
 
-        Ok(bytes)
+        let mut metadata_mock = MockMetadataOps::new();
+        metadata_mock.expect_from_bytes().returning(|_| {
+            Ok((
+                ImageFormat::Jpeg,
+                NonZeroU32::new(800).unwrap(),
+                NonZeroU32::new(600).unwrap(),
+            ))
+        });
+
+        let mock_deps = MockImageDeps {
+            metadata: metadata_mock,
+            downloader: downloader_mock,
+            ..Default::default()
+        };
+
+        let response = Response::from(
+            HttpResponse::builder()
+                .status(200)
+                .header("content-type", "image/jpeg")
+                .body("dummy body")
+                .unwrap(),
+        );
+
+        let image = Image::from_http_response_internal(response, &mock_deps).unwrap();
+
+        assert_eq!(image.format, ImageFormat::Jpeg);
+        assert_eq!(image.width(), 800);
+        assert_eq!(image.height(), 600);
+        assert_eq!(image.src, ImageSrc::Url(dummy_url));
+        assert_eq!(image.data, ImageData::EncodedBytes(dummy_bytes));
+    }
+
+    #[test]
+    fn test_from_http_response_internal_parse_response_fails() {
+        let mut downloader_mock = MockUrlDownloaderOp::new();
+        downloader_mock.expect_parse_response().returning(|_| {
+            Err(ImageError::FailedRequest {
+                message: "bad response".into(),
+                status_code: 500,
+                url: Url::parse("http://example.com").unwrap(),
+            })
+        });
+
+        let mock_deps = MockImageDeps {
+            downloader: downloader_mock,
+            ..Default::default()
+        };
+
+        let response = Response::from(HttpResponse::builder().status(500).body("error").unwrap());
+
+        let result = Image::from_http_response_internal(response, &mock_deps);
+        assert!(matches!(result, Err(ImageError::FailedRequest { .. })));
+    }
+
+    #[test]
+    fn test_from_http_response_internal_from_bytes_fails() {
+        let dummy_url = Url::parse("http://example.com/image.jpg").unwrap();
+
+        let mut downloader_mock = MockUrlDownloaderOp::new();
+        downloader_mock
+            .expect_parse_response()
+            .returning(move |_| Ok((vec![1, 2, 3], dummy_url.clone())));
+
+        let mut metadata_mock = MockMetadataOps::new();
+        metadata_mock
+            .expect_from_bytes()
+            .returning(|_| Err(ImageError::UnknownFormat));
+
+        let mock_deps = MockImageDeps {
+            downloader: downloader_mock,
+            metadata: metadata_mock,
+            ..Default::default()
+        };
+
+        let response = Response::from(HttpResponse::builder().status(200).body("dummy").unwrap());
+
+        let result = Image::from_http_response_internal(response, &mock_deps);
+        assert!(matches!(result, Err(ImageError::UnknownFormat)));
     }
 }

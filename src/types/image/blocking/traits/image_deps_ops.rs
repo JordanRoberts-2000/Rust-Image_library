@@ -5,7 +5,7 @@ pub trait ImageDepsOps {
     type Metadata: MetadataOps;
     type FsRepo: FsOps;
 
-    fn download(&self) -> &Self::Downloader;
+    fn downloader(&self) -> &Self::Downloader;
     fn metadata(&self) -> &Self::Metadata;
     fn fs(&self) -> &Self::FsRepo;
 }

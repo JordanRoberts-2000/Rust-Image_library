@@ -23,7 +23,7 @@ where
     type Metadata = M;
     type FsRepo = FS;
 
-    fn download(&self) -> &D {
+    fn downloader(&self) -> &D {
         &self.downloader
     }
 
@@ -57,7 +57,7 @@ impl ImageDepsOps for MockImageDeps {
     type Metadata = MockMetadataOps;
     type FsRepo = MockFsOps;
 
-    fn download(&self) -> &Self::Downloader {
+    fn downloader(&self) -> &Self::Downloader {
         &self.downloader
     }
 
