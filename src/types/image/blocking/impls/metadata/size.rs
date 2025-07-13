@@ -3,7 +3,7 @@ use crate::{
     image::{
         blocking::{
             dependencies::ImageDeps,
-            traits::{FsOps, ImageDepsOps},
+            traits::{FsRepoOps, ImageDepsOps},
         },
         enums::ImageSrc,
     },
@@ -15,7 +15,7 @@ impl Image {
         self.apply_transforms()?;
 
         let mut buffer = Vec::new();
-        self.encode(&mut buffer)?;
+        self.encode(&mut buffer, self.format)?;
         Ok(ByteSize::new(buffer.len()))
     }
 

@@ -5,7 +5,7 @@ impl Image {
         self.apply_transforms()?;
 
         let mut buffer = Vec::new();
-        self.encode(&mut buffer)?;
+        self.encode(&mut buffer, self.format)?;
 
         Ok(buffer)
     }

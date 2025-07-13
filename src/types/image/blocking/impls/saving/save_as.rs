@@ -1,10 +1,21 @@
 use std::path::Path;
 
-use crate::{utils::fs::trash_file, Image, ImageError, ImageFormat, ImageSrc, Result};
+use crate::{
+    blocking::Image,
+    image::{
+        blocking::{traits::FsRepoOps, FsRepo},
+        enums::ImageSrc,
+    },
+    ImageError, ImageFormat, Result,
+};
 
 impl Image {
     pub fn save_as(&mut self, path: impl AsRef<Path>) -> Result<()> {
-        let mut path = path.as_ref().to_path_buf();
+        self.save_as_internal(path.as_ref(), &FsRepo)
+    }
+
+    fn save_as_internal(&mut self, path: &Path, fs: &impl FsRepoOps) -> Result<()> {
+        let mut path = path.to_path_buf();
 
         if path.extension().is_none() {
             let ext = self.format.extention();
@@ -19,23 +30,15 @@ impl Image {
         let format = ImageFormat::try_from(ext)
             .map_err(|_| ImageError::InvalidExtension(ext.to_string()))?;
 
-        let original_format = self.format;
-        self.format = format;
+        self.apply_transforms()?;
+        self.atomic_save(&path, format, fs)?;
 
-        let result = (|| {
-            self.apply_transforms()?;
-            self.atomic_save(&path)?;
-            if self.config.remove_source {
-                if let ImageSrc::File(path) = &self.src {
-                    trash_file(path)?;
-                }
+        if self.config.remove_source {
+            if let ImageSrc::File(path) = &self.src {
+                fs.trash_file(path)?;
             }
+        }
 
-            Ok(())
-        })();
-
-        self.format = original_format;
-
-        result
+        Ok(())
     }
 }

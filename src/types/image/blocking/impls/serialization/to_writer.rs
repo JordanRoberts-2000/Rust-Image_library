@@ -5,6 +5,6 @@ use crate::{blocking::Image, Result};
 impl Image {
     pub fn to_writer(&mut self, writer: impl Write) -> Result<()> {
         self.apply_transforms()?;
-        self.encode(writer)
+        self.encode(writer, self.format)
     }
 }

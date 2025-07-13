@@ -7,7 +7,7 @@ impl Image {
         self.apply_transforms()?;
 
         let mut buffer = Vec::new();
-        self.encode(&mut buffer)?;
+        self.encode(&mut buffer, self.format)?;
 
         let base64 = BASE64.encode(buffer);
         let data_url = format!("data:{};base64,{}", self.format.to_mime_type(), base64);

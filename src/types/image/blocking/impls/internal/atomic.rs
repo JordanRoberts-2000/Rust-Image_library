@@ -1,32 +1,24 @@
-use {
-    std::{fs, path::Path},
-    tempfile::{Builder, NamedTempFile},
-};
+use std::path::Path;
 
-use crate::{blocking::Image, ImageError, IoError, Result};
+use crate::{blocking::Image, image::blocking::traits::FsRepoOps, ImageError, ImageFormat, Result};
 
 impl Image {
-    pub fn atomic_save(&mut self, path: &Path) -> Result<()> {
+    pub fn atomic_save(
+        &mut self,
+        path: &Path,
+        format: ImageFormat,
+        fs: &impl FsRepoOps,
+    ) -> Result<()> {
         let parent = path
             .parent()
             .ok_or_else(|| ImageError::MissingParent(path.to_path_buf()))?;
-        fs::create_dir_all(parent).map_err(|e| IoError::CreateDir(e, parent.to_path_buf()))?;
+        fs.ensure_dir(parent)?;
 
-        // Try system temp first, fall back to parent directory
-        let temp_file = NamedTempFile::new()
-            .or_else(|_| {
-                Builder::new()
-                    .prefix(".")
-                    .suffix(".tmp")
-                    .tempfile_in(parent)
-            })
-            .map_err(|e| IoError::CreateTempFile(e, parent.to_path_buf()))?;
+        let temp_file = fs.create_temp_file(parent)?;
 
-        self.encode(&temp_file)?;
+        self.encode(&temp_file, format)?;
 
-        temp_file
-            .persist(path)
-            .map_err(|e| IoError::PersistTempFile(e.error, path.to_path_buf()))?;
+        fs.persist_temp_file(temp_file, path)?;
 
         Ok(())
     }

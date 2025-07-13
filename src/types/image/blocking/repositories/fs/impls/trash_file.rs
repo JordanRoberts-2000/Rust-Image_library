@@ -1,10 +1,8 @@
-use std::path::Path;
+use std::{fs, path::Path};
 
 use crate::{IoError, Result, ValidationError};
 
-pub fn trash_file(path: impl AsRef<Path>) -> Result<()> {
-    let path = path.as_ref();
-
+pub fn trash_file(path: &Path) -> Result<()> {
     if !path.exists() {
         return Err(ValidationError::PathNotFound(path.to_path_buf()).into());
     }
@@ -20,7 +18,7 @@ pub fn trash_file(path: impl AsRef<Path>) -> Result<()> {
             trash_err
         );
 
-        std::fs::remove_file(path).map_err(|e| IoError::DeleteFile(e, path.to_path_buf()))?;
+        fs::remove_file(path).map_err(|e| IoError::DeleteFile(e, path.to_path_buf()))?;
     }
 
     Ok(())

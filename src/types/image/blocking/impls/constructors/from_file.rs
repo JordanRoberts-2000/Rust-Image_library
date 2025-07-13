@@ -3,7 +3,7 @@ use {
         image::{
             blocking::{
                 dependencies::ImageDeps,
-                traits::{FsOps, ImageDepsOps, MetadataOps},
+                traits::{FsRepoOps, ImageDepsOps, MetadataOps},
                 Image,
             },
             enums::{ImageData, ImageSrc},
@@ -22,7 +22,7 @@ impl Image {
     }
 
     fn from_file_internal(path: &Path, image_deps: &impl ImageDepsOps) -> Result<Self> {
-        image_deps.fs().ensure_existing_file(path)?;
+        image_deps.fs().check_existing_file(path)?;
 
         let (format, width, height) = image_deps.metadata().from_path(path)?;
         let (file_name, parent_dir) = file_info(path);
@@ -50,7 +50,7 @@ mod tests {
             image::{
                 blocking::{
                     dependencies::MockImageDeps,
-                    traits::{MockFsOps, MockMetadataOps},
+                    traits::{MockFsRepoOps, MockMetadataOps},
                 },
                 enums::{ImageData, ImageSrc},
             },
@@ -63,8 +63,8 @@ mod tests {
     fn test_from_file_internal_success() {
         let path = PathBuf::from("test_image.jpg");
 
-        let mut fs_mock = MockFsOps::new();
-        fs_mock.expect_ensure_existing_file().returning(|_| Ok(()));
+        let mut fs_mock = MockFsRepoOps::new();
+        fs_mock.expect_check_existing_file().returning(|_| Ok(()));
 
         let mut metadata_mock = MockMetadataOps::new();
         metadata_mock.expect_from_path().returning(|_| {
@@ -95,8 +95,8 @@ mod tests {
     fn test_from_file_internal_fails_when_file_missing() {
         let path = PathBuf::from("missing.jpg");
 
-        let mut fs_mock = MockFsOps::new();
-        fs_mock.expect_ensure_existing_file().returning(|path| {
+        let mut fs_mock = MockFsRepoOps::new();
+        fs_mock.expect_check_existing_file().returning(|path| {
             Err(ImageError::Validation(ValidationError::PathNotFound(
                 path.to_path_buf(),
             )))
@@ -119,8 +119,8 @@ mod tests {
     fn test_from_file_internal_fails_when_metadata_fails() {
         let path = PathBuf::from("corrupt.jpg");
 
-        let mut fs_mock = MockFsOps::new();
-        fs_mock.expect_ensure_existing_file().returning(|_| Ok(()));
+        let mut fs_mock = MockFsRepoOps::new();
+        fs_mock.expect_check_existing_file().returning(|_| Ok(()));
 
         let mut metadata_mock = MockMetadataOps::new();
         metadata_mock

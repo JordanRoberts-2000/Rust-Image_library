@@ -1,7 +1,7 @@
 use crate::image::blocking::{
     dependencies::{Metadata, UrlDownloader},
     traits::{
-        FsOps, ImageDepsOps, MetadataOps, MockFsOps, MockMetadataOps, MockUrlDownloaderOp,
+        FsRepoOps, ImageDepsOps, MetadataOps, MockFsRepoOps, MockMetadataOps, MockUrlDownloaderOp,
         UrlDownloaderOp,
     },
     FsRepo,
@@ -17,7 +17,7 @@ impl<D, M, FS> ImageDepsOps for ImageDeps<D, M, FS>
 where
     D: UrlDownloaderOp,
     M: MetadataOps,
-    FS: FsOps,
+    FS: FsRepoOps,
 {
     type Downloader = D;
     type Metadata = M;
@@ -47,7 +47,7 @@ impl Default for ImageDeps<UrlDownloader, Metadata, FsRepo> {
 }
 
 pub struct MockImageDeps {
-    pub fs: MockFsOps,
+    pub fs: MockFsRepoOps,
     pub metadata: MockMetadataOps,
     pub downloader: MockUrlDownloaderOp,
 }
@@ -55,7 +55,7 @@ pub struct MockImageDeps {
 impl ImageDepsOps for MockImageDeps {
     type Downloader = MockUrlDownloaderOp;
     type Metadata = MockMetadataOps;
-    type FsRepo = MockFsOps;
+    type FsRepo = MockFsRepoOps;
 
     fn downloader(&self) -> &Self::Downloader {
         &self.downloader
@@ -73,7 +73,7 @@ impl ImageDepsOps for MockImageDeps {
 impl Default for MockImageDeps {
     fn default() -> Self {
         Self {
-            fs: MockFsOps::new(),
+            fs: MockFsRepoOps::new(),
             metadata: MockMetadataOps::new(),
             downloader: MockUrlDownloaderOp::new(),
         }
