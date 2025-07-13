@@ -8,6 +8,7 @@ use {
         io::{BufRead, Cursor, Seek},
         num::NonZeroU32,
         path::Path,
+        sync::Arc,
     },
     tokio::{fs::File, io::AsyncReadExt, task::spawn_blocking},
 };
@@ -26,12 +27,15 @@ impl MetadataOps for Metadata {
             .await
             .map_err(|e| IoError::ReadStream(e))?;
 
-        self.from_bytes(buffer).await
+        self.from_bytes(Arc::new(buffer)).await
     }
 
-    async fn from_bytes(&self, bytes: Vec<u8>) -> Result<(ImageFormat, NonZeroU32, NonZeroU32)> {
+    async fn from_bytes(
+        &self,
+        bytes: Arc<Vec<u8>>,
+    ) -> Result<(ImageFormat, NonZeroU32, NonZeroU32)> {
         spawn_blocking(move || {
-            let reader = ImageReader::new(Cursor::new(bytes))
+            let reader = ImageReader::new(Cursor::new(bytes.as_ref()))
                 .with_guessed_format()
                 .map_err(|_| ImageError::FormatDetectionFailed)?;
 
