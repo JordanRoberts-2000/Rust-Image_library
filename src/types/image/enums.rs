@@ -1,4 +1,7 @@
-use {std::path::PathBuf, url::Url};
+use {
+    std::{num::NonZeroU32, path::PathBuf},
+    url::Url,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ImageData {
@@ -11,10 +14,10 @@ pub enum ImageData {
 pub enum TransformOp {
     Crop(u32, u32, u32, u32),
     Rotate(u32),
-    Resize(u32, u32),
-    ResizeExact(u32, u32),
-    ResizeToFill(u32, u32),
-    MaxSize(u32),
+    Resize(NonZeroU32, NonZeroU32),
+    ResizeExact(NonZeroU32, NonZeroU32),
+    ResizeToFill(NonZeroU32, NonZeroU32),
+    MaxSize(NonZeroU32),
     Grayscale,
     Contrast(f32),
     Blur(f32),
