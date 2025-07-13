@@ -2,7 +2,7 @@ use crate::{
     blocking::Image,
     image::{
         enums::TransformOp,
-        helpers::{clamp_ratio, to_nonzero_u32_with_context},
+        utils::{clamp_ratio, to_nonzero_u32_with_context},
     },
 };
 

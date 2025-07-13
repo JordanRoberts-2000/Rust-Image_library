@@ -1,6 +1,6 @@
-mod from_file;
+pub mod dependencies;
 mod image;
-mod repositories;
-mod service;
+mod impls;
+pub mod traits;
 
-pub use {image::AsyncImage, repositories::*, service::AsyncImageService};
+pub use image::Image;

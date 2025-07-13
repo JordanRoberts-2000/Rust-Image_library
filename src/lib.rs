@@ -16,7 +16,7 @@ pub use {
     error::ImageError,
     types::{
         byte_size::ByteSize,
-        image::{AvifConfig, JpegConfig, WebpConfig},
+        image::{r#async::Image, AvifConfig, JpegConfig, WebpConfig},
         rgb::Rgb,
     },
 };

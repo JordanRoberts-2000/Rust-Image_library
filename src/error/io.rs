@@ -27,7 +27,7 @@ pub enum IoError {
     PersistTempFile(#[source] std::io::Error, PathBuf),
 
     #[error("Failed to read from reader: {0}")]
-    ReadStream(#[source] io::Error),
+    ReadStream(io::Error),
 
     #[error("Failed to retrieve metadata for `{1}`: {0}")]
     MetaData(#[source] io::Error, PathBuf),

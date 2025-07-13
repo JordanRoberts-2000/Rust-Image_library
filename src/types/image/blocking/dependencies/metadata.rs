@@ -1,5 +1,8 @@
 use {
-    crate::{image::blocking::traits::MetadataOps, ImageError, ImageFormat, ValidationError},
+    crate::{
+        image::{blocking::traits::MetadataOps, utils::parse_reader_dimensions},
+        ImageError, ImageFormat,
+    },
     image::ImageReader,
     std::{
         io::{BufRead, Cursor, Seek},
@@ -17,21 +20,7 @@ impl MetadataOps for Metadata {
             path: path.to_path_buf(),
         })?;
 
-        let format = reader
-            .format()
-            .ok_or(ImageError::UnknownFormat)
-            .and_then(ImageFormat::try_from)?;
-
-        let (width, height) = reader
-            .into_dimensions()
-            .map_err(ImageError::DimensionsFailed)?;
-
-        let width =
-            NonZeroU32::new(width).ok_or(ValidationError::InvalidDimensions(width, height))?;
-        let height = NonZeroU32::new(height)
-            .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
-
-        Ok((format, width, height))
+        parse_reader_dimensions(reader)
     }
 
     fn from_bytes(
@@ -42,19 +31,7 @@ impl MetadataOps for Metadata {
             .with_guessed_format()
             .map_err(|_| ImageError::FormatDetectionFailed)?;
 
-        let format =
-            ImageFormat::try_from(reader.format().ok_or_else(|| ImageError::UnknownFormat)?)?;
-
-        let (width, height) = reader
-            .into_dimensions()
-            .map_err(ImageError::DimensionsFailed)?;
-
-        let width =
-            NonZeroU32::new(width).ok_or(ValidationError::InvalidDimensions(width, height))?;
-        let height = NonZeroU32::new(height)
-            .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
-
-        Ok((format, width, height))
+        parse_reader_dimensions(reader)
     }
 
     fn from_reader<R>(
@@ -68,21 +45,6 @@ impl MetadataOps for Metadata {
             .with_guessed_format()
             .map_err(|_| ImageError::FormatDetectionFailed)?;
 
-        let format = ImageFormat::try_from(
-            image_reader
-                .format()
-                .ok_or_else(|| ImageError::UnknownFormat)?,
-        )?;
-
-        let (width, height) = image_reader
-            .into_dimensions()
-            .map_err(ImageError::DimensionsFailed)?;
-
-        let width =
-            NonZeroU32::new(width).ok_or(ValidationError::InvalidDimensions(width, height))?;
-        let height = NonZeroU32::new(height)
-            .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
-
-        Ok((format, width, height))
+        parse_reader_dimensions(image_reader)
     }
 }

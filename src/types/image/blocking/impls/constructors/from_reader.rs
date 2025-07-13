@@ -15,8 +15,8 @@ use {
 };
 
 impl Image {
-    pub fn from_reader(mut reader: impl BufRead + Seek + 'static) -> Result<Self> {
-        Self::from_reader_internal(&mut reader, &ImageDeps::default())
+    pub fn from_reader(reader: &mut (impl BufRead + Seek + 'static)) -> Result<Self> {
+        Self::from_reader_internal(reader, &ImageDeps::default())
     }
 
     fn from_reader_internal(

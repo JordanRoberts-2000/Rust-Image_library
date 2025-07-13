@@ -1,13 +1,21 @@
-use crate::{ImageConfig, ImageData, ImageFormat, ImageSrc};
+use {
+    crate::{
+        image::{
+            enums::{ImageData, ImageSrc},
+            ImageConfig,
+        },
+        ImageFormat,
+    },
+    std::num::NonZeroU32,
+};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct AsyncImage {
+pub struct Image {
     pub(super) src: ImageSrc,
     pub(super) config: ImageConfig,
     pub(super) data: ImageData,
 
-    pub height: u32,
-    pub width: u32,
-    pub aspect_ratio: f32,
+    pub(super) height: NonZeroU32,
+    pub(super) width: NonZeroU32,
     pub format: ImageFormat,
 }

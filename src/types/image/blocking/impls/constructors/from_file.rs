@@ -7,7 +7,7 @@ use {
                 Image,
             },
             enums::{ImageData, ImageSrc},
-            helpers::file_info,
+            utils::file_info,
             ImageConfig,
         },
         Result,

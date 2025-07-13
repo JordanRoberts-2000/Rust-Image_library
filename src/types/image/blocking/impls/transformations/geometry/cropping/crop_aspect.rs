@@ -1,6 +1,6 @@
 use crate::{
     blocking::Image,
-    image::{enums::TransformOp, helpers::to_nonzero_u32_with_context},
+    image::{enums::TransformOp, utils::to_nonzero_u32_with_context},
 };
 
 impl Image {

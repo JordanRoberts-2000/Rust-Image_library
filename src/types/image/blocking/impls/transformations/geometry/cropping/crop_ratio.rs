@@ -1,4 +1,4 @@
-use crate::{blocking::Image, image::helpers::clamp_ratio, CropEdge};
+use crate::{blocking::Image, image::utils::clamp_ratio, CropEdge};
 
 impl Image {
     pub fn crop_ratio(&mut self, edge: CropEdge, ratio: f32) -> &mut Self {

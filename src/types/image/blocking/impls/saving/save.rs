@@ -1,7 +1,7 @@
 use crate::{
     blocking::Image,
     image::{
-        blocking::{traits::FsRepoOps, FsRepo},
+        blocking::{dependencies::FsRepo, traits::FsRepoOps},
         enums::ImageSrc,
     },
     Result,

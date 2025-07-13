@@ -1,10 +1,9 @@
 use crate::image::blocking::{
-    dependencies::{Metadata, UrlDownloader},
+    dependencies::{FsRepo, Metadata, UrlDownloader},
     traits::{
         FsRepoOps, ImageDepsOps, MetadataOps, MockFsRepoOps, MockMetadataOps, MockUrlDownloaderOp,
         UrlDownloaderOp,
     },
-    FsRepo,
 };
 
 pub struct ImageDeps<D, M, FS> {

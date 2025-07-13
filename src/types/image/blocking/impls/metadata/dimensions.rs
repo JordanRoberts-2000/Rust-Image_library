@@ -1,4 +1,4 @@
-use crate::{blocking::Image, image::helpers::greatest_common_divisor};
+use crate::{blocking::Image, image::utils::greatest_common_divisor};
 
 impl Image {
     pub fn width(&self) -> u32 {
