@@ -3,9 +3,9 @@ use crate::{
         blocking::{
             dependencies::ImageDeps,
             traits::{ImageDepsOps, MetadataOps},
-            Image,
+            Image, ImageData,
         },
-        enums::{ImageData, ImageSrc},
+        enums::ImageSrc,
         ImageConfig,
     },
     Result,
@@ -36,8 +36,8 @@ mod tests {
         crate::{
             blocking::Image,
             image::{
-                blocking::{dependencies::MockImageDeps, traits::MockMetadataOps},
-                enums::{ImageData, ImageSrc},
+                blocking::{dependencies::MockImageDeps, traits::MockMetadataOps, ImageData},
+                enums::ImageSrc,
             },
             ImageError, ImageFormat,
         },

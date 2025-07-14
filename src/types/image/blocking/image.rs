@@ -1,10 +1,7 @@
 use std::num::NonZeroU32;
 
 use crate::{
-    image::{
-        enums::{ImageData, ImageSrc},
-        ImageConfig,
-    },
+    image::{blocking::ImageData, enums::ImageSrc, ImageConfig},
     ImageFormat,
 };
 
@@ -16,5 +13,5 @@ pub struct Image {
 
     pub(super) height: NonZeroU32,
     pub(super) width: NonZeroU32,
-    pub format: ImageFormat,
+    pub(super) format: ImageFormat,
 }

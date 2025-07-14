@@ -30,7 +30,7 @@ impl Image {
 mod tests {
     use crate::{
         blocking::Image,
-        image::enums::{ImageData, ImageSrc},
+        image::{blocking::ImageData, enums::ImageSrc},
         ColorType, ImageError, IoError,
     };
 

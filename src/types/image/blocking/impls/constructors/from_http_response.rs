@@ -4,9 +4,9 @@ use {
             blocking::{
                 dependencies::ImageDeps,
                 traits::{ImageDepsOps, MetadataOps, UrlDownloaderOp},
-                Image,
+                Image, ImageData,
             },
-            enums::{ImageData, ImageSrc},
+            enums::ImageSrc,
             ImageConfig,
         },
         Result,
@@ -46,8 +46,9 @@ mod tests {
                 blocking::{
                     dependencies::MockImageDeps,
                     traits::{MockMetadataOps, MockUrlDownloaderOp},
+                    ImageData,
                 },
-                enums::{ImageData, ImageSrc},
+                enums::ImageSrc,
             },
             ImageError, ImageFormat,
         },

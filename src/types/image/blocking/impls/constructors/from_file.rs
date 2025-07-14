@@ -4,9 +4,9 @@ use {
             blocking::{
                 dependencies::ImageDeps,
                 traits::{FsRepoOps, ImageDepsOps, MetadataOps},
-                Image,
+                Image, ImageData,
             },
-            enums::{ImageData, ImageSrc},
+            enums::ImageSrc,
             utils::file_info,
             ImageConfig,
         },
@@ -51,8 +51,9 @@ mod tests {
                 blocking::{
                     dependencies::MockImageDeps,
                     traits::{MockFsRepoOps, MockMetadataOps},
+                    ImageData,
                 },
-                enums::{ImageData, ImageSrc},
+                enums::ImageSrc,
             },
             ImageError, ImageFormat, ValidationError,
         },

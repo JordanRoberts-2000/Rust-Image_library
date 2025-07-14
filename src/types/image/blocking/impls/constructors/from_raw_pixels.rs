@@ -1,10 +1,7 @@
 use {
     crate::{
         blocking::Image,
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
+        image::{blocking::ImageData, enums::ImageSrc, ImageConfig},
         ColorType, ImageError, ImageFormat, Result, ValidationError,
     },
     image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
@@ -53,10 +50,7 @@ impl Image {
 mod tests {
     use crate::{
         blocking::Image,
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
+        image::{blocking::ImageData, enums::ImageSrc, ImageConfig},
         ColorType, ImageError, ValidationError,
     };
 

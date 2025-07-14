@@ -4,9 +4,9 @@ use {
             blocking::{
                 dependencies::ImageDeps,
                 traits::{ImageDepsOps, MetadataOps},
-                Image,
+                Image, ImageData,
             },
-            enums::{ImageData, ImageSrc},
+            enums::ImageSrc,
             ImageConfig,
         },
         IoError, Result,
@@ -50,8 +50,10 @@ mod tests {
     use {
         crate::{
             image::{
-                blocking::{dependencies::MockImageDeps, traits::MockMetadataOps, Image},
-                enums::{ImageData, ImageSrc},
+                blocking::{
+                    dependencies::MockImageDeps, traits::MockMetadataOps, Image, ImageData,
+                },
+                enums::ImageSrc,
             },
             ImageError, ImageFormat,
         },

@@ -1,24 +1,22 @@
 use image::{DynamicImage, ImageReader};
 
-use crate::{blocking::Image, image::enums::ImageData, ImageError, InternalError};
+use crate::{blocking::Image, image::blocking::ImageData, ImageError, InternalError};
 
 impl Image {
-    pub fn get_decoded(&mut self) -> Result<&mut DynamicImage, ImageError> {
-        if let ImageData::Decoded(ref mut decoded) = self.data {
-            return Ok(decoded);
-        }
-
-        let decoded = match &self.data {
+    pub(crate) fn decode(&self) -> Result<DynamicImage, ImageError> {
+        match &self.data {
             ImageData::File(path) => {
                 let reader = ImageReader::open(path).map_err(|e| ImageError::Open {
                     source: e,
                     path: path.clone(),
                 })?;
+
                 reader.decode().map_err(|e| ImageError::DecodeFile {
                     source: e,
                     path: path.clone(),
-                })?
+                })
             }
+
             ImageData::EncodedBytes(bytes) => {
                 image::load_from_memory_with_format(bytes, self.format.into()).map_err(|e| {
                     ImageError::Decoding {
@@ -26,19 +24,12 @@ impl Image {
                         format: self.format,
                         source: e,
                     }
-                })?
+                })
             }
+
             ImageData::Decoded(_) => {
-                return Err(InternalError::DecodingInvariantViolatedBeforeDecodeMatch.into());
+                Err(InternalError::DecodingInvariantViolatedBeforeDecodeMatch.into())
             }
-        };
-
-        self.data = ImageData::Decoded(decoded);
-
-        if let ImageData::Decoded(ref mut decoded) = self.data {
-            Ok(decoded)
-        } else {
-            Err(InternalError::DecodingInvariantViolatedAfterDecodeAssignment.into())
         }
     }
 }

@@ -1,49 +1,20 @@
-use {
-    std::io::{BufWriter, Write},
-    webp::{Encoder, PixelLayout},
-};
+use std::io::Write;
 
 use crate::{
-    blocking::Image, constants::DEFAULT_WEBP_QUALITY, CompressionType, ImageError, Result,
+    blocking::Image,
+    image::utils::{encode_webp_data, resolve_webp_config},
+    Result,
 };
 
 impl Image {
     pub fn encode_webp(&mut self, writer: impl Write) -> Result<()> {
-        let rgba_image = &self.get_decoded()?.to_rgba8();
+        let rgba_image = self.get_decoded()?.to_rgba8();
         let (width, height) = rgba_image.dimensions();
+        let id = self.describe_source();
 
-        let (lossless, quality) = if let Some(cfg) = &self.config.webp {
-            (cfg.lossless, cfg.quality.clamp(1, 100) as f32)
-        } else {
-            match self.config.compression {
-                CompressionType::Lossless => (true, 0.0),
-                CompressionType::Lossy => (
-                    false,
-                    self.config
-                        .quality
-                        .map(|q| q.clamp(1, 100) as f32)
-                        .unwrap_or(DEFAULT_WEBP_QUALITY as f32),
-                ),
-            }
-        };
+        let (lossless, quality) = resolve_webp_config(&self.config);
+        let webp_data = encode_webp_data(&rgba_image, width, height, lossless, quality, &id)?;
 
-        let encoder = Encoder::new(rgba_image.as_raw(), PixelLayout::Rgba, width, height);
-        let webp_data =
-            encoder
-                .encode_simple(lossless, quality)
-                .map_err(|e| ImageError::WebPEncoding {
-                    err: e,
-                    id: self.describe_source(),
-                })?;
-
-        let mut buf_writer = BufWriter::new(writer);
-        buf_writer
-            .write_all(&webp_data)
-            .map_err(|e| ImageError::WriteWebP {
-                source: e,
-                id: self.describe_source(),
-            })?;
-
-        Ok(())
+        Self::write_encoded(writer, &webp_data, id)
     }
 }

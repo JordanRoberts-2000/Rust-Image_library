@@ -33,8 +33,9 @@ mod tests {
                 blocking::{
                     dependencies::MockImageDeps,
                     traits::{MockMetadataOps, MockUrlDownloaderOp},
+                    ImageData,
                 },
-                enums::{ImageData, ImageSrc},
+                enums::ImageSrc,
             },
             ImageError, ImageFormat,
         },

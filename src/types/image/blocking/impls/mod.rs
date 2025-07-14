@@ -12,6 +12,7 @@ mod serialization;
 mod metadata {
     mod color;
     mod dimensions;
+    mod format;
     mod size;
 }
 mod internal;
