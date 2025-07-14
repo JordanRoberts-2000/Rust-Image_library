@@ -5,14 +5,17 @@ use {
                 dependencies::ImageDeps,
                 traits::{ImageDepsOps, MetadataOps},
             },
-            enums::{ImageData, ImageSrc},
-            r#async::Image,
+            enums::ImageSrc,
+            r#async::{Image, ImageData, ImageState},
             ImageConfig,
         },
         ImageError, IoError, Result,
     },
-    std::io::{BufRead, Seek},
-    tokio::task::spawn_blocking,
+    std::{
+        io::{BufRead, Seek},
+        sync::Arc,
+    },
+    tokio::{sync::RwLock, task::spawn_blocking},
 };
 
 impl Image {
@@ -31,13 +34,17 @@ impl Image {
                 .read_to_end(&mut bytes)
                 .map_err(IoError::ReadStream)?;
 
-            Ok(Self {
-                src: ImageSrc::Reader,
-                data: ImageData::EncodedBytes(bytes),
+            let state = ImageState {
                 config: ImageConfig::default(),
+                data: ImageData::EncodedBytes(Arc::new(bytes)),
                 height,
                 width,
                 format,
+            };
+
+            Ok(Self {
+                src: ImageSrc::Reader,
+                state: Arc::new(RwLock::new(state)),
             })
         })
         .await

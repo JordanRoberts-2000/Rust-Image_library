@@ -1,18 +1,19 @@
 use {
     crate::{
         image::{
-            enums::{ImageData, ImageSrc},
+            enums::ImageSrc,
             r#async::{
                 dependencies::ImageDeps,
                 traits::{ImageDepsOps, MetadataOps, UrlDownloaderOp},
-                Image,
+                Image, ImageData, ImageState,
             },
             ImageConfig,
         },
-        InternalError, Result,
+        Result,
     },
     reqwest::Response,
     std::sync::Arc,
+    tokio::sync::RwLock,
 };
 
 impl Image {
@@ -29,19 +30,17 @@ impl Image {
         let bytes_arc = Arc::new(bytes);
         let (format, width, height) = image_deps.metadata().from_bytes(bytes_arc.clone()).await?;
 
-        let bytes_vec = Arc::try_unwrap(bytes_arc).map_err(|_| {
-            InternalError::ArcUnwrapFailed(
-                "getting image bytes from 'from_bytes_internal'".to_string(),
-            )
-        })?;
-
-        Ok(Self {
-            src: ImageSrc::Url(url),
-            data: ImageData::EncodedBytes(bytes_vec),
+        let state = ImageState {
             config: ImageConfig::default(),
+            data: ImageData::EncodedBytes(bytes_arc),
             height,
             width,
             format,
+        };
+
+        Ok(Self {
+            src: ImageSrc::Url(url),
+            state: Arc::new(RwLock::new(state)),
         })
     }
 }

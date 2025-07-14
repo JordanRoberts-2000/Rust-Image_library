@@ -31,4 +31,10 @@ pub enum IoError {
 
     #[error("Failed to retrieve metadata for `{1}`: {0}")]
     MetaData(#[source] io::Error, PathBuf),
+
+    #[error("Failed to write data to `{1}`: {0}")]
+    WriteAll(#[source] io::Error, String),
+
+    #[error("Failed to flush data to `{1}`: {0}")]
+    Flush(#[source] io::Error, String),
 }

@@ -1,21 +1,23 @@
 use {
     crate::{
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
+        image::{enums::ImageSrc, r#async::ImageData, ImageConfig},
         ImageFormat,
     },
-    std::num::NonZeroU32,
+    std::{num::NonZeroU32, sync::Arc},
+    tokio::sync::RwLock,
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Image {
     pub(super) src: ImageSrc,
-    pub(super) config: ImageConfig,
-    pub(super) data: ImageData,
+    pub(super) state: Arc<RwLock<ImageState>>,
+}
 
-    pub(super) height: NonZeroU32,
-    pub(super) width: NonZeroU32,
+#[derive(Debug, Clone)]
+pub struct ImageState {
+    pub config: ImageConfig,
+    pub data: ImageData,
+    pub height: NonZeroU32,
+    pub width: NonZeroU32,
     pub format: ImageFormat,
 }

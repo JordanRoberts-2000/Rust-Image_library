@@ -1,16 +1,18 @@
 use std::sync::Arc;
 
+use tokio::sync::RwLock;
+
 use crate::{
     image::{
-        enums::{ImageData, ImageSrc},
+        enums::ImageSrc,
         r#async::{
             dependencies::ImageDeps,
             traits::{ImageDepsOps, MetadataOps},
-            Image,
+            Image, ImageData, ImageState,
         },
         ImageConfig,
     },
-    InternalError, Result,
+    Result,
 };
 
 impl Image {
@@ -22,19 +24,17 @@ impl Image {
         let bytes_arc = Arc::new(bytes);
         let (format, width, height) = image_deps.metadata().from_bytes(bytes_arc.clone()).await?;
 
-        let bytes_vec = Arc::try_unwrap(bytes_arc).map_err(|_| {
-            InternalError::ArcUnwrapFailed(
-                "getting image bytes from 'from_bytes_internal'".to_string(),
-            )
-        })?;
-
-        Ok(Self {
-            src: ImageSrc::Bytes,
-            data: ImageData::EncodedBytes(bytes_vec),
+        let state = ImageState {
             config: ImageConfig::default(),
+            data: ImageData::EncodedBytes(bytes_arc),
             height,
             width,
             format,
+        };
+
+        Ok(Self {
+            src: ImageSrc::Bytes,
+            state: Arc::new(RwLock::new(state)),
         })
     }
 }

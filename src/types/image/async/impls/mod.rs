@@ -8,3 +8,24 @@ mod constructors {
     mod from_reader;
     mod from_url;
 }
+mod configure;
+mod transformations;
+mod saving {
+    mod save;
+    mod save_as;
+    mod save_to_folder;
+}
+mod metadata {
+    mod color;
+    mod dimensions;
+    mod format;
+    mod size;
+}
+mod encoding;
+mod internal;
+mod output;
+mod serialization;
+mod source {
+    mod remove_source_file;
+    mod source;
+}

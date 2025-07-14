@@ -1,17 +1,19 @@
 use {
     crate::{
         image::{
-            enums::{ImageData, ImageSrc},
+            enums::ImageSrc,
             r#async::{
                 dependencies::ImageDeps,
                 traits::{FsRepoOps, ImageDepsOps, MetadataOps},
+                ImageData, ImageState,
             },
             utils::file_info,
             ImageConfig,
         },
         Image, Result,
     },
-    std::path::Path,
+    std::{path::Path, sync::Arc},
+    tokio::sync::RwLock,
 };
 
 impl Image {
@@ -26,8 +28,7 @@ impl Image {
         let (format, width, height) = image_deps.metadata().from_path(path).await?;
         let (file_name, parent_dir) = file_info(path);
 
-        Ok(Self {
-            src: ImageSrc::File(path.to_path_buf()),
+        let state = ImageState {
             data: ImageData::File(path.to_path_buf()),
             config: ImageConfig {
                 file_name,
@@ -37,6 +38,11 @@ impl Image {
             height,
             width,
             format,
+        };
+
+        Ok(Self {
+            src: ImageSrc::File(path.to_path_buf()),
+            state: Arc::new(RwLock::new(state)),
         })
     }
 }

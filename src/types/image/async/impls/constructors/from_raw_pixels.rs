@@ -1,13 +1,15 @@
 use {
     crate::{
         image::{
-            enums::{ImageData, ImageSrc},
+            enums::ImageSrc,
+            r#async::{ImageData, ImageState},
             ImageConfig,
         },
         ColorType, Image, ImageError, ImageFormat, Result, ValidationError,
     },
     image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
-    std::num::NonZeroU32,
+    std::{num::NonZeroU32, sync::Arc},
+    tokio::sync::RwLock,
 };
 
 impl Image {
@@ -37,13 +39,17 @@ impl Image {
         let height = NonZeroU32::new(height)
             .ok_or(ValidationError::InvalidDimensions(width.get(), height))?;
 
-        Ok(Self {
-            src: ImageSrc::RawPixels,
-            data: ImageData::Decoded(img),
+        let state = ImageState {
             config: ImageConfig::default(),
+            data: ImageData::Decoded(img),
             height,
             width,
             format: ImageFormat::default(),
+        };
+
+        Ok(Self {
+            src: ImageSrc::RawPixels,
+            state: Arc::new(RwLock::new(state)),
         })
     }
 }
