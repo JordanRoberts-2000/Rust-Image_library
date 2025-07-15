@@ -9,16 +9,12 @@ use crate::{
 };
 
 impl Image {
-    pub async fn save_to_folder(&mut self, folder_path: impl AsRef<Path>) -> Result<()> {
+    pub async fn save_to_folder(&self, folder_path: impl AsRef<Path>) -> Result<()> {
         self.save_to_folder_internal(folder_path.as_ref(), &FsRepo)
             .await
     }
 
-    async fn save_to_folder_internal(
-        &mut self,
-        folder_path: &Path,
-        fs: &impl FsRepoOps,
-    ) -> Result<()> {
+    async fn save_to_folder_internal(&self, folder_path: &Path, fs: &impl FsRepoOps) -> Result<()> {
         fs.check_existing_dir(folder_path).await?;
 
         let (format, remove_source) = {
@@ -26,7 +22,7 @@ impl Image {
             (state.format, state.config.remove_source)
         };
 
-        let ext = format.extention();
+        let ext = format.extension();
         let path = folder_path.join(format!("{}.{}", self.build_file_name().await, ext));
 
         self.apply_transforms().await?;

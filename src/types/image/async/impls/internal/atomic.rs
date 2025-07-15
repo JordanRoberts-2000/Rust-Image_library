@@ -4,7 +4,7 @@ use crate::{image::r#async::traits::FsRepoOps, Image, ImageError, ImageFormat, I
 
 impl Image {
     pub async fn atomic_save(
-        &mut self,
+        &self,
         path: &Path,
         format: ImageFormat,
         fs: &impl FsRepoOps,

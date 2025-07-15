@@ -7,17 +7,17 @@ use crate::{
 };
 
 impl Image {
-    pub async fn save(&mut self) -> Result<()> {
+    pub async fn save(&self) -> Result<()> {
         self.save_internal(&FsRepo).await
     }
 
-    async fn save_internal(&mut self, fs: &impl FsRepoOps) -> Result<()> {
+    async fn save_internal(&self, fs: &impl FsRepoOps) -> Result<()> {
         let (format, config) = {
             let state = self.state.read().await;
             (state.format, state.config.clone())
         };
 
-        let ext = format.extention();
+        let ext = format.extension();
         let path = config
             .output_dir
             .join(format!("{}.{}", self.build_file_name().await, ext));

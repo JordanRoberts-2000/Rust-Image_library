@@ -24,7 +24,7 @@ mod metadata {
 mod encoding;
 mod internal;
 mod output;
-mod serialization;
+mod serializers;
 mod source {
     mod remove_source_file;
     mod source;

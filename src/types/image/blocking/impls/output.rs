@@ -1,7 +1,7 @@
 use crate::blocking::Image;
 
 impl Image {
-    pub fn file_name(&mut self, file_name: impl AsRef<str>) -> &mut Self {
+    pub fn with_file_name(&mut self, file_name: impl AsRef<str>) -> &mut Self {
         self.config.file_name = file_name.as_ref().to_string();
         self
     }
@@ -16,7 +16,21 @@ impl Image {
         self
     }
 
-    pub fn build_file_name(&self) -> String {
+    pub fn file_name(&self) -> String {
+        format!(
+            "{}{}{}{}",
+            self.config.prefix.as_deref().unwrap_or(""),
+            self.config.file_name,
+            self.config.suffix.as_deref().unwrap_or(""),
+            self.format.extension()
+        )
+    }
+
+    pub fn extension(&self) -> &str {
+        self.format.extension()
+    }
+
+    pub fn file_stem(&self) -> String {
         format!(
             "{}{}{}",
             self.config.prefix.as_deref().unwrap_or(""),

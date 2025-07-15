@@ -8,7 +8,7 @@ mod constructors {
     mod from_reader;
     mod from_url;
 }
-mod serialization;
+mod serializers;
 mod metadata {
     mod color;
     mod dimensions;

@@ -18,7 +18,7 @@ impl Image {
         let mut path = path.to_path_buf();
 
         if path.extension().is_none() {
-            let ext = self.format.extention();
+            let ext = self.format.extension();
             path.set_extension(ext);
         }
 

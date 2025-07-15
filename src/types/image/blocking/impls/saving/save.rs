@@ -13,11 +13,7 @@ impl Image {
     }
 
     fn save_internal(&mut self, fs: &impl FsRepoOps) -> Result<()> {
-        let ext = self.format.extention();
-        let path = self
-            .config
-            .output_dir
-            .join(format!("{}.{}", self.build_file_name(), ext));
+        let path = self.config.output_dir.join(self.file_name());
 
         self.apply_transforms()?;
         self.atomic_save(&path, self.format, fs)?;

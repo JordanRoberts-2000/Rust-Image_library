@@ -9,11 +9,11 @@ use crate::{
 };
 
 impl Image {
-    pub async fn save_as(&mut self, path: impl AsRef<Path>) -> Result<()> {
+    pub async fn save_as(&self, path: impl AsRef<Path>) -> Result<()> {
         self.save_as_internal(path.as_ref(), &FsRepo).await
     }
 
-    async fn save_as_internal(&mut self, path: &Path, fs: &impl FsRepoOps) -> Result<()> {
+    async fn save_as_internal(&self, path: &Path, fs: &impl FsRepoOps) -> Result<()> {
         let mut path = path.to_path_buf();
 
         let (default_format, remove_source) = {
@@ -22,7 +22,7 @@ impl Image {
         };
 
         if path.extension().is_none() {
-            let ext = default_format.extention();
+            let ext = default_format.extension();
             path.set_extension(ext);
         }
 
