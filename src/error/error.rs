@@ -2,6 +2,7 @@ use std::{io, path::PathBuf};
 
 use tokio::task::JoinError;
 use url::Url;
+use walkdir::Error as WalkDirError;
 
 use crate::{ColorType, ImageFormat, InternalError, IoError, ValidationError};
 
@@ -139,8 +140,14 @@ pub enum ImageError {
     #[error("output path `{0}` has no parent directory")]
     MissingParent(PathBuf),
 
+    #[error("directory traversal error")]
+    WalkDir(WalkDirError),
+
     #[error("source file size is only available for local file sources")]
     SourceFileSizeUnavailable,
+
+    #[error("file name collision detected: `{0}`")]
+    FileNameCollision(String),
 }
 
 pub fn format_unsupported_error(format: &image::ImageFormat) -> String {

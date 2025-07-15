@@ -19,4 +19,7 @@ pub enum ValidationError {
 
     #[error("Invalid image dimensions: width={0}, height={1}")]
     InvalidDimensions(u32, u32),
+
+    #[error("Index {0} out of bounds")]
+    IndexOutOfBounds(usize),
 }

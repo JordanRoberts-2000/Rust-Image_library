@@ -1,5 +1,7 @@
 use std::{io, path::PathBuf};
 
+use zip::result::ZipError;
+
 #[derive(thiserror::Error, Debug)]
 pub enum IoError {
     #[error("Failed to create directory at `{1}`: {0}")]
@@ -37,4 +39,13 @@ pub enum IoError {
 
     #[error("Failed to flush data to `{1}`: {0}")]
     Flush(#[source] io::Error, String),
+
+    #[error("Failed to start zip entry for '{1}': {0}")]
+    ZipStartFile(#[source] ZipError, String),
+
+    #[error("Failed to write image '{1}' to zip: {0}")]
+    ZipWriteFile(#[source] io::Error, String),
+
+    #[error("Failed to finalize zip file: {0}")]
+    ZipFinalize(#[from] ZipError),
 }

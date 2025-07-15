@@ -1,12 +1,14 @@
 use {
-    crate::{blocking::Image, Result, ValidationError},
+    crate::{blocking::Image, images::types::ImagesConfig, Result, ValidationError},
     std::ops::{Index, IndexMut, RangeBounds},
 };
 
 const DEFAULT_CAPACITY: usize = 8;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Images {
     pub(crate) inner: Vec<Image>,
+    pub(crate) config: ImagesConfig,
 }
 
 impl Index<usize> for Images {
@@ -54,17 +56,22 @@ impl Images {
     pub fn new() -> Self {
         Self {
             inner: Vec::with_capacity(DEFAULT_CAPACITY),
+            config: ImagesConfig::default(),
         }
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             inner: Vec::with_capacity(capacity),
+            config: ImagesConfig::default(),
         }
     }
 
     pub fn from_vec(images: Vec<Image>) -> Self {
-        Self { inner: images }
+        Self {
+            inner: images,
+            config: ImagesConfig::default(),
+        }
     }
 
     pub fn push(&mut self, image: Image) {
