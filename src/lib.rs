@@ -7,6 +7,7 @@ mod types {
     pub mod rgb;
 }
 pub(crate) mod constants;
+pub mod encoders;
 
 pub mod blocking {
     pub use super::types::{image::blocking::Image, images::blocking::Images};
