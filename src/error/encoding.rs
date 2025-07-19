@@ -5,6 +5,12 @@ pub enum EncodingError {
     #[error("Failed to encode PNG")]
     PngEncoding(ImageError),
 
+    #[error("Failed to encode WEBP")]
+    WebPLossyEncoding { err: webp::WebPEncodingError },
+
+    #[error("Failed to encode WEBP")]
+    WebPLosslessEncoding(image::ImageError),
+
     #[error("Failed to encode JPEG")]
     JpegEncoding(image::ImageError),
 
@@ -26,12 +32,6 @@ pub enum EncodingError {
     #[cfg(feature = "progressive-jpeg")]
     #[error("Failed to write JPEG scanlines{0}")]
     JpegWriteScanlines(std::io::Error),
-    // #[error("failed to encode img '{id}' to format 'webp'")]
-    // WebPEncoding {
-    //     err: webp::WebPEncodingError,
-    //     id: String,
-    // },
-
     // #[error("failed to encode img '{id}' to format 'avif'")]
     // AvifEncoding { err: ravif::Error, id: String },
 }

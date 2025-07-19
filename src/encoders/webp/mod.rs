@@ -6,4 +6,4 @@ mod impls {
     mod setters;
 }
 
-pub use encoder::PngEncoder;
+pub use encoder::WebPEncoder;

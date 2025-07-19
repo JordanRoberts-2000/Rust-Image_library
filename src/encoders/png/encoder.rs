@@ -7,3 +7,9 @@ pub struct PngEncoder {
     pub(super) strip_unused_transparency: bool,
     pub(super) quantize_to_8bit: bool,
 }
+
+impl Default for PngEncoder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

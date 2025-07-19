@@ -5,3 +5,9 @@ pub struct JpegEncoder {
     pub(super) color_type: Option<JpegColorType>,
     pub(super) progressive: bool,
 }
+
+impl Default for JpegEncoder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
