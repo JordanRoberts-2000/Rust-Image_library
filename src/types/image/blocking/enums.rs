@@ -3,6 +3,6 @@ use std::path::PathBuf;
 #[derive(Debug, Clone, PartialEq)]
 pub enum ImageData {
     EncodedBytes(Vec<u8>),
-    Decoded(image::DynamicImage),
+    DynamicImage(image::DynamicImage),
     File(PathBuf),
 }

@@ -1,11 +1,8 @@
 use {
     crate::{
+        blocking::{dependencies::ImageService, traits::ImageServiceOps},
         image::{
-            blocking::{
-                dependencies::ImageDeps,
-                traits::{FsRepoOps, ImageDepsOps, MetadataOps},
-                Image, ImageData,
-            },
+            blocking::{Image, ImageData},
             enums::ImageSrc,
             utils::file_info,
             ImageConfig,
@@ -18,13 +15,13 @@ use {
 impl Image {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
-        Self::from_file_internal(path, &ImageDeps::default())
+        Self::from_file_internal(path, &ImageService::default())
     }
 
-    fn from_file_internal(path: &Path, image_deps: &impl ImageDepsOps) -> Result<Self> {
-        image_deps.fs().check_existing_file(path)?;
+    fn from_file_internal(path: &Path, service: &impl ImageServiceOps) -> Result<Self> {
+        service.fs().check_existing_file(path)?;
 
-        let (format, width, height) = image_deps.metadata().from_path(path)?;
+        let (format, width, height) = service.metadata().from_path(path)?;
         let (file_name, parent_dir) = file_info(path);
 
         Ok(Self {
@@ -46,15 +43,12 @@ impl Image {
 mod tests {
     use {
         crate::{
-            blocking::Image,
-            image::{
-                blocking::{
-                    dependencies::MockImageDeps,
-                    traits::{MockFsRepoOps, MockMetadataOps},
-                    ImageData,
-                },
-                enums::ImageSrc,
+            blocking::{
+                dependencies::MockImageService,
+                traits::{MockFsRepoOps, MockMetadataOps},
+                Image,
             },
+            image::{blocking::ImageData, enums::ImageSrc},
             ImageError, ImageFormat, ValidationError,
         },
         std::{num::NonZeroU32, path::PathBuf},
@@ -76,7 +70,7 @@ mod tests {
             ))
         });
 
-        let mock_deps = MockImageDeps {
+        let mock_deps = MockImageService {
             fs: fs_mock,
             metadata: metadata_mock,
             ..Default::default()
@@ -103,7 +97,7 @@ mod tests {
             )))
         });
 
-        let mock_deps = MockImageDeps {
+        let mock_deps = MockImageService {
             fs: fs_mock,
             ..Default::default()
         };
@@ -128,7 +122,7 @@ mod tests {
             .expect_from_path()
             .returning(|_| Err(ImageError::UnknownFormat));
 
-        let mock_deps = MockImageDeps {
+        let mock_deps = MockImageService {
             fs: fs_mock,
             metadata: metadata_mock,
             ..Default::default()

@@ -1,10 +1,10 @@
 use crate::{
+    blocking::{
+        dependencies::ImageService,
+        traits::{ImageServiceOps, MetadataOps},
+    },
     image::{
-        blocking::{
-            dependencies::ImageDeps,
-            traits::{ImageDepsOps, MetadataOps},
-            Image, ImageData,
-        },
+        blocking::{Image, ImageData},
         enums::ImageSrc,
         ImageConfig,
     },
@@ -13,11 +13,11 @@ use crate::{
 
 impl Image {
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
-        Self::from_bytes_internal(bytes, &ImageDeps::default())
+        Self::from_bytes_internal(bytes, &ImageService::default())
     }
 
-    fn from_bytes_internal(bytes: Vec<u8>, image_deps: &impl ImageDepsOps) -> Result<Self> {
-        let (format, width, height) = image_deps.metadata().from_bytes(&bytes)?;
+    fn from_bytes_internal(bytes: Vec<u8>, service: &impl ImageServiceOps) -> Result<Self> {
+        let (format, width, height) = service.metadata().from_bytes(&bytes)?;
 
         Ok(Self {
             src: ImageSrc::Bytes,
@@ -34,11 +34,8 @@ impl Image {
 mod tests {
     use {
         crate::{
-            blocking::Image,
-            image::{
-                blocking::{dependencies::MockImageDeps, traits::MockMetadataOps, ImageData},
-                enums::ImageSrc,
-            },
+            blocking::{dependencies::MockImageService, traits::MockMetadataOps, Image},
+            image::{blocking::ImageData, enums::ImageSrc},
             ImageError, ImageFormat,
         },
         std::num::NonZeroU32,
@@ -57,7 +54,7 @@ mod tests {
             ))
         });
 
-        let mock_deps = MockImageDeps {
+        let mock_deps = MockImageService {
             metadata: metadata_mock,
             ..Default::default()
         };
@@ -80,7 +77,7 @@ mod tests {
             .expect_from_bytes()
             .returning(|_| Err(ImageError::UnknownFormat));
 
-        let mock_deps = MockImageDeps {
+        let mock_deps = MockImageService {
             metadata: metadata_mock,
             ..Default::default()
         };

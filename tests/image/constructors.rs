@@ -1,4 +1,4 @@
-use img::{blocking::Image as SyncImage, ImageError};
+// use img::{blocking::Image as SyncImage, ImageError};
 
 // #[test]
 // fn test_image_from_file_success() -> Result<(), ImageError> {

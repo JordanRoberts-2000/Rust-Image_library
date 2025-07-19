@@ -1,10 +1,12 @@
+mod encoding;
 mod error;
 mod internal;
 mod io;
 mod validation;
 
-pub use {error::ImageError, io::IoError, validation::ValidationError};
-
-pub(crate) use internal::InternalError;
+pub use {
+    encoding::EncodingError, error::ImageError, internal::InternalError, io::IoError,
+    validation::ValidationError,
+};
 
 pub type Result<T> = std::result::Result<T, ImageError>;

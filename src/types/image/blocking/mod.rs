@@ -1,8 +1,7 @@
-pub(crate) mod dependencies;
 pub mod enums;
 mod image;
 mod impls;
-pub mod traits;
+mod traits;
 
 pub use image::Image;
 

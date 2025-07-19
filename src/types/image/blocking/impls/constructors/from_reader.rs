@@ -1,11 +1,11 @@
 use {
     crate::{
+        blocking::{
+            dependencies::ImageService,
+            traits::{ImageServiceOps, MetadataOps},
+        },
         image::{
-            blocking::{
-                dependencies::ImageDeps,
-                traits::{ImageDepsOps, MetadataOps},
-                Image, ImageData,
-            },
+            blocking::{Image, ImageData},
             enums::ImageSrc,
             ImageConfig,
         },
@@ -16,23 +16,19 @@ use {
 
 impl Image {
     pub fn from_reader(reader: &mut (impl BufRead + Seek + 'static)) -> Result<Self> {
-        Self::from_reader_internal(reader, &ImageDeps::default())
+        Self::from_reader_internal(reader, &ImageService::default())
     }
 
     fn from_reader_internal(
         reader: &mut (impl BufRead + Seek + 'static),
-        image_deps: &impl ImageDepsOps,
+        service: &impl ImageServiceOps,
     ) -> Result<Self> {
-        reader.rewind().map_err(IoError::ReadStream)?;
-
-        let (format, width, height) = image_deps.metadata().from_reader(reader)?;
-
-        reader.rewind().map_err(IoError::ReadStream)?;
-
         let mut bytes = Vec::new();
         reader
             .read_to_end(&mut bytes)
             .map_err(IoError::ReadStream)?;
+
+        let (format, width, height) = service.metadata().from_bytes(reader)?;
 
         Ok(Self {
             src: ImageSrc::Reader,
@@ -49,10 +45,9 @@ impl Image {
 mod tests {
     use {
         crate::{
+            blocking::{dependencies::MockImageService, traits::MockMetadataOps},
             image::{
-                blocking::{
-                    dependencies::MockImageDeps, traits::MockMetadataOps, Image, ImageData,
-                },
+                blocking::{Image, ImageData},
                 enums::ImageSrc,
             },
             ImageError, ImageFormat,
@@ -76,7 +71,7 @@ mod tests {
                 ))
             });
 
-        let mock_deps = MockImageDeps {
+        let mock_deps = MockImageService {
             metadata: metadata_mock,
             ..Default::default()
         };
@@ -100,7 +95,7 @@ mod tests {
             .expect_from_reader()
             .returning(|_: &mut Cursor<Vec<u8>>| Err(ImageError::UnknownFormat));
 
-        let mock_deps = MockImageDeps {
+        let mock_deps = MockImageService {
             metadata: metadata_mock,
             ..Default::default()
         };

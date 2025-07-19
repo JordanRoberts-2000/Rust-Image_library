@@ -1,10 +1,10 @@
-use std::{io, path::PathBuf};
+use std::path::PathBuf;
 
 use tokio::task::JoinError;
 use url::Url;
 use walkdir::Error as WalkDirError;
 
-use crate::{ColorType, ImageFormat, InternalError, IoError, ValidationError};
+use crate::{EncodingError, ImageFormat, InternalError, IoError, ValidationError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum ImageError {
@@ -17,27 +17,16 @@ pub enum ImageError {
     #[error(transparent)]
     Internal(#[from] InternalError),
 
-    #[error("failed to encode img '{id}' to format '{format:?}'")]
-    Encoding {
-        source: image::ImageError,
-        id: String,
-        format: ImageFormat,
-    },
-
-    #[error("failed to encode img '{id}' to format 'webp'")]
-    WebPEncoding {
-        err: webp::WebPEncodingError,
-        id: String,
-    },
-
-    #[error("failed to encode img '{id}' to format 'avif'")]
-    AvifEncoding { err: ravif::Error, id: String },
+    #[error(transparent)]
+    Encoding(#[from] EncodingError),
 
     #[error("failed to join a blocking task: {0}")]
     TaskJoinError(JoinError),
 
-    #[error("Could not read raw pixels. Pixels invalid for color type: {0:?}")]
-    InvalidBuffer(ColorType),
+    // #[error("Could not read raw pixels. Pixels invalid for color type: {0:?}")]
+    // InvalidBuffer(ColorType),
+    #[error("Failed to decode image from memory buffer")]
+    DecodeFromMemory(image::ImageError),
 
     #[error("failed to decode base64: {0}")]
     Base64DecodeFailed(base64::DecodeError, String),

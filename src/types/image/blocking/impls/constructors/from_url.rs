@@ -1,10 +1,7 @@
 use {
     crate::{
-        image::blocking::{
-            dependencies::ImageDeps,
-            traits::{ImageDepsOps, UrlDownloaderOp},
-            Image,
-        },
+        blocking::{dependencies::ImageService, traits::ImageServiceOps},
+        image::blocking::Image,
         ImageError, Result,
     },
     url::Url,
@@ -15,12 +12,12 @@ impl Image {
         let url = Url::parse(url.as_ref())
             .map_err(|e| ImageError::UrlParse(e, url.as_ref().to_string()))?;
 
-        Self::from_url_internal(url, &ImageDeps::default())
+        Self::from_url_internal(url, &ImageService::default())
     }
 
-    pub fn from_url_internal(url: Url, image_deps: &impl ImageDepsOps) -> Result<Self> {
-        let response = image_deps.downloader().url(url)?;
-        Self::from_http_response_internal(response, image_deps)
+    pub fn from_url_internal(url: Url, service: &impl ImageServiceOps) -> Result<Self> {
+        let response = service.http().url(url)?;
+        Self::from_http_response_internal(response, service)
     }
 }
 
@@ -28,15 +25,12 @@ impl Image {
 mod tests {
     use {
         crate::{
-            blocking::Image,
-            image::{
-                blocking::{
-                    dependencies::MockImageDeps,
-                    traits::{MockMetadataOps, MockUrlDownloaderOp},
-                    ImageData,
-                },
-                enums::ImageSrc,
+            blocking::{
+                dependencies::MockImageService,
+                traits::{MockHttpClientOps, MockMetadataOps},
+                Image,
             },
+            image::{blocking::ImageData, enums::ImageSrc},
             ImageError, ImageFormat,
         },
         http::Response as HttpResponse,
@@ -50,8 +44,8 @@ mod tests {
         let test_url = Url::parse("http://example.com/image.jpg").unwrap();
         let dummy_bytes = vec![1, 2, 3];
 
-        let mut downloader_mock = MockUrlDownloaderOp::new();
-        downloader_mock.expect_url().returning(move |_| {
+        let mut http_mock = MockHttpClientOps::new();
+        http_mock.expect_url().returning(move |_| {
             Ok(Response::from(
                 HttpResponse::builder()
                     .status(200)
@@ -63,7 +57,7 @@ mod tests {
 
         let expected_url = test_url.clone();
         let expected_bytes = dummy_bytes.clone();
-        downloader_mock
+        http_mock
             .expect_parse_response()
             .returning(move |_| Ok((expected_bytes.clone(), expected_url.clone())));
 
@@ -76,8 +70,8 @@ mod tests {
             ))
         });
 
-        let mock_deps = MockImageDeps {
-            downloader: downloader_mock,
+        let mock_deps = MockImageService {
+            http: http_mock,
             metadata: metadata_mock,
             ..Default::default()
         };
@@ -95,8 +89,8 @@ mod tests {
     fn test_from_url_internal_downloader_url_failure() {
         let test_url = Url::parse("http://example.com/image.jpg").unwrap();
 
-        let mut downloader_mock = MockUrlDownloaderOp::new();
-        downloader_mock.expect_url().returning({
+        let mut http_mock = MockHttpClientOps::new();
+        http_mock.expect_url().returning({
             let url = test_url.clone();
             move |_| {
                 Err(ImageError::DownloadFailed {
@@ -106,8 +100,8 @@ mod tests {
             }
         });
 
-        let mock_deps = MockImageDeps {
-            downloader: downloader_mock,
+        let mock_deps = MockImageService {
+            http: http_mock,
             ..Default::default()
         };
 

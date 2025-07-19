@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use crate::{blocking::Image, image::blocking::traits::FsRepoOps, ImageError, ImageFormat, Result};
+use crate::{
+    blocking::{traits::FsRepoOps, Image},
+    ImageError, ImageFormat, Result,
+};
 
 impl Image {
     pub fn atomic_save(
