@@ -1,5 +1,4 @@
 mod encoder;
-mod traits;
 mod impls {
     mod constructors;
     mod interface;
@@ -7,4 +6,4 @@ mod impls {
     mod setters;
 }
 
-pub use encoder::PngEncoder;
+pub use encoder::JpegEncoder;

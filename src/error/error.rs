@@ -31,22 +31,6 @@ pub enum ImageError {
     #[error("failed to decode base64: {0}")]
     Base64DecodeFailed(base64::DecodeError, String),
 
-    #[cfg(feature = "progressive-jpeg")]
-    #[error("Failed to start progressive JPEG compression for {id}: {source}")]
-    JpegCompressionStart { source: std::io::Error, id: String },
-
-    #[cfg(feature = "progressive-jpeg")]
-    #[error("Failed to finalize progressive JPEG compression for {id}: {source}")]
-    JpegCompressionFinish { source: std::io::Error, id: String },
-
-    #[cfg(feature = "progressive-jpeg")]
-    #[error("Failed to write progressive JPEG to output for {id}: {source}")]
-    JpegWriteOutput { source: std::io::Error, id: String },
-
-    #[cfg(feature = "progressive-jpeg")]
-    #[error("Failed to write JPEG scanlines for image {id}: {source}")]
-    JpegWriteScanlines { source: std::io::Error, id: String },
-
     #[error(
         "failed to decode image '{}' to format '{:?}', err: {}",
         id,
