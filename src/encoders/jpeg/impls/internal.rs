@@ -69,7 +69,7 @@ impl JpegEncoder {
 
         let color_type = match &self.color_type {
             Some(ct) => ct.clone(),
-            None => JpegColorType::try_from(img.color())?,
+            None => img.color().into(),
         };
 
         Ok((img, width, height, color_type))

@@ -9,7 +9,9 @@ mod crop_edge;
 mod format;
 
 pub use {
-    color_types::{jpeg::JpegColorType, png::PngColorType, webp::WebPColorType},
+    color_types::{
+        avif::AvifColorType, jpeg::JpegColorType, png::PngColorType, webp::WebPColorType,
+    },
     compression::CompressionType,
     crop_edge::CropEdge,
     format::ImageFormat,

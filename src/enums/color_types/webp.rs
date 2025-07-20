@@ -1,8 +1,6 @@
 use image::{ColorType, ExtendedColorType};
 use webp::PixelLayout;
 
-use crate::{EncodingError, ImageError};
-
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum WebPColorType {
     L8,
@@ -44,6 +42,28 @@ impl From<&WebPColorType> for ExtendedColorType {
     }
 }
 
+impl From<WebPColorType> for ColorType {
+    fn from(color_type: WebPColorType) -> Self {
+        match color_type {
+            WebPColorType::Rgb8 => ColorType::Rgb8,
+            WebPColorType::Rgba8 => ColorType::Rgba8,
+            WebPColorType::L8 => ColorType::L8,
+            WebPColorType::La8 => ColorType::La8,
+        }
+    }
+}
+
+impl From<&WebPColorType> for ColorType {
+    fn from(color_type: &WebPColorType) -> Self {
+        match color_type {
+            WebPColorType::Rgb8 => ColorType::Rgb8,
+            WebPColorType::Rgba8 => ColorType::Rgba8,
+            WebPColorType::L8 => ColorType::L8,
+            WebPColorType::La8 => ColorType::La8,
+        }
+    }
+}
+
 impl From<WebPColorType> for PixelLayout {
     fn from(color_type: WebPColorType) -> Self {
         match color_type {
@@ -53,17 +73,12 @@ impl From<WebPColorType> for PixelLayout {
     }
 }
 
-impl TryFrom<ColorType> for WebPColorType {
-    type Error = ImageError;
-
-    fn try_from(color: ColorType) -> Result<Self, Self::Error> {
+impl From<ColorType> for WebPColorType {
+    fn from(color: ColorType) -> Self {
         match color {
-            ColorType::L8 => Ok(WebPColorType::L8),
-            ColorType::Rgb8 => Ok(WebPColorType::Rgb8),
-            other => Err(ImageError::Encoding(EncodingError::UnsupportedColorType {
-                format: "webp",
-                color: format!("{:?}", other),
-            })),
+            ColorType::L8 => WebPColorType::L8,
+            ColorType::Rgb8 => WebPColorType::Rgb8,
+            _ => WebPColorType::default(),
         }
     }
 }

@@ -3,8 +3,6 @@ use image::{ColorType, ExtendedColorType};
 #[cfg(feature = "progressive-jpeg")]
 use mozjpeg::ColorSpace;
 
-use crate::{EncodingError, ImageError};
-
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum JpegColorType {
     L8,
@@ -30,17 +28,12 @@ impl From<&JpegColorType> for ExtendedColorType {
     }
 }
 
-impl TryFrom<ColorType> for JpegColorType {
-    type Error = ImageError;
-
-    fn try_from(color: ColorType) -> Result<Self, Self::Error> {
+impl From<ColorType> for JpegColorType {
+    fn from(color: ColorType) -> Self {
         match color {
-            ColorType::L8 => Ok(JpegColorType::L8),
-            ColorType::Rgb8 => Ok(JpegColorType::Rgb8),
-            other => Err(ImageError::Encoding(EncodingError::UnsupportedColorType {
-                format: "jpeg",
-                color: format!("{:?}", other),
-            })),
+            ColorType::L8 => JpegColorType::L8,
+            ColorType::Rgb8 => JpegColorType::Rgb8,
+            _ => JpegColorType::default(),
         }
     }
 }

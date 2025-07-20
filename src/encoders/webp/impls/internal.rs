@@ -19,21 +19,26 @@ impl WebPEncoder {
         let (width, height) = img.dimensions();
         validate_dimensions(width, height)?;
 
-        let mut color_type: WebPColorType = match &self.color_type {
-            Some(ct) => ct.clone(),
-            None => WebPColorType::try_from(img.color())?,
+        let mut color_type = match &self.color_type {
+            Some(ct) => ct.into(),
+            None => img.color(),
         };
 
         if self.strip_unused_transparency && color_type.has_alpha() {
             if let Some(stripped) = try_strip_alpha_if_unused(&img) {
                 img = stripped;
-                color_type = WebPColorType::try_from(img.color())?;
+                color_type = img.color();
             }
         }
 
         match self.compression {
             CompressionType::Lossy => {
-                let encoder = LossyEncoder::new(img.as_bytes(), color_type.into(), width, height);
+                let encoder = LossyEncoder::new(
+                    img.as_bytes(),
+                    WebPColorType::from(color_type).into(),
+                    width,
+                    height,
+                );
                 let encoded = encoder.encode(self.quality as f32).to_vec();
                 writer
                     .write_all(&encoded)
