@@ -1,6 +1,9 @@
 use {
     crate::{
-        blocking::{dependencies::ImageService, traits::ImageServiceOps},
+        blocking::{
+            dependencies::ImageService,
+            traits::{HttpClientOps, ImageServiceOps},
+        },
         image::blocking::Image,
         ImageError, Result,
     },
@@ -31,11 +34,11 @@ mod tests {
                 Image,
             },
             image::{blocking::ImageData, enums::ImageSrc},
-            ImageError, ImageFormat,
+            ImageError, ImageFormat, ImageMetadata,
         },
         http::Response as HttpResponse,
         reqwest::blocking::Response,
-        std::num::NonZeroU32,
+        std::{cell::RefCell, rc::Rc},
         url::Url,
     };
 
@@ -62,19 +65,12 @@ mod tests {
             .returning(move |_| Ok((expected_bytes.clone(), expected_url.clone())));
 
         let mut metadata_mock = MockMetadataOps::new();
-        metadata_mock.expect_from_bytes().returning(|_| {
-            Ok((
-                ImageFormat::Jpeg,
-                NonZeroU32::new(640).unwrap(),
-                NonZeroU32::new(480).unwrap(),
-            ))
-        });
+        metadata_mock
+            .expect_from_bytes()
+            .returning(|_| Ok(ImageMetadata::new(800, 600, ImageFormat::Jpeg)));
 
-        let mock_deps = MockImageService {
-            http: http_mock,
-            metadata: metadata_mock,
-            ..Default::default()
-        };
+        let mock_deps =
+            MockImageService { http: http_mock, metadata: metadata_mock, ..Default::default() };
 
         let image = Image::from_url_internal(test_url.clone(), &mock_deps).unwrap();
 
@@ -82,7 +78,7 @@ mod tests {
         assert_eq!(image.width(), 640);
         assert_eq!(image.height(), 480);
         assert_eq!(image.src, ImageSrc::Url(test_url));
-        assert_eq!(image.data, ImageData::EncodedBytes(dummy_bytes));
+        assert_eq!(image.data, Rc::new(RefCell::new(ImageData::EncodedBytes(dummy_bytes))));
     }
 
     #[test]
@@ -100,10 +96,7 @@ mod tests {
             }
         });
 
-        let mock_deps = MockImageService {
-            http: http_mock,
-            ..Default::default()
-        };
+        let mock_deps = MockImageService { http: http_mock, ..Default::default() };
 
         let result = Image::from_url_internal(test_url, &mock_deps);
 

@@ -43,8 +43,7 @@ mod tests {
 
     #[test]
     fn test_file_info_with_non_utf8_name() {
-        use std::ffi::OsStr;
-        use std::os::unix::ffi::OsStrExt;
+        use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
 
         let bytes = b"\xFF\xFE"; // invalid UTF-8
         let path = Path::new(OsStr::from_bytes(bytes));

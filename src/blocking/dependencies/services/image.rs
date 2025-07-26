@@ -1,9 +1,8 @@
+#[cfg(test)]
+use crate::blocking::traits::{MockFsRepoOps, MockHttpClientOps, MockMetadataOps};
 use crate::blocking::{
     dependencies::{FsRepo, HttpClient, MetadataService},
-    traits::{
-        FsRepoOps, HttpClientOps, ImageServiceOps, MetadataOps, MockFsRepoOps, MockHttpClientOps,
-        MockMetadataOps,
-    },
+    traits::{FsRepoOps, HttpClientOps, ImageServiceOps, MetadataOps},
 };
 
 pub struct ImageService<C, M, FS> {
@@ -37,20 +36,18 @@ where
 
 impl Default for ImageService<HttpClient, MetadataService, FsRepo> {
     fn default() -> Self {
-        Self {
-            http: HttpClient,
-            metadata: MetadataService,
-            fs: FsRepo,
-        }
+        Self { http: HttpClient, metadata: MetadataService, fs: FsRepo }
     }
 }
 
+#[cfg(test)]
 pub struct MockImageService {
     pub fs: MockFsRepoOps,
     pub metadata: MockMetadataOps,
     pub http: MockHttpClientOps,
 }
 
+#[cfg(test)]
 impl ImageServiceOps for MockImageService {
     type HttpClient = MockHttpClientOps;
     type Metadata = MockMetadataOps;
@@ -69,6 +66,7 @@ impl ImageServiceOps for MockImageService {
     }
 }
 
+#[cfg(test)]
 impl Default for MockImageService {
     fn default() -> Self {
         Self {

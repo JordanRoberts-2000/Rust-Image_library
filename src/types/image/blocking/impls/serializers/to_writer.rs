@@ -1,10 +1,10 @@
-use std::io::Write;
-
-use crate::{blocking::Image, Result};
+use {
+    crate::{blocking::Image, Result},
+    std::io::Write,
+};
 
 impl Image {
     pub fn to_writer(&mut self, writer: impl Write) -> Result<()> {
-        self.apply_transforms()?;
         self.encode(writer, self.format)
     }
 }

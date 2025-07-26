@@ -1,12 +1,12 @@
-use std::{
-    fs::File,
-    io::{BufWriter, Write},
-    path::Path,
+use {
+    crate::{blocking::Images, IoError, Result},
+    std::{
+        fs::File,
+        io::{BufWriter, Write},
+        path::Path,
+    },
+    zip::{write::FileOptions, CompressionMethod, ZipWriter},
 };
-
-use zip::{write::FileOptions, CompressionMethod, ZipWriter};
-
-use crate::{blocking::Images, IoError, Result};
 
 impl Images {
     pub(crate) fn to_zip(&mut self, path: &Path) -> Result<()> {

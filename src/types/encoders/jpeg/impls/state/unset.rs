@@ -26,20 +26,13 @@ impl JpegEncoder<Unset> {
     }
 
     pub fn from_raw_pixels<'a>(
-        self,
-        pixels: &'a [u8],
-        width: u32,
-        height: u32,
+        self, pixels: &'a [u8], width: u32, height: u32,
     ) -> JpegEncoder<Raw<'a>> {
         JpegEncoder {
             quality: self.quality,
             color_type: self.color_type,
             progressive: self.progressive,
-            input: Raw {
-                width,
-                height,
-                bytes: pixels,
-            },
+            input: Raw { width, height, bytes: pixels },
         }
     }
 
@@ -48,26 +41,18 @@ impl JpegEncoder<Unset> {
             quality: self.quality,
             color_type: self.color_type,
             progressive: self.progressive,
-            input: Bytes {
-                bytes,
-                format: None,
-            },
+            input: Bytes { bytes, format: None },
         }
     }
 
     pub fn from_encoded_bytes_with_format<'a>(
-        self,
-        bytes: &'a [u8],
-        format: ImageFormat,
+        self, bytes: &'a [u8], format: ImageFormat,
     ) -> JpegEncoder<Bytes<'a>> {
         JpegEncoder {
             quality: self.quality,
             color_type: self.color_type,
             progressive: self.progressive,
-            input: Bytes {
-                bytes,
-                format: Some(format),
-            },
+            input: Bytes { bytes, format: Some(format) },
         }
     }
 
@@ -76,26 +61,18 @@ impl JpegEncoder<Unset> {
             quality: self.quality,
             color_type: self.color_type,
             progressive: self.progressive,
-            input: Reader {
-                reader,
-                format: None,
-            },
+            input: Reader { reader, format: None },
         }
     }
 
     pub fn from_encoded_reader_with_format<R: Read>(
-        self,
-        reader: R,
-        format: ImageFormat,
+        self, reader: R, format: ImageFormat,
     ) -> JpegEncoder<Reader<R>> {
         JpegEncoder {
             quality: self.quality,
             color_type: self.color_type,
             progressive: self.progressive,
-            input: Reader {
-                reader,
-                format: Some(format),
-            },
+            input: Reader { reader, format: Some(format) },
         }
     }
 }

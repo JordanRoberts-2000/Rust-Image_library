@@ -24,3 +24,13 @@ impl From<&AvifColorType> for ColorType {
         }
     }
 }
+
+impl From<ColorType> for AvifColorType {
+    fn from(color: ColorType) -> Self {
+        match color {
+            ColorType::Rgba8 => AvifColorType::Rgba8,
+            ColorType::Rgb8 => AvifColorType::Rgb8,
+            _ => AvifColorType::default(),
+        }
+    }
+}

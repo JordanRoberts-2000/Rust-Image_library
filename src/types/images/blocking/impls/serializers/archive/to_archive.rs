@@ -1,6 +1,7 @@
-use std::path::Path;
-
-use crate::{blocking::Images, ArchiveFormat, Result};
+use {
+    crate::{blocking::Images, ArchiveFormat, Result},
+    std::path::Path,
+};
 
 impl Images {
     pub fn to_archive(&mut self, path: impl AsRef<Path>, format: ArchiveFormat) -> Result<()> {

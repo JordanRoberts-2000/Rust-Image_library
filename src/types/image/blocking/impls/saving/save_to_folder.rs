@@ -1,12 +1,10 @@
-use std::path::Path;
-
-use crate::{
-    blocking::Image,
-    image::{
-        blocking::{dependencies::FsRepo, traits::FsRepoOps},
-        enums::ImageSrc,
+use {
+    crate::{
+        blocking::{dependencies::FsRepo, traits::FsRepoOps, Image},
+        image::enums::ImageSrc,
+        Result,
     },
-    Result,
+    std::path::Path,
 };
 
 impl Image {
@@ -19,7 +17,6 @@ impl Image {
 
         let path = folder_path.join(self.file_name());
 
-        self.apply_transforms()?;
         self.atomic_save(&path, self.format, fs)?;
 
         if self.config.remove_source {

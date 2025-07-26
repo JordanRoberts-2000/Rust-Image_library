@@ -1,5 +1,4 @@
 use image::{ColorType, ExtendedColorType};
-
 #[cfg(feature = "progressive-jpeg")]
 use mozjpeg::ColorSpace;
 

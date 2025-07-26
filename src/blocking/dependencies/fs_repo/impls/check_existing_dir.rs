@@ -1,6 +1,7 @@
-use std::path::Path;
-
-use crate::{Result, ValidationError};
+use {
+    crate::{Result, ValidationError},
+    std::path::Path,
+};
 
 pub fn check_existing_dir(path: &Path) -> Result<()> {
     if !path.exists() {

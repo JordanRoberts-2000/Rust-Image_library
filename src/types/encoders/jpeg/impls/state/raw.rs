@@ -1,8 +1,9 @@
-use std::io::Write;
-
-use crate::{
-    encoders::{jpeg::Raw, utils::validate_dimensions, JpegEncoder},
-    Result,
+use {
+    crate::{
+        encoders::{jpeg::Raw, utils::validate_dimensions, JpegEncoder},
+        Result,
+    },
+    std::io::Write,
 };
 
 impl<'a> JpegEncoder<Raw<'a>> {

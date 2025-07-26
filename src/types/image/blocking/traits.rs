@@ -1,8 +1,8 @@
-use std::path::{Path, PathBuf};
-
-use url::Url;
-
-use crate::{blocking::Image, ImageError};
+use {
+    crate::{blocking::Image, ImageError},
+    std::path::{Path, PathBuf},
+    url::Url,
+};
 
 impl TryFrom<Url> for Image {
     type Error = ImageError;

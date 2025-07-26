@@ -1,6 +1,7 @@
-use std::collections::{HashMap, HashSet};
-
-use crate::{blocking::Images, CollisionStrategy, ImageError, Result};
+use {
+    crate::{blocking::Images, CollisionStrategy, ImageError, Result},
+    std::collections::{HashMap, HashSet},
+};
 
 impl Images {
     pub(crate) fn handle_file_name_collisions(&mut self) -> Result<()> {

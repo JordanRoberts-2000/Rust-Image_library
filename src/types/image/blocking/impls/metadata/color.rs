@@ -1,39 +1,28 @@
-use crate::{blocking::Image, ImageError, Result, Rgb};
-
-use color_thief::{get_palette, ColorFormat};
+use {
+    crate::{blocking::Image, traits::ToColorThiefFormat, ImageError, Result, Rgb},
+    color_thief::get_palette,
+};
 
 impl Image {
-    pub fn dominant_color(&mut self) -> Result<Rgb> {
-        self.apply_transforms()?;
-
-        let rgb_pixels = self.get_decoded()?.to_rgb8().into_raw();
-        let palette =
-            get_palette(&rgb_pixels, ColorFormat::Rgb, 5, 1).map_err(ImageError::GetColors)?;
-
-        let dominant_color = palette.get(0).ok_or_else(|| ImageError::EmptyPalette)?;
-
-        Ok(Rgb {
-            r: dominant_color.r,
-            g: dominant_color.g,
-            b: dominant_color.b,
-        })
-    }
-
     pub fn palette(&mut self) -> Result<Vec<Rgb>> {
-        self.apply_transforms()?;
+        let img = self.process_image()?;
 
-        let rgb_pixels = self.get_decoded()?.to_rgb8().into_raw();
-
-        let palette = get_palette(&rgb_pixels, ColorFormat::Rgb, 5, 5)
-            .map_err(ImageError::GetColors)?
-            .into_iter()
-            .map(|color| Rgb {
-                r: color.r,
-                g: color.g,
-                b: color.b,
-            })
-            .collect();
+        let palette = get_palette(
+            &img.as_ref().as_bytes(),
+            img.as_ref().color().to_color_thief_format(),
+            5,
+            5,
+        )
+        .map_err(ImageError::GetColors)?
+        .into_iter()
+        .map(|color| Rgb { r: color.r, g: color.g, b: color.b })
+        .collect();
 
         Ok(palette)
+    }
+
+    pub fn dominant_color(&mut self) -> Result<Rgb> {
+        let palette = self.palette()?;
+        palette.get(0).cloned().ok_or_else(|| ImageError::EmptyPalette)
     }
 }

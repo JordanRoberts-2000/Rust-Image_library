@@ -1,8 +1,8 @@
-use std::{fs::File, path::Path};
-
-use tempfile::NamedTempFile;
-
-use crate::{blocking::traits::FsRepoOps, Result};
+use {
+    crate::{blocking::traits::FsRepoOps, Result},
+    std::{fs::File, path::Path},
+    tempfile::NamedTempFile,
+};
 
 pub struct FsRepo;
 

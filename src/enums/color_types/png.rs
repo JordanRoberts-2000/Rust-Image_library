@@ -42,3 +42,19 @@ impl From<&PngColorType> for ColorType {
         }
     }
 }
+
+impl From<ColorType> for PngColorType {
+    fn from(color: ColorType) -> Self {
+        match color {
+            ColorType::Rgb8 => PngColorType::Rgb8,
+            ColorType::Rgba8 => PngColorType::Rgba8,
+            ColorType::Rgb16 => PngColorType::Rgb16,
+            ColorType::Rgba16 => PngColorType::Rgba16,
+            ColorType::L8 => PngColorType::L8,
+            ColorType::La8 => PngColorType::La8,
+            ColorType::L16 => PngColorType::L16,
+            ColorType::La16 => PngColorType::La16,
+            _ => PngColorType::default(),
+        }
+    }
+}

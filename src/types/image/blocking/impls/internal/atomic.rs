@@ -1,20 +1,16 @@
-use std::path::Path;
-
-use crate::{
-    blocking::{traits::FsRepoOps, Image},
-    ImageError, ImageFormat, Result,
+use {
+    crate::{
+        blocking::{traits::FsRepoOps, Image},
+        ImageError, ImageFormat, Result,
+    },
+    std::path::Path,
 };
 
 impl Image {
     pub fn atomic_save(
-        &mut self,
-        path: &Path,
-        format: ImageFormat,
-        fs: &impl FsRepoOps,
+        &mut self, path: &Path, format: ImageFormat, fs: &impl FsRepoOps,
     ) -> Result<()> {
-        let parent = path
-            .parent()
-            .ok_or_else(|| ImageError::MissingParent(path.to_path_buf()))?;
+        let parent = path.parent().ok_or_else(|| ImageError::MissingParent(path.to_path_buf()))?;
         fs.ensure_dir(parent)?;
 
         let temp_file = fs.create_temp_file(parent)?;

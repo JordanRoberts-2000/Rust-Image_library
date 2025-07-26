@@ -1,10 +1,9 @@
-use std::{fs::File, path::Path};
-
-use tempfile::NamedTempFile;
-
-use crate::{IoError, Result};
+use {
+    crate::{IoError, Result},
+    std::{fs::File, path::Path},
+    tempfile::NamedTempFile,
+};
 
 pub fn persist_temp_file(temp: NamedTempFile, path: &Path) -> Result<File> {
-    temp.persist(path)
-        .map_err(|e| IoError::PersistTempFile(e.error, path.to_path_buf()).into())
+    temp.persist(path).map_err(|e| IoError::PersistTempFile(e.error, path.to_path_buf()).into())
 }

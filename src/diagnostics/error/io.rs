@@ -1,0 +1,52 @@
+use {
+    std::{io, path::PathBuf},
+    zip::result::ZipError,
+};
+
+#[derive(thiserror::Error, Debug)]
+pub enum IoError {
+    #[error("Failed to create directory at `{1}`: {0}")]
+    CreateDir(#[source] io::Error, PathBuf),
+
+    #[error("Failed to create file at `{1}`: {0}")]
+    CreateFile(#[source] io::Error, PathBuf),
+
+    #[error("Failed to write file at `{1}`: {0}")]
+    WriteFile(#[source] io::Error, PathBuf),
+
+    #[error("Failed to delete file at `{1}`: {0}")]
+    DeleteFile(#[source] io::Error, PathBuf),
+
+    #[error("Failed to rename directory from `{1}` to `{2}`: {0}")]
+    Rename(#[source] io::Error, PathBuf, PathBuf),
+
+    #[error("Failed to read file at `{1}`: {0}")]
+    ReadFile(#[source] io::Error, PathBuf),
+
+    #[error("Failed to create temporary file in directory: {1}")]
+    CreateTempFile(#[source] std::io::Error, PathBuf),
+
+    #[error("Failed to persist temporary file to: {1}")]
+    PersistTempFile(#[source] std::io::Error, PathBuf),
+
+    #[error("Failed to read from reader: {0}")]
+    ReadStream(io::Error),
+
+    #[error("Failed to retrieve metadata for `{1}`: {0}")]
+    MetaData(#[source] io::Error, PathBuf),
+
+    #[error("Failed to write all data")]
+    WriteAll(io::Error),
+
+    #[error("Failed to flush data to `{1}`: {0}")]
+    Flush(#[source] io::Error, String),
+
+    #[error("Failed to start zip entry for '{1}': {0}")]
+    ZipStartFile(#[source] ZipError, String),
+
+    #[error("Failed to write image '{1}' to zip: {0}")]
+    ZipWriteFile(#[source] io::Error, String),
+
+    #[error("Failed to finalize zip file: {0}")]
+    ZipFinalize(#[from] ZipError),
+}

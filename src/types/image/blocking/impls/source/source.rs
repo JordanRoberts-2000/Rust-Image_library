@@ -1,6 +1,8 @@
-use {crate::image::enums::ImageSrc, std::path::PathBuf, url::Url};
-
-use crate::blocking::Image;
+use {
+    crate::{blocking::Image, image::enums::ImageSrc},
+    std::path::PathBuf,
+    url::Url,
+};
 
 impl Image {
     pub fn source_path(&self) -> Option<PathBuf> {

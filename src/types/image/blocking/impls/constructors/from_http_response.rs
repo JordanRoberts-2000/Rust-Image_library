@@ -1,14 +1,18 @@
 use {
     crate::{
-        blocking::{dependencies::ImageService, traits::ImageServiceOps},
+        blocking::{
+            dependencies::ImageService,
+            traits::{HttpClientOps, ImageServiceOps, MetadataOps},
+        },
         image::{
             blocking::{Image, ImageData},
             enums::ImageSrc,
             ImageConfig,
         },
-        Result,
+        Result, ValidationError,
     },
     reqwest::blocking::Response,
+    std::{cell::RefCell, num::NonZeroU32, rc::Rc},
 };
 
 impl Image {
@@ -17,19 +21,18 @@ impl Image {
     }
 
     pub(crate) fn from_http_response_internal(
-        response: Response,
-        service: &impl ImageServiceOps,
+        response: Response, service: &impl ImageServiceOps,
     ) -> Result<Self> {
-        let (bytes, url) = service.downloader().parse_response(response)?;
-        let (format, width, height) = service.metadata().from_bytes(&bytes)?;
+        let (bytes, url) = service.http().parse_response(response)?;
+        let metadata = service.metadata().from_bytes(&bytes)?;
 
         Ok(Self {
             src: ImageSrc::Url(url),
-            data: ImageData::EncodedBytes(bytes),
+            data: Rc::new(RefCell::new(ImageData::EncodedBytes(bytes))),
             config: ImageConfig::default(),
-            height,
-            width,
-            format,
+            height: NonZeroU32::new(metadata.height).ok_or(ValidationError::InvalidHeight)?,
+            width: NonZeroU32::new(metadata.width).ok_or(ValidationError::InvalidWidth)?,
+            format: metadata.format,
         })
     }
 }
@@ -44,11 +47,11 @@ mod tests {
                 Image,
             },
             image::{blocking::ImageData, enums::ImageSrc},
-            ImageError, ImageFormat,
+            ImageError, ImageFormat, ImageMetadata,
         },
         http::Response as HttpResponse,
         reqwest::blocking::Response,
-        std::num::NonZeroU32,
+        std::{cell::RefCell, rc::Rc},
         url::Url,
     };
 
@@ -59,26 +62,16 @@ mod tests {
 
         let mut http_mock = MockHttpClientOps::new();
         http_mock.expect_parse_response().returning(move |_| {
-            Ok((
-                vec![1, 2, 3],
-                Url::parse("http://example.com/image.jpg").unwrap(),
-            ))
+            Ok((vec![1, 2, 3], Url::parse("http://example.com/image.jpg").unwrap()))
         });
 
         let mut metadata_mock = MockMetadataOps::new();
-        metadata_mock.expect_from_bytes().returning(|_| {
-            Ok((
-                ImageFormat::Jpeg,
-                NonZeroU32::new(800).unwrap(),
-                NonZeroU32::new(600).unwrap(),
-            ))
-        });
+        metadata_mock
+            .expect_from_bytes()
+            .returning(|_| Ok(ImageMetadata::new(800, 600, ImageFormat::Jpeg)));
 
-        let mock_deps = MockImageService {
-            metadata: metadata_mock,
-            http: http_mock,
-            ..Default::default()
-        };
+        let mock_deps =
+            MockImageService { metadata: metadata_mock, http: http_mock, ..Default::default() };
 
         let response = Response::from(
             HttpResponse::builder()
@@ -94,7 +87,7 @@ mod tests {
         assert_eq!(image.width(), 800);
         assert_eq!(image.height(), 600);
         assert_eq!(image.src, ImageSrc::Url(dummy_url));
-        assert_eq!(image.data, ImageData::EncodedBytes(dummy_bytes));
+        assert_eq!(image.data, Rc::new(RefCell::new(ImageData::EncodedBytes(dummy_bytes))));
     }
 
     #[test]
@@ -108,10 +101,7 @@ mod tests {
             })
         });
 
-        let mock_deps = MockImageService {
-            http: http_mock,
-            ..Default::default()
-        };
+        let mock_deps = MockImageService { http: http_mock, ..Default::default() };
 
         let response = Response::from(HttpResponse::builder().status(500).body("error").unwrap());
 
@@ -129,15 +119,10 @@ mod tests {
             .returning(move |_| Ok((vec![1, 2, 3], dummy_url.clone())));
 
         let mut metadata_mock = MockMetadataOps::new();
-        metadata_mock
-            .expect_from_bytes()
-            .returning(|_| Err(ImageError::UnknownFormat));
+        metadata_mock.expect_from_bytes().returning(|_| Err(ImageError::UnknownFormat));
 
-        let mock_deps = MockImageService {
-            http: http_mock,
-            metadata: metadata_mock,
-            ..Default::default()
-        };
+        let mock_deps =
+            MockImageService { http: http_mock, metadata: metadata_mock, ..Default::default() };
 
         let response = Response::from(HttpResponse::builder().status(200).body("dummy").unwrap());
 

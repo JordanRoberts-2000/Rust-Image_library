@@ -12,7 +12,7 @@ use {
         ImageError, Result, ValidationError,
     },
     base64::Engine,
-    std::num::NonZeroU32,
+    std::{cell::RefCell, num::NonZeroU32, rc::Rc},
 };
 
 impl Image {
@@ -30,7 +30,7 @@ impl Image {
 
         Ok(Self {
             src: ImageSrc::Base64(base_64.to_string()),
-            data: ImageData::EncodedBytes(bytes),
+            data: Rc::new(RefCell::new(ImageData::EncodedBytes(bytes))),
             config: ImageConfig::default(),
             height: NonZeroU32::new(metadata.height).ok_or(ValidationError::InvalidHeight)?,
             width: NonZeroU32::new(metadata.width).ok_or(ValidationError::InvalidWidth)?,
@@ -48,6 +48,7 @@ mod tests {
             ImageError, ImageFormat, ImageMetadata,
         },
         base64::Engine,
+        std::{cell::RefCell, rc::Rc},
     };
 
     #[test]
@@ -60,17 +61,14 @@ mod tests {
             .expect_from_bytes()
             .returning(|_| Ok(ImageMetadata::new(800, 600, ImageFormat::Png)));
 
-        let mock_deps = MockImageService {
-            metadata: metadata_mock,
-            ..Default::default()
-        };
+        let mock_deps = MockImageService { metadata: metadata_mock, ..Default::default() };
 
         let image = Image::from_base64_internal(&valid_base64, &mock_deps).unwrap();
 
         assert_eq!(image.format, ImageFormat::Png);
         assert_eq!(image.width(), 800);
         assert_eq!(image.height(), 600);
-        assert_eq!(image.data, ImageData::EncodedBytes(dummy_bytes));
+        assert_eq!(image.data, Rc::new(RefCell::new(ImageData::EncodedBytes(dummy_bytes))));
         assert_eq!(image.src, ImageSrc::Base64(valid_base64));
     }
 
@@ -88,14 +86,9 @@ mod tests {
         let valid_base64 = base64::engine::general_purpose::STANDARD.encode(&dummy_bytes);
 
         let mut metadata_mock = MockMetadataOps::new();
-        metadata_mock
-            .expect_from_bytes()
-            .returning(|_| Err(ImageError::UnknownFormat));
+        metadata_mock.expect_from_bytes().returning(|_| Err(ImageError::UnknownFormat));
 
-        let mock_deps = MockImageService {
-            metadata: metadata_mock,
-            ..Default::default()
-        };
+        let mock_deps = MockImageService { metadata: metadata_mock, ..Default::default() };
 
         let result = Image::from_base64_internal(&valid_base64, &mock_deps);
 

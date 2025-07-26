@@ -11,6 +11,5 @@ mod impls {
     }
 }
 
-pub use {color_type::JpegColorType, core::JpegEncoder};
-
 pub(super) use core::{Bytes, Raw, Reader, Unset};
+pub use {color_type::JpegColorType, core::JpegEncoder};

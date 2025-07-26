@@ -1,6 +1,7 @@
-use std::{fs, path::Path};
-
-use crate::{IoError, Result, ValidationError};
+use {
+    crate::{IoError, Result, ValidationError},
+    std::{fs, path::Path},
+};
 
 pub fn trash_file(path: &Path) -> Result<()> {
     if !path.exists() {
@@ -26,11 +27,12 @@ pub fn trash_file(path: &Path) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ImageError;
-
-    use super::*;
-    use std::{fs::File, path::PathBuf};
-    use tempfile::TempDir;
+    use {
+        super::*,
+        crate::ImageError,
+        std::{fs::File, path::PathBuf},
+        tempfile::TempDir,
+    };
 
     #[test]
     fn test_trash_file_nonexistent_path() {
@@ -66,9 +68,6 @@ mod tests {
 
         trash_file(&file_path).expect("should succeed");
 
-        assert!(
-            !file_path.exists(),
-            "after trash_file, the file should no longer exist"
-        );
+        assert!(!file_path.exists(), "after trash_file, the file should no longer exist");
     }
 }

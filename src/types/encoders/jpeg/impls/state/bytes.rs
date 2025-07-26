@@ -1,14 +1,14 @@
-use std::io::Write;
-
-use image::GenericImageView;
-
-use crate::{
-    encoders::{
-        jpeg::Bytes,
-        utils::{decode, validate_dimensions},
-        JpegEncoder,
+use {
+    crate::{
+        encoders::{
+            jpeg::Bytes,
+            utils::{decode, validate_dimensions},
+            JpegEncoder,
+        },
+        Result,
     },
-    Result,
+    image::GenericImageView,
+    std::io::Write,
 };
 
 impl<'a> JpegEncoder<Bytes<'a>> {

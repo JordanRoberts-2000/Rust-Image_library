@@ -18,7 +18,7 @@ impl Image {
 
     pub fn file_name(&self) -> String {
         format!(
-            "{}{}{}{}",
+            "{}{}{}.{}",
             self.config.prefix.as_deref().unwrap_or(""),
             self.config.file_name,
             self.config.suffix.as_deref().unwrap_or(""),

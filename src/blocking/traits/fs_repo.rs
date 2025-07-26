@@ -1,11 +1,12 @@
+#[cfg(test)]
+use mockall::automock;
 use {
     crate::Result,
-    mockall::automock,
     std::{fs::File, path::Path},
     tempfile::NamedTempFile,
 };
 
-#[automock]
+#[cfg_attr(test, automock)]
 pub trait FsRepoOps {
     fn check_existing_file(&self, path: &Path) -> Result<()>;
     fn check_existing_dir(&self, path: &Path) -> Result<()>;

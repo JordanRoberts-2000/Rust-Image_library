@@ -1,5 +1,7 @@
-use image::{ColorType, ExtendedColorType};
-use webp::PixelLayout;
+use {
+    image::{ColorType, ExtendedColorType},
+    webp::PixelLayout,
+};
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum WebPColorType {

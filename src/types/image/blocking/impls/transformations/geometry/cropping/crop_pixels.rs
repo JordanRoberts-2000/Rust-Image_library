@@ -46,9 +46,7 @@ impl Image {
             return self;
         }
 
-        self.config
-            .pipeline
-            .push(TransformOp::Crop(x, y, new_w, new_h));
+        self.config.pipeline.push(TransformOp::Crop(x, y, new_w, new_h));
 
         self.width = to_nonzero_u32_with_context(new_w, "Cropped width");
         self.height = to_nonzero_u32_with_context(new_h, "Cropped height");

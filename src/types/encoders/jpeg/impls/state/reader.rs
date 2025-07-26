@@ -1,23 +1,20 @@
-use std::io::{Read, Write};
-
-use image::GenericImageView;
-
-use crate::{
-    encoders::{
-        jpeg::Reader,
-        utils::{decode, validate_dimensions},
-        JpegEncoder,
+use {
+    crate::{
+        encoders::{
+            jpeg::Reader,
+            utils::{decode, validate_dimensions},
+            JpegEncoder,
+        },
+        IoError, Result,
     },
-    IoError, Result,
+    image::GenericImageView,
+    std::io::{Read, Write},
 };
 
 impl<R: Read> JpegEncoder<Reader<R>> {
     pub fn write_to(mut self, writer: impl Write) -> Result<()> {
         let mut buffer = Vec::new();
-        self.input
-            .reader
-            .read_to_end(&mut buffer)
-            .map_err(IoError::ReadStream)?;
+        self.input.reader.read_to_end(&mut buffer).map_err(IoError::ReadStream)?;
 
         let img = decode(&mut buffer, self.input.format)?;
 
@@ -34,10 +31,7 @@ impl<R: Read> JpegEncoder<Reader<R>> {
 
     pub fn to_bytes(mut self) -> Result<Vec<u8>> {
         let mut buffer = Vec::new();
-        self.input
-            .reader
-            .read_to_end(&mut buffer)
-            .map_err(IoError::ReadStream)?;
+        self.input.reader.read_to_end(&mut buffer).map_err(IoError::ReadStream)?;
 
         let img = decode(&mut buffer, self.input.format)?;
 

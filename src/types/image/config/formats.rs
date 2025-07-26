@@ -10,10 +10,7 @@ pub struct JpegConfig {
 
 impl Default for JpegConfig {
     fn default() -> Self {
-        Self {
-            quality: DEFAULT_JPEG_QUALITY,
-            progressive: false,
-        }
+        Self { quality: DEFAULT_JPEG_QUALITY, progressive: false }
     }
 }
 
@@ -42,9 +39,6 @@ pub struct WebpConfig {
 
 impl Default for WebpConfig {
     fn default() -> Self {
-        Self {
-            quality: DEFAULT_WEBP_QUALITY,
-            lossless: false,
-        }
+        Self { quality: DEFAULT_WEBP_QUALITY, lossless: false }
     }
 }

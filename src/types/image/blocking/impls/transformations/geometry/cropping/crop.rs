@@ -23,34 +23,16 @@ impl Image {
             .max(1); // but at least 1px
 
         if x != original_x {
-            log::warn!(
-                "Crop x {} exceeded image width {}, clamped to {}",
-                original_x,
-                orig_w,
-                x
-            );
+            log::warn!("Crop x {} exceeded image width {}, clamped to {}", original_x, orig_w, x);
         }
         if y != original_y {
-            log::warn!(
-                "Crop y {} exceeded image height {}, clamped to {}",
-                original_y,
-                orig_h,
-                y
-            );
+            log::warn!("Crop y {} exceeded image height {}, clamped to {}", original_y, orig_h, y);
         }
         if w != original_w {
-            log::warn!(
-                "Crop width {} exceeded available space, clamped to {}",
-                original_w,
-                w
-            );
+            log::warn!("Crop width {} exceeded available space, clamped to {}", original_w, w);
         }
         if h != original_h {
-            log::warn!(
-                "Crop height {} exceeded available space, clamped to {}",
-                original_h,
-                h
-            );
+            log::warn!("Crop height {} exceeded available space, clamped to {}", original_h, h);
         }
 
         if x == 0 && y == 0 && w == orig_w && h == orig_h {

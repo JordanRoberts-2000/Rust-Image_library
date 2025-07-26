@@ -1,6 +1,5 @@
-use crate::ImageError;
-
 use {
+    crate::ImageError,
     strum::VariantNames,
     strum_macros::{Display, VariantNames},
 };
@@ -9,8 +8,8 @@ use {
 #[strum(serialize_all = "lowercase")]
 pub enum ImageFormat {
     WebP,
-    Png,
     #[default]
+    Png,
     Jpeg,
     Avif,
 }

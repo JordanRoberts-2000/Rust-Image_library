@@ -34,9 +34,7 @@ impl Image {
             return self;
         }
 
-        self.config
-            .pipeline
-            .push(TransformOp::Resize(width, height));
+        self.config.pipeline.push(TransformOp::Resize(width, height));
         self.apply_scale(scale);
 
         self
@@ -50,9 +48,7 @@ impl Image {
             return self;
         }
 
-        self.config
-            .pipeline
-            .push(TransformOp::ResizeExact(width, height));
+        self.config.pipeline.push(TransformOp::ResizeExact(width, height));
 
         self.width = width;
         self.height = height;
@@ -73,9 +69,7 @@ impl Image {
             return self;
         }
 
-        self.config
-            .pipeline
-            .push(TransformOp::ResizeToFill(width, height));
+        self.config.pipeline.push(TransformOp::ResizeToFill(width, height));
         self.apply_scale(scale);
 
         self

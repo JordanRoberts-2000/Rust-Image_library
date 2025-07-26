@@ -1,12 +1,10 @@
-use std::path::Path;
-
-use crate::{
-    blocking::Image,
-    image::{
-        blocking::{dependencies::FsRepo, traits::FsRepoOps},
-        enums::ImageSrc,
+use {
+    crate::{
+        blocking::{dependencies::FsRepo, traits::FsRepoOps, Image},
+        image::enums::ImageSrc,
+        ImageError, ImageFormat, Result,
     },
-    ImageError, ImageFormat, Result,
+    std::path::Path,
 };
 
 impl Image {
@@ -30,7 +28,6 @@ impl Image {
         let format = ImageFormat::try_from(ext)
             .map_err(|_| ImageError::InvalidExtension(ext.to_string()))?;
 
-        self.apply_transforms()?;
         self.atomic_save(&path, format, fs)?;
 
         if self.config.remove_source {

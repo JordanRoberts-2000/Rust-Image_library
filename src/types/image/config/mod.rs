@@ -1,7 +1,8 @@
-mod base;
+mod core;
 mod formats;
+mod resolvers;
 
 pub use {
-    base::ImageConfig,
+    core::ImageConfig,
     formats::{AvifConfig, JpegConfig, WebpConfig},
 };

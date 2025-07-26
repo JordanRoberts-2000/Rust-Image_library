@@ -1620,35 +1620,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "img"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "blurhash",
- "color-thief",
- "http 1.3.1",
- "httpmock",
- "image",
- "log",
- "mockall",
- "mozjpeg",
- "ravif 0.12.0",
- "reqwest",
- "serde",
- "strum",
- "strum_macros",
- "tempfile",
- "thiserror 2.0.12",
- "tokio",
- "tokio-macros",
- "trash",
- "url",
- "walkdir",
- "webp",
- "zip",
-]
-
-[[package]]
 name = "imgref"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2688,6 +2659,35 @@ checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
+]
+
+[[package]]
+name = "razr"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "blurhash",
+ "color-thief",
+ "http 1.3.1",
+ "httpmock",
+ "image",
+ "log",
+ "mockall",
+ "mozjpeg",
+ "ravif 0.12.0",
+ "reqwest",
+ "serde",
+ "strum",
+ "strum_macros",
+ "tempfile",
+ "thiserror 2.0.12",
+ "tokio",
+ "tokio-macros",
+ "trash",
+ "url",
+ "walkdir",
+ "webp",
+ "zip",
 ]
 
 [[package]]

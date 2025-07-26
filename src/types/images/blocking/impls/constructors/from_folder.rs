@@ -1,11 +1,11 @@
-use std::path::Path;
-
-use walkdir::{DirEntry, Error as WalkDirError, WalkDir};
-
-use crate::{
-    blocking::{Image, Images},
-    images::types::FromFolderConfig,
-    ImageError, ImageFormat,
+use {
+    crate::{
+        blocking::{Image, Images},
+        images::types::FromFolderConfig,
+        ImageError, ImageFormat,
+    },
+    std::path::Path,
+    walkdir::{DirEntry, Error as WalkDirError, WalkDir},
 };
 
 impl Images {
@@ -14,8 +14,7 @@ impl Images {
     }
 
     pub fn from_folder_with_config(
-        path: impl AsRef<Path>,
-        config: FromFolderConfig,
+        path: impl AsRef<Path>, config: FromFolderConfig,
     ) -> Result<Self, ImageError> {
         let path = path.as_ref();
         let mut images = Vec::new();
@@ -55,24 +54,20 @@ impl Images {
     }
 
     fn create_walker<'a>(
-        path: impl AsRef<Path> + 'a,
-        config: &'a FromFolderConfig,
+        path: impl AsRef<Path> + 'a, config: &'a FromFolderConfig,
     ) -> impl Iterator<Item = Result<DirEntry, WalkDirError>> + 'a {
-        WalkDir::new(path)
-            .max_depth(config.max_depth)
-            .follow_links(false)
-            .into_iter()
-            .filter_entry(move |entry| {
+        WalkDir::new(path).max_depth(config.max_depth).follow_links(false).into_iter().filter_entry(
+            move |entry| {
                 if !config.recursive && entry.depth() > 1 {
                     return false;
                 }
                 true
-            })
+            },
+        )
     }
 
     fn resovle_entry(
-        entry: Result<DirEntry, WalkDirError>,
-        config: &FromFolderConfig,
+        entry: Result<DirEntry, WalkDirError>, config: &FromFolderConfig,
     ) -> Result<Option<DirEntry>, WalkDirError> {
         match entry {
             Ok(e) => Ok(Some(e)),
