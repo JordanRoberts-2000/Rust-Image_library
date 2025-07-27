@@ -1,5 +1,6 @@
 use {
-    crate::ImageError,
+    crate::{ImageError, ValidationError},
+    std::path::Path,
     strum::VariantNames,
     strum_macros::{Display, VariantNames},
 };
@@ -73,6 +74,31 @@ impl From<ImageFormat> for image::ImageFormat {
             ImageFormat::Png => image::ImageFormat::Png,
             ImageFormat::Jpeg => image::ImageFormat::Jpeg,
             ImageFormat::Avif => image::ImageFormat::Avif,
+        }
+    }
+}
+
+impl ImageFormat {
+    pub fn try_from_path(path: impl AsRef<Path>) -> Result<Self, ImageError> {
+        let path = path.as_ref();
+
+        match path.extension() {
+            Some(extension) => {
+                let ext_str = extension
+                    .to_str()
+                    .ok_or_else(|| {
+                        ValidationError::InvalidExtensionFormat(extension.to_os_string())
+                    })?
+                    .to_lowercase();
+
+                match ext_str.as_str() {
+                    "jpg" | "jpeg" => Ok(ImageFormat::Jpeg),
+                    "png" => Ok(ImageFormat::Png),
+                    "webp" => Ok(ImageFormat::WebP),
+                    _ => Err(ValidationError::UnsupportedExtension(ext_str).into()),
+                }
+            }
+            None => Err(ValidationError::MissingExtensionForPath(path.to_path_buf()).into()),
         }
     }
 }
