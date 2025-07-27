@@ -1,5 +1,5 @@
 use {
-    crate::{RawColorType, RawColorTypeF32, RawColorTypeU16},
+    crate::{ImageFormat, RawColorType, RawColorTypeF32, RawColorTypeU16},
     std::path::PathBuf,
 };
 
@@ -23,8 +23,20 @@ pub enum ValidationError {
     #[error("Invalid image dimensions, height cannot be 0")]
     InvalidHeight,
 
+    #[error("invalid extension format (contains invalid UTF-8): {0:?}")]
+    InvalidExtensionFormat(std::ffi::OsString),
+
+    #[error("missing file extension for path: {0}")]
+    MissingExtensionForPath(PathBuf),
+
     #[error("Invalid image dimensions, width cannot be 0")]
     InvalidWidth,
+
+    #[error("format mismatch: expected {expected:?}, detected {detected:?}")]
+    FormatMismatch { expected: ImageFormat, detected: image::ImageFormat },
+
+    #[error("Input byte array cannot be empty")]
+    EmptyByteArray,
 
     #[error("Index {0} out of bounds")]
     IndexOutOfBounds(usize),
@@ -37,4 +49,7 @@ pub enum ValidationError {
 
     #[error("Invalid f32 buffer: pixel data did not match expected layout for color type {0:?}")]
     InvalidBufferF32(RawColorTypeF32),
+
+    #[error("unsupported file extension: {0}")]
+    UnsupportedExtension(String),
 }

@@ -1,6 +1,6 @@
 use {
     super::super::Unset,
-    crate::{constants::DEFAULT_JPEG_QUALITY, encoders::JpegEncoder},
+    crate::{constants::DEFAULT_JPEG_QUALITY, JpegEncoder},
 };
 
 impl JpegEncoder<Unset> {

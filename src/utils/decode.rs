@@ -1,5 +1,5 @@
 use {
-    crate::{ImageError, ImageFormat, Result},
+    crate::{ImageError, ImageFormat, Result, ValidationError},
     image::{load_from_memory, load_from_memory_with_format, DynamicImage, ImageReader},
     std::path::Path,
 };
@@ -22,7 +22,7 @@ pub fn from_bytes(bytes: &[u8]) -> Result<DynamicImage> {
 pub fn from_bytes_with_format(bytes: &[u8], format: ImageFormat) -> Result<DynamicImage> {
     if let Ok(detected) = image::guess_format(bytes) {
         if detected != format.into() {
-            return Err(ImageError::FormatMismatch { expected: format, detected });
+            return Err(ValidationError::FormatMismatch { expected: format, detected }.into());
         }
     }
 

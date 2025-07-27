@@ -18,21 +18,21 @@ pub(crate) mod utils {
     pub mod decode;
 }
 
+pub(crate) use {
+    diagnostics::error::*,
+    types::{encoders, image, images},
+};
 pub use {
-    diagnostics::error::ImageError,
+    diagnostics::error::{ImageError, ValidationError},
     enums::{
         CompressionType, CropEdge, ImageFormat, RawColorType, RawColorTypeF32, RawColorTypeU16,
     },
     types::{
         byte_size::ByteSize,
-        encoders,
+        encoders::jpeg::{JpegColorType, JpegEncoder},
         image::{AvifConfig, JpegConfig, WebpConfig},
         images::enums::{ArchiveFormat, CollisionStrategy},
         metadata::ImageMetadata,
         rgb::Rgb,
     },
-};
-pub(crate) use {
-    diagnostics::error::*,
-    types::{image, images},
 };

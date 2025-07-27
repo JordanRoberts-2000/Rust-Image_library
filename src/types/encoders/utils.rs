@@ -4,6 +4,10 @@ use {
 };
 
 pub fn decode(bytes: &[u8], format: Option<ImageFormat>) -> Result<DynamicImage> {
+    if bytes.is_empty() {
+        return Err(ValidationError::EmptyByteArray.into());
+    }
+
     if let Some(fmt) = format {
         decode::from_bytes_with_format(bytes, fmt)
     } else {

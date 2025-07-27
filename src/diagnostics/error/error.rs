@@ -29,9 +29,6 @@ pub enum ImageError {
     #[error("failed to decode base64: {0}")]
     Base64DecodeFailed(base64::DecodeError, String),
 
-    #[error("format mismatch: expected {expected:?}, detected {detected:?}")]
-    FormatMismatch { expected: ImageFormat, detected: image::ImageFormat },
-
     #[error("failed to decode image '{}' to format '{:?}', err: {}", id, format, source)]
     Decoding { id: String, source: image::ImageError, format: ImageFormat },
 

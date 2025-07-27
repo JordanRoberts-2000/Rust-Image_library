@@ -1,12 +1,9 @@
 use {
     crate::{
-        encoders::{
-            jpeg::{Bytes, Raw, Reader, Unset},
-            JpegColorType, JpegEncoder,
-        },
-        ImageFormat,
+        encoders::jpeg::{Bytes, Path, Raw, Reader, Unset},
+        ImageFormat, JpegColorType, JpegEncoder,
     },
-    std::io::Read,
+    std::{io::Read, path::Path as IoPath},
 };
 
 impl JpegEncoder<Unset> {
@@ -73,6 +70,15 @@ impl JpegEncoder<Unset> {
             color_type: self.color_type,
             progressive: self.progressive,
             input: Reader { reader, format: Some(format) },
+        }
+    }
+
+    pub fn from_file(self, path: impl AsRef<IoPath>) -> JpegEncoder<Path> {
+        JpegEncoder {
+            quality: self.quality,
+            color_type: self.color_type,
+            progressive: self.progressive,
+            input: Path { path: path.as_ref().to_path_buf(), format: None },
         }
     }
 }

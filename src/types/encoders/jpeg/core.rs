@@ -1,6 +1,6 @@
 use {
-    crate::{encoders::JpegColorType, ImageFormat},
-    std::io::Read,
+    crate::{ImageFormat, JpegColorType},
+    std::{io::Read, path::PathBuf},
 };
 
 pub struct Unset;
@@ -12,6 +12,12 @@ pub struct Reader<R: Read> {
     pub reader: R,
     pub format: Option<ImageFormat>,
 }
+
+pub struct Path {
+    pub path: PathBuf,
+    pub format: Option<ImageFormat>,
+}
+
 pub struct Raw<'a> {
     pub bytes: &'a [u8],
     pub width: u32,

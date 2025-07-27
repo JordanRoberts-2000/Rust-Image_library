@@ -1,8 +1,12 @@
 mod fs_repo;
 mod http;
 mod image;
+mod io_repo;
 mod metadata;
 
-pub use {fs_repo::FsRepoOps, http::HttpClientOps, image::ImageServiceOps, metadata::MetadataOps};
+pub use {
+    fs_repo::FsRepoOps, http::HttpClientOps, image::ImageServiceOps, io_repo::IoRepoOps,
+    metadata::MetadataOps,
+};
 #[cfg(test)]
 pub use {fs_repo::MockFsRepoOps, http::MockHttpClientOps, metadata::MockMetadataOps};

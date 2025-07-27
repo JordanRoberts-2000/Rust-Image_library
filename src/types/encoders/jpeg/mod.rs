@@ -5,11 +5,12 @@ mod impls {
     mod internal;
     mod state {
         mod bytes;
+        mod path;
         mod raw;
         mod reader;
         mod unset;
     }
 }
 
-pub(super) use core::{Bytes, Raw, Reader, Unset};
+pub(crate) use core::{Bytes, Path, Raw, Reader, Unset};
 pub use {color_type::JpegColorType, core::JpegEncoder};
