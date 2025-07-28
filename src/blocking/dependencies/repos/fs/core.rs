@@ -1,6 +1,6 @@
 use {
     crate::{blocking::traits::FsRepoOps, Result},
-    std::{fs::File, path::Path},
+    std::path::Path,
     tempfile::NamedTempFile,
 };
 
@@ -27,11 +27,10 @@ impl FsRepoOps for FsRepo {
         super::trash_file(path)
     }
 
-    fn create_temp_file(&self, parent: &Path) -> Result<NamedTempFile> {
-        super::create_temp_file(parent)
-    }
-
-    fn persist_temp_file(&self, temp: NamedTempFile, path: &Path) -> Result<File> {
-        super::persist_temp_file(temp, path)
+    fn atomic_write<F>(&self, path: &Path, write_fn: F) -> Result<()>
+    where
+        F: FnOnce(&mut NamedTempFile) -> Result<()>,
+    {
+        super::atomic_write(path, write_fn)
     }
 }

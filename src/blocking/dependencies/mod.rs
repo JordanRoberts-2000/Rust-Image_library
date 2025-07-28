@@ -8,8 +8,6 @@ mod services {
 }
 mod http_client;
 
-#[cfg(test)]
-pub use services::image::MockImageService;
 pub use {
     http_client::HttpClient,
     repos::{fs::FsRepo, io::IoRepo},

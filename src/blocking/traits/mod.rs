@@ -8,5 +8,3 @@ pub use {
     fs_repo::FsRepoOps, http::HttpClientOps, image::ImageServiceOps, io_repo::IoRepoOps,
     metadata::MetadataOps,
 };
-#[cfg(test)]
-pub use {fs_repo::MockFsRepoOps, http::MockHttpClientOps, metadata::MockMetadataOps};
