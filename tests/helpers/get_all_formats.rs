@@ -1,7 +1,7 @@
-use std::fs;
+use std::{fs, path::PathBuf};
 
-pub fn get_test_image_paths() -> Vec<std::path::PathBuf> {
-    let assets_dir = "tests/assets";
+pub fn get_all_formats() -> Vec<PathBuf> {
+    let assets_dir = "tests/assets/formats";
 
     let entries = fs::read_dir(assets_dir).expect("Failed to read assets directory");
 

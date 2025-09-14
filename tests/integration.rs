@@ -1,7 +1,3 @@
-mod image {
-    mod constructors;
-}
-
 mod encoders {
     mod jpeg;
 }
