@@ -4,10 +4,10 @@ use {
             enums::{ImageData, ImageSrc},
             ImageConfig,
         },
-        BitDepth, ColorModel, Image, ImageFormat, Result, ValidationError,
+        BitDepth, ColorModel, Image, ImageFormat, ImageMetadata, Result, ValidationError,
     },
     image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
-    std::{borrow::Cow, num::NonZeroU32},
+    std::{borrow::Cow, cell::RefCell},
 };
 
 #[derive(Debug, Clone)]
@@ -140,11 +140,9 @@ impl Image {
 
         Ok(Self {
             src: ImageSrc::RawPixels,
-            data: Some(ImageData::RawPixels(img)),
+            data: RefCell::new(ImageData::RawPixels(img)),
             config: ImageConfig::default(),
-            height: NonZeroU32::new(height).ok_or(ValidationError::InvalidHeight)?,
-            width: NonZeroU32::new(width).ok_or(ValidationError::InvalidWidth)?,
-            format: ImageFormat::default(),
+            metadata: ImageMetadata::new(width, height, ImageFormat::default())?,
         })
     }
 }
@@ -180,12 +178,15 @@ mod tests {
         let pixels = seq_u8((w * h * c) as usize);
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgb)?;
         assert_src_rawpixels(&img);
-        assert_eq!(img.width.get(), w);
-        assert_eq!(img.height.get(), h);
+        assert_eq!(img.width(), w);
+        assert_eq!(img.height(), h);
 
-        let raw = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_rgb8().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_rgb8().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())
@@ -197,12 +198,15 @@ mod tests {
         let pixels = seq_u8((w * h * c) as usize);
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgba)?;
         assert_src_rawpixels(&img);
-        assert_eq!(img.width.get(), w);
-        assert_eq!(img.height.get(), h);
+        assert_eq!(img.width(), w);
+        assert_eq!(img.height(), h);
 
-        let raw = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_rgba8().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_rgba8().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())
@@ -214,12 +218,15 @@ mod tests {
         let pixels = seq_u8((w * h * c) as usize);
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Luma)?;
         assert_src_rawpixels(&img);
-        assert_eq!(img.width.get(), w);
-        assert_eq!(img.height.get(), h);
+        assert_eq!(img.width(), w);
+        assert_eq!(img.height(), h);
 
-        let raw = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_luma8().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_luma8().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())
@@ -231,12 +238,15 @@ mod tests {
         let pixels = seq_u8((w * h * c) as usize);
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::LumaA)?;
         assert_src_rawpixels(&img);
-        assert_eq!(img.width.get(), w);
-        assert_eq!(img.height.get(), h);
+        assert_eq!(img.width(), w);
+        assert_eq!(img.height(), h);
 
-        let raw = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_luma_alpha8().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_luma_alpha8().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())
@@ -257,12 +267,15 @@ mod tests {
         let pixels = seq_u16((w * h * c) as usize);
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgb)?;
         assert_src_rawpixels(&img);
-        assert_eq!(img.width.get(), w);
-        assert_eq!(img.height.get(), h);
+        assert_eq!(img.width(), w);
+        assert_eq!(img.height(), h);
 
-        let raw: Vec<u16> = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_rgb16().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_rgb16().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())
@@ -275,9 +288,12 @@ mod tests {
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgba)?;
         assert_src_rawpixels(&img);
 
-        let raw: Vec<u16> = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_rgba16().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_rgba16().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())
@@ -298,12 +314,15 @@ mod tests {
         let pixels = seq_f32((w * h * c) as usize);
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgba)?;
         assert_src_rawpixels(&img);
-        assert_eq!(img.width.get(), w);
-        assert_eq!(img.height.get(), h);
+        assert_eq!(img.width(), w);
+        assert_eq!(img.height(), h);
 
-        let raw: Vec<f32> = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_rgba32f().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_rgba32f().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())
@@ -316,9 +335,12 @@ mod tests {
         let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgb)?;
         assert_src_rawpixels(&img);
 
-        let raw: Vec<f32> = match &img.data {
-            Some(ImageData::RawPixels(di)) => di.to_rgb32f().into_raw(),
-            _ => panic!("expected Some(RawPixels)"),
+        let raw = {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::RawPixels(di) => di.to_rgb32f().into_raw(),
+                _ => panic!("expected RawPixels"),
+            }
         };
         assert_eq!(raw, pixels);
         Ok(())

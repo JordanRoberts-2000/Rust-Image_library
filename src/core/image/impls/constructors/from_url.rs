@@ -5,9 +5,9 @@ use {
             ImageConfig,
         },
         utils::BlockingHttpClient,
-        Image, ImageMetadata, Result, ValidationError,
+        Image, ImageMetadata, Result,
     },
-    std::num::NonZeroU32,
+    std::cell::RefCell,
     url::Url,
 };
 
@@ -20,11 +20,9 @@ impl Image {
 
         Ok(Self {
             src: ImageSrc::Url(url),
-            data: Some(ImageData::EncodedBytes(bytes)),
+            data: RefCell::new(ImageData::EncodedBytes(bytes)),
             config: ImageConfig::default(),
-            height: NonZeroU32::new(metadata.height).ok_or(ValidationError::InvalidHeight)?,
-            width: NonZeroU32::new(metadata.width).ok_or(ValidationError::InvalidWidth)?,
-            format: metadata.format,
+            metadata,
         })
     }
 }
@@ -51,9 +49,12 @@ mod tests {
             _ => panic!("expected ImageSrc::Url"),
         }
 
-        match &img.data {
-            Some(ImageData::EncodedBytes(b)) => assert_eq!(b, &bytes),
-            _ => panic!("expected Some(EncodedBytes)"),
+        {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
+                _ => panic!("expected ImageData::EncodedBytes"),
+            }
         }
 
         Ok(())

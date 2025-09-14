@@ -4,9 +4,9 @@ use {
             enums::{ImageData, ImageSrc},
             ImageConfig,
         },
-        Image, ImageMetadata, Result, ValidationError,
+        Image, ImageMetadata, Result,
     },
-    std::num::NonZeroU32,
+    std::cell::RefCell,
 };
 
 impl Image {
@@ -16,11 +16,9 @@ impl Image {
 
         Ok(Self {
             src: ImageSrc::Bytes,
-            data: Some(ImageData::EncodedBytes(bytes.to_vec())),
+            data: RefCell::new(ImageData::EncodedBytes(bytes.to_vec())),
             config: ImageConfig::default(),
-            height: NonZeroU32::new(metadata.height).ok_or(ValidationError::InvalidHeight)?,
-            width: NonZeroU32::new(metadata.width).ok_or(ValidationError::InvalidWidth)?,
-            format: metadata.format,
+            metadata,
         })
     }
 }
@@ -40,9 +38,12 @@ mod tests {
             _ => panic!("expected ImageSrc::Bytes"),
         }
 
-        match img.data {
-            Some(ImageData::EncodedBytes(ref b)) => assert_eq!(b, &bytes),
-            _ => panic!("expected Some(EncodedBytes)"),
+        {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
+                _ => panic!("expected ImageData::EncodedBytes"),
+            }
         }
 
         Ok(())

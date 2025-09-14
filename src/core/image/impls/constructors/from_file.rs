@@ -1,10 +1,13 @@
 use {
     crate::{
-        image::{enums::ImageSrc, utils, ImageConfig},
-        Image, ImageMetadata, Result, ValidationError,
+        image::{
+            enums::{ImageData, ImageSrc},
+            utils, ImageConfig,
+        },
+        Image, ImageMetadata, Result,
     },
     fs_ext::fsx,
-    std::{num::NonZeroU32, path::Path},
+    std::{cell::RefCell, path::Path},
 };
 
 impl Image {
@@ -17,12 +20,10 @@ impl Image {
         let (file_name, parent_dir) = utils::file_info(path);
 
         Ok(Self {
-            src: ImageSrc::File(path.to_path_buf()),
-            data: None,
+            src: ImageSrc::File(path.to_owned()),
+            data: RefCell::new(ImageData::File(path.to_owned())),
             config: ImageConfig { file_name, output_dir: parent_dir, ..Default::default() },
-            height: NonZeroU32::new(metadata.height).ok_or(ValidationError::InvalidHeight)?,
-            width: NonZeroU32::new(metadata.width).ok_or(ValidationError::InvalidWidth)?,
-            format: metadata.format,
+            metadata,
         })
     }
 }
@@ -50,7 +51,13 @@ mod tests {
             _ => panic!("expected ImageSrc::File"),
         }
 
-        assert!(img.data.is_none(), "from_file should not eagerly populate pixel data");
+        {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::File(p) => assert_eq!(p, &path),
+                _ => panic!("expected ImageData::File"),
+            }
+        }
 
         Ok(())
     }

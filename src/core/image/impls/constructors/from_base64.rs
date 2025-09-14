@@ -4,10 +4,10 @@ use {
             enums::{ImageData, ImageSrc},
             ImageConfig,
         },
-        Image, ImageError, ImageMetadata, Result, ValidationError,
+        Image, ImageError, ImageMetadata, Result,
     },
     base64::Engine,
-    std::num::NonZeroU32,
+    std::cell::RefCell,
 };
 
 impl Image {
@@ -22,11 +22,9 @@ impl Image {
 
         Ok(Self {
             src: ImageSrc::Base64,
-            data: Some(ImageData::EncodedBytes(bytes)),
+            data: RefCell::new(ImageData::EncodedBytes(bytes)),
             config: ImageConfig::default(),
-            height: NonZeroU32::new(metadata.height).ok_or(ValidationError::InvalidHeight)?,
-            width: NonZeroU32::new(metadata.width).ok_or(ValidationError::InvalidWidth)?,
-            format: metadata.format,
+            metadata,
         })
     }
 }
@@ -54,9 +52,12 @@ mod tests {
             _ => panic!("expected ImageSrc::Base64"),
         }
 
-        match img.data {
-            Some(ImageData::EncodedBytes(ref b)) => assert_eq!(b, &bytes),
-            _ => panic!("expected Some(EncodedBytes)"),
+        {
+            let data = img.data.borrow();
+            match &*data {
+                ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
+                _ => panic!("expected ImageData::EncodedBytes"),
+            }
         }
 
         Ok(())
