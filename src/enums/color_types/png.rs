@@ -1,4 +1,4 @@
-use image::ColorType;
+use image::{ColorType, ExtendedColorType};
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum PngColorType {
@@ -11,6 +11,21 @@ pub enum PngColorType {
     La8,
     L16,
     La16,
+}
+
+impl From<PngColorType> for ExtendedColorType {
+    fn from(png_type: PngColorType) -> Self {
+        match png_type {
+            PngColorType::Rgb8 => ExtendedColorType::Rgb8,
+            PngColorType::Rgba8 => ExtendedColorType::Rgba8,
+            PngColorType::Rgb16 => ExtendedColorType::Rgb16,
+            PngColorType::Rgba16 => ExtendedColorType::Rgba16,
+            PngColorType::L8 => ExtendedColorType::L8,
+            PngColorType::La8 => ExtendedColorType::La8,
+            PngColorType::L16 => ExtendedColorType::L16,
+            PngColorType::La16 => ExtendedColorType::La16,
+        }
+    }
 }
 
 impl From<PngColorType> for ColorType {

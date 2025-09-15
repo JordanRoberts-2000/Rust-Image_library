@@ -33,7 +33,7 @@ impl ImageFormat {
         match self {
             ImageFormat::WebP => "webp",
             ImageFormat::Png => "png",
-            ImageFormat::Jpeg => "jpg",
+            ImageFormat::Jpeg => "jpeg",
             ImageFormat::Avif => "avif",
         }
     }
