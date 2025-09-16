@@ -35,3 +35,24 @@ impl Default for AvifEncoder {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn quality_is_clamped() {
+        let enc = AvifEncoder::new().with_quality(0);
+        assert_eq!(enc.quality, 1);
+        let enc = AvifEncoder::new().with_quality(101);
+        assert_eq!(enc.quality, 100);
+    }
+
+    #[test]
+    fn speed_is_clamped() {
+        let enc = AvifEncoder::new().with_speed(0);
+        assert_eq!(enc.speed, 1);
+        let enc = AvifEncoder::new().with_speed(101);
+        assert_eq!(enc.speed, 10);
+    }
+}

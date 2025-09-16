@@ -30,3 +30,123 @@ impl JpegEncoder {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use {
+        super::*,
+        crate::test_utils::{create_image_data, create_rgb_data},
+        strum::IntoEnumIterator,
+    };
+
+    #[test]
+    fn test_encode() {
+        let encoder = JpegEncoder::new();
+        let mut output = Vec::new();
+        let (width, height) = (12, 12);
+        let rgb_data = create_rgb_data(width, height);
+
+        let result = encoder.encode(&mut output, &rgb_data, width, height, JpegColorType::Rgb8);
+
+        assert!(result.is_ok());
+        assert!(!output.is_empty(), "Output should contain encoded data");
+    }
+
+    #[cfg(feature = "progressive-jpeg")]
+    #[test]
+    fn test_encode_progressive() {
+        let encoder = JpegEncoder::progressive();
+        let mut output = Vec::new();
+        let (width, height) = (12, 12);
+        let rgb_data = create_rgb_data(width, height);
+
+        let result = encoder.encode(&mut output, &rgb_data, width, height, JpegColorType::Rgb8);
+
+        assert!(result.is_ok());
+        assert!(!output.is_empty(), "Output should contain encoded data");
+    }
+
+    #[cfg(feature = "progressive-jpeg")]
+    #[test]
+    fn test_encode_different_qualities() {
+        let qualities = [1, 25, 50, 75, 100];
+        let (width, height) = (12, 12);
+        let image_data = create_rgb_data(width, height);
+
+        for &quality in &qualities {
+            let encoder = JpegEncoder::new().with_quality(quality);
+            let mut output = Vec::new();
+
+            let result =
+                encoder.encode(&mut output, &image_data, width, height, JpegColorType::Rgb8);
+
+            assert!(result.is_ok(), "Failed with quality {}", quality);
+            assert!(!output.is_empty(), "No output for quality {}", quality);
+        }
+    }
+
+    #[cfg(feature = "progressive-jpeg")]
+    #[test]
+    fn test_encode_progressive_different_qualities() {
+        let qualities = [1, 25, 50, 75, 100];
+        let (width, height) = (12, 12);
+        let image_data = create_rgb_data(width, height);
+
+        for &quality in &qualities {
+            let encoder = JpegEncoder::progressive().with_quality(quality);
+            let mut output = Vec::new();
+
+            let result =
+                encoder.encode(&mut output, &image_data, width, height, JpegColorType::Rgb8);
+
+            assert!(result.is_ok(), "Failed with quality {}", quality);
+            assert!(!output.is_empty(), "No output for quality {}", quality);
+        }
+    }
+
+    #[cfg(feature = "progressive-jpeg")]
+    #[test]
+    fn test_encode_different_color_types() {
+        let encoder = JpegEncoder::new();
+        for ct in JpegColorType::iter() {
+            let mut output = Vec::new();
+            let (width, height) = (12, 12);
+            let rgb_data = create_image_data(width, height, ct.channels());
+
+            let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
+
+            assert!(result.is_ok());
+            assert!(!output.is_empty(), "Output should contain encoded data");
+        }
+    }
+
+    #[cfg(feature = "progressive-jpeg")]
+    #[test]
+    fn test_encode_progressive_different_color_types() {
+        let encoder = JpegEncoder::progressive();
+        for ct in JpegColorType::iter() {
+            let mut output = Vec::new();
+            let (width, height) = (12, 12);
+            let rgb_data = create_image_data(width, height, ct.channels());
+
+            let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
+
+            assert!(result.is_ok());
+            assert!(!output.is_empty(), "Output should contain encoded data");
+        }
+    }
+
+    #[cfg(not(feature = "progressive-jpeg"))]
+    #[test]
+    fn test_progressive_feature_disabled_falls_back() {
+        let encoder = JpegEncoder::progressive();
+        let mut output = Vec::new();
+        let (width, height) = (12, 12);
+        let rgb_data = create_rgb_data(width, height);
+
+        let result = encoder.encode(&mut output, &rgb_data, width, height, JpegColorType::Rgb8);
+
+        assert!(result.is_ok(), "Should fall back to baseline JPEG");
+        assert!(!output.is_empty(), "Output should contain encoded data");
+    }
+}

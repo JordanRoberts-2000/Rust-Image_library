@@ -44,3 +44,16 @@ impl Default for WebPEncoder {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn quality_is_clamped() {
+        let enc = WebPEncoder::new().with_quality(0);
+        assert_eq!(enc.quality, 1);
+        let enc = WebPEncoder::new().with_quality(101);
+        assert_eq!(enc.quality, 100);
+    }
+}

@@ -20,3 +20,96 @@ impl PngEncoder {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use {
+        super::*,
+        crate::test_utils::{create_image_data, create_rgb_data},
+        strum::IntoEnumIterator,
+    };
+
+    #[test]
+    fn test_encode() {
+        let encoder = PngEncoder::new();
+        let mut output = Vec::new();
+        let (width, height) = (12, 12);
+        let rgb_data = create_rgb_data(width, height);
+
+        let result = encoder.encode(&mut output, &rgb_data, width, height, PngColorType::Rgb8);
+
+        assert!(result.is_ok());
+        assert!(!output.is_empty(), "Output should contain encoded data");
+    }
+
+    #[test]
+    fn test_encode_fast() {
+        let encoder = PngEncoder::fast();
+        let mut output = Vec::new();
+        let (width, height) = (12, 12);
+        let rgb_data = create_rgb_data(width, height);
+
+        let result = encoder.encode(&mut output, &rgb_data, width, height, PngColorType::Rgb8);
+
+        assert!(result.is_ok());
+        assert!(!output.is_empty(), "Output should contain encoded data");
+    }
+
+    #[test]
+    fn test_encode_best_compression() {
+        let encoder = PngEncoder::best_compression();
+        let mut output = Vec::new();
+        let (width, height) = (12, 12);
+        let rgb_data = create_rgb_data(width, height);
+
+        let result = encoder.encode(&mut output, &rgb_data, width, height, PngColorType::Rgb8);
+
+        assert!(result.is_ok());
+        assert!(!output.is_empty(), "Output should contain encoded data");
+    }
+
+    #[test]
+    fn test_encode_different_color_types() {
+        let encoder = PngEncoder::new();
+        for ct in PngColorType::iter() {
+            let mut output = Vec::new();
+            let (width, height) = (12, 12);
+            let rgb_data = create_image_data(width, height, ct.channels());
+
+            let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
+
+            assert!(result.is_ok());
+            assert!(!output.is_empty(), "Output should contain encoded data");
+        }
+    }
+
+    #[test]
+    fn test_encode_fast_different_color_types() {
+        let encoder = PngEncoder::fast();
+        for ct in PngColorType::iter() {
+            let mut output = Vec::new();
+            let (width, height) = (12, 12);
+            let rgb_data = create_image_data(width, height, ct.channels());
+
+            let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
+
+            assert!(result.is_ok());
+            assert!(!output.is_empty(), "Output should contain encoded data");
+        }
+    }
+
+    #[test]
+    fn test_encode_best_compression_different_color_types() {
+        let encoder = PngEncoder::best_compression();
+        for ct in PngColorType::iter() {
+            let mut output = Vec::new();
+            let (width, height) = (12, 12);
+            let rgb_data = create_image_data(width, height, ct.channels());
+
+            let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
+
+            assert!(result.is_ok());
+            assert!(!output.is_empty(), "Output should contain encoded data");
+        }
+    }
+}
