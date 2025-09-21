@@ -5,7 +5,7 @@ use {
 };
 
 impl Image {
-    pub fn save_to_folder(&mut self, folder_path: impl AsRef<Path>) -> Result<()> {
+    pub fn save_to_folder(&self, folder_path: impl AsRef<Path>) -> Result<()> {
         fsx::dir::assert_exists(&folder_path)?;
 
         let path = folder_path.as_ref().join(self.file_name());

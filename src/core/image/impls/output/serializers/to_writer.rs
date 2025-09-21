@@ -4,7 +4,7 @@ use {
 };
 
 impl Image {
-    pub fn to_writer(&mut self, writer: impl Write) -> Result<()> {
+    pub fn to_writer(&self, writer: impl Write) -> Result<()> {
         self.encode(writer, self.format)
     }
 }

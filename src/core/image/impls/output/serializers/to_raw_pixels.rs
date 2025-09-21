@@ -1,7 +1,7 @@
 use crate::{blocking::Image, RawColorType, RawColorTypeF32, RawColorTypeU16, Result};
 
 impl Image {
-    pub fn to_raw_pixels(&mut self, color_type: RawColorType) -> Result<Vec<u8>> {
+    pub fn to_raw_pixels(&self, color_type: RawColorType) -> Result<Vec<u8>> {
         let cow = self.process_image()?;
         let img = cow.as_ref();
 
@@ -15,7 +15,7 @@ impl Image {
         Ok(raw)
     }
 
-    pub fn to_raw_pixels_u16(&mut self, color_type: RawColorTypeU16) -> Result<Vec<u16>> {
+    pub fn to_raw_pixels_u16(&self, color_type: RawColorTypeU16) -> Result<Vec<u16>> {
         let cow = self.process_image()?;
         let img = cow.as_ref();
 
@@ -29,7 +29,7 @@ impl Image {
         Ok(raw)
     }
 
-    pub fn to_raw_pixels_f32(&mut self, color_type: RawColorTypeF32) -> Result<Vec<f32>> {
+    pub fn to_raw_pixels_f32(&self, color_type: RawColorTypeF32) -> Result<Vec<f32>> {
         let cow = self.process_image()?;
         let img = cow.as_ref();
 

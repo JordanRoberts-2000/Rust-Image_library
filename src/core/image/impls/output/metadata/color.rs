@@ -4,7 +4,7 @@ use {
 };
 
 impl Image {
-    pub fn palette(&mut self) -> Result<Vec<Rgb>> {
+    pub fn palette(&self) -> Result<Vec<Rgb>> {
         let img = self.processed_image()?;
 
         let palette = if img.color().has_alpha() {
@@ -22,7 +22,7 @@ impl Image {
             .collect())
     }
 
-    pub fn dominant_color(&mut self) -> Result<Rgb> {
+    pub fn dominant_color(&self) -> Result<Rgb> {
         let palette = self.palette()?;
         palette.get(0).cloned().ok_or_else(|| ImageError::EmptyPalette)
     }

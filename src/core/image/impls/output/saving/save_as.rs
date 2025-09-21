@@ -5,7 +5,7 @@ use {
 };
 
 impl Image {
-    pub fn save_as(&mut self, path: impl AsRef<Path>) -> Result<()> {
+    pub fn save_as(&self, path: impl AsRef<Path>) -> Result<()> {
         let mut path = path.as_ref().to_path_buf();
 
         let ext = match path.extension() {
