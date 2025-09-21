@@ -1,0 +1,107 @@
+use {
+    crate::{EncodingError, ImageFormat, ValidationError},
+    std::{io, path::PathBuf},
+    tokio::task::JoinError,
+    url::Url,
+    walkdir::Error as WalkDirError,
+};
+
+#[derive(thiserror::Error, Debug)]
+pub enum ImageError {
+    #[error(transparent)]
+    Io(#[from] io::Error),
+
+    #[error(transparent)]
+    Validation(#[from] ValidationError),
+
+    #[error(transparent)]
+    Encoding(#[from] EncodingError),
+
+    #[error("color-type '{0:?}' not currently supported")]
+    UnsupportedColorType(image::ColorType),
+
+    #[error("failed to join a blocking task: {0}")]
+    TaskJoinError(JoinError),
+
+    #[error(transparent)]
+    UrlParse(#[from] url::ParseError),
+
+    #[error("Failed to decode image from memory buffer")]
+    DecodeFromMemory(image::ImageError),
+
+    #[error("failed to decode base64: {0}")]
+    Base64DecodeFailed(base64::DecodeError, String),
+
+    #[error("failed to decode image '{}' to format '{:?}', err: {}", id, format, source)]
+    Decoding { id: String, source: image::ImageError, format: ImageFormat },
+
+    #[error("failed to open img '{:?}', err: {}", path, source)]
+    Open { source: std::io::Error, path: PathBuf },
+
+    #[error("failed to decode image file '{:?}', err: {}", path, source)]
+    DecodeFile { source: image::ImageError, path: PathBuf },
+
+    #[error("failed to decode image from reader, err: {0}")]
+    DecodeReader(image::ImageError),
+
+    #[error("Failed to download image from '{url:?}': {source}")]
+    DownloadFailed { url: Url, source: reqwest::Error },
+
+    #[error("Failed to read bytes from response for '{url:?}': {source}")]
+    ResponseReadFailed { url: Url, source: reqwest::Error },
+
+    #[error("{}", format_unsupported_error(.0))]
+    UnsupportedFormat(image::ImageFormat),
+
+    #[error("{}", ext_unsupported_error(.0))]
+    InvalidExtension(String),
+
+    #[error("Failed to detect image format from byte stream")]
+    FormatDetectionFailed(std::io::Error),
+
+    #[error("Unknown or unsupported image format")]
+    UnknownFormat,
+
+    #[error("Failed to read image dimensions: {0:?}")]
+    DimensionsFailed(image::ImageError),
+
+    #[error("Extention required on path '{0}'")]
+    ExtensionMissing(PathBuf),
+
+    #[error("failed to create new image {:?}, err: {}", path, source)]
+    Save { source: image::ImageError, path: PathBuf },
+
+    #[error("Could not retrieve palette: {0}")]
+    GetColors(color_thief::Error),
+
+    #[error("No colors in retrieved palette")]
+    EmptyPalette,
+
+    #[error("Blurhash failed to encode img, err: {0}")]
+    BlurHash(blurhash::Error),
+
+    #[error("Path does not have a file name: {0:?}")]
+    MissingFileName(PathBuf),
+
+    #[error("'{url}' response returned status code '{status_code}'")]
+    FailedRequest { url: Url, status_code: u16, message: String },
+
+    #[error("directory traversal error")]
+    WalkDir(WalkDirError),
+
+    #[error("source file size is only available for local file sources")]
+    SourceFileSizeUnavailable,
+
+    #[error("file name collision detected: `{0}`")]
+    FileNameCollision(String),
+}
+
+pub fn format_unsupported_error(format: &image::ImageFormat) -> String {
+    let supported = ImageFormat::supported().join(",");
+    format!("unsupported image format: '{format:?}'; supported formats are: {supported}")
+}
+
+pub fn ext_unsupported_error(ext: &String) -> String {
+    let supported = ImageFormat::supported().join(",");
+    format!("unsupported ext: '{ext}'; supported extentions are: {supported}")
+}

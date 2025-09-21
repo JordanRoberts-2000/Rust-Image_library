@@ -1,11 +1,8 @@
 use {
     crate::{
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
+        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
         utils::BlockingHttpClient,
-        Image, ImageMetadata, Result,
+        Image, Result,
     },
     std::cell::RefCell,
     url::Url,
@@ -15,6 +12,7 @@ impl Image {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
         let url = Url::parse(url.as_ref())?;
         let response = BlockingHttpClient::fetch_url(&url)?;
+
         let bytes = BlockingHttpClient::parse_response(response)?;
         let metadata = ImageMetadata::from_bytes(&bytes)?;
 

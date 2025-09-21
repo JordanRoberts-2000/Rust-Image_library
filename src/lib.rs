@@ -1,38 +1,26 @@
-mod enums;
-mod diagnostics {
-    pub mod error;
-    pub mod warnings;
-}
-pub(crate) mod traits;
-mod types {
-    pub mod byte_size;
+mod error;
+mod types;
+mod core {
     pub mod encoders;
     pub mod image;
-    pub mod images;
-    pub mod metadata;
-    pub mod rgb;
+    // pub mod images;
 }
-pub mod blocking;
 pub(crate) mod constants;
-pub(crate) mod utils {
-    pub mod decode;
-}
+pub mod utils;
 
-pub(crate) use {
-    diagnostics::error::*,
-    types::{encoders, image, images},
-};
+#[cfg(test)]
+pub(crate) mod test_utils;
+
+pub(crate) use {core::image, error::*};
 pub use {
-    diagnostics::error::{ImageError, ValidationError},
-    enums::{
-        CompressionType, CropEdge, ImageFormat, RawColorType, RawColorTypeF32, RawColorTypeU16,
+    core::{
+        encoders::{AvifEncoder, JpegEncoder, PngEncoder, WebPEncoder},
+        image::{AvifConfig, Image, JpegConfig, PngConfig, WebpConfig},
+        // images::enums::{ArchiveFormat, CollisionStrategy},
     },
+    error::{ImageError, ValidationError},
     types::{
-        byte_size::ByteSize,
-        encoders::jpeg::{JpegColorType, JpegEncoder},
-        image::{AvifConfig, JpegConfig, WebpConfig},
-        images::enums::{ArchiveFormat, CollisionStrategy},
-        metadata::ImageMetadata,
-        rgb::Rgb,
+        AvifColorType, BitDepth, ColorModel, ColorType, CompressionType, CropEdge, ImageFormat,
+        JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
     },
 };

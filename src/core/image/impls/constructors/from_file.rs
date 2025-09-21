@@ -1,10 +1,7 @@
 use {
     crate::{
-        image::{
-            enums::{ImageData, ImageSrc},
-            utils, ImageConfig,
-        },
-        Image, ImageMetadata, Result,
+        image::{utils, ImageConfig, ImageData, ImageMetadata, ImageSrc},
+        Image, Result,
     },
     fs_ext::fsx,
     std::{cell::RefCell, path::Path},

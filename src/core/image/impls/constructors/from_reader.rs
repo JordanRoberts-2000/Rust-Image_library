@@ -1,10 +1,7 @@
 use {
     crate::{
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
-        Image, ImageMetadata, Result,
+        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
+        Image, Result,
     },
     std::{cell::RefCell, io::Read},
 };

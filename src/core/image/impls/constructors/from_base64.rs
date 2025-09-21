@@ -1,10 +1,7 @@
 use {
     crate::{
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
-        Image, ImageError, ImageMetadata, Result,
+        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
+        Image, ImageError, Result,
     },
     base64::Engine,
     std::cell::RefCell,
@@ -34,7 +31,7 @@ mod tests {
     use {
         super::*,
         crate::{
-            image::enums::{ImageData, ImageSrc},
+            image::{ImageData, ImageSrc},
             test_utils::png_bytes,
         },
         base64::engine::general_purpose::STANDARD,

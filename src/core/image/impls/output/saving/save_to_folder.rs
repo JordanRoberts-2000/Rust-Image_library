@@ -1,0 +1,25 @@
+use {
+    crate::{image::ImageSrc, Image, Result},
+    fs_ext::fsx,
+    std::{io, path::Path},
+};
+
+impl Image {
+    pub fn save_to_folder(&mut self, folder_path: impl AsRef<Path>) -> Result<()> {
+        fsx::dir::assert_exists(&folder_path)?;
+
+        let path = folder_path.as_ref().join(self.file_name());
+
+        fsx::file::atomic::overwrite(&path, |file| {
+            self.encode(file, self.format()).map_err(|e| io::Error::new(io::ErrorKind::Other, e))
+        })?;
+
+        if self.config.remove_source {
+            if let ImageSrc::File(path) = &self.src {
+                fsx::file::trash_or_remove(path)?;
+            }
+        }
+
+        Ok(())
+    }
+}

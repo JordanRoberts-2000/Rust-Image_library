@@ -1,10 +1,7 @@
 use {
     crate::{
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
-        BitDepth, ColorModel, Image, ImageFormat, ImageMetadata, Result, ValidationError,
+        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
+        ColorModel, Image, ImageFormat, Result, ValidationError,
     },
     image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
     std::{borrow::Cow, cell::RefCell},
@@ -14,8 +11,8 @@ use {
 pub enum PixelDataCow<'a> {
     U8(Cow<'a, [u8]>),
     U16(Cow<'a, [u16]>),
-    F32(Cow<'a, [f32]>),
 }
+
 impl<'a> From<&'a [u8]> for PixelDataCow<'a> {
     fn from(s: &'a [u8]) -> Self {
         Self::U8(Cow::Borrowed(s))
@@ -36,16 +33,6 @@ impl From<Vec<u16>> for PixelDataCow<'_> {
         Self::U16(Cow::Owned(v))
     }
 }
-impl<'a> From<&'a [f32]> for PixelDataCow<'a> {
-    fn from(s: &'a [f32]) -> Self {
-        Self::F32(Cow::Borrowed(s))
-    }
-}
-impl From<Vec<f32>> for PixelDataCow<'_> {
-    fn from(v: Vec<f32>) -> Self {
-        Self::F32(Cow::Owned(v))
-    }
-}
 impl<'a> From<&'a Vec<u8>> for PixelDataCow<'a> {
     fn from(v: &'a Vec<u8>) -> Self {
         Self::U8(Cow::Borrowed(v.as_slice()))
@@ -54,11 +41,6 @@ impl<'a> From<&'a Vec<u8>> for PixelDataCow<'a> {
 impl<'a> From<&'a Vec<u16>> for PixelDataCow<'a> {
     fn from(v: &'a Vec<u16>) -> Self {
         Self::U16(Cow::Borrowed(v.as_slice()))
-    }
-}
-impl<'a> From<&'a Vec<f32>> for PixelDataCow<'a> {
-    fn from(v: &'a Vec<f32>) -> Self {
-        Self::F32(Cow::Borrowed(v.as_slice()))
     }
 }
 
@@ -80,15 +62,15 @@ impl Image {
                     .map(DynamicImage::ImageRgba8)
                     .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgba))?
             }
-            (U8(b), ColorModel::Luma) => {
+            (U8(b), ColorModel::Grayscale) => {
                 ImageBuffer::<Luma<u8>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLuma8)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Luma))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Grayscale))?
             }
-            (U8(b), ColorModel::LumaA) => {
+            (U8(b), ColorModel::GrayscaleAlpha) => {
                 ImageBuffer::<LumaA<u8>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLumaA8)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::LumaA))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::GrayscaleAlpha))?
             }
 
             (U16(b), ColorModel::Rgb) => {
@@ -101,40 +83,15 @@ impl Image {
                     .map(DynamicImage::ImageRgba16)
                     .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgba))?
             }
-            (U16(b), ColorModel::Luma) => {
+            (U16(b), ColorModel::Grayscale) => {
                 ImageBuffer::<Luma<u16>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLuma16)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Luma))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Grayscale))?
             }
-            (U16(b), ColorModel::LumaA) => {
+            (U16(b), ColorModel::GrayscaleAlpha) => {
                 ImageBuffer::<LumaA<u16>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLumaA16)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::LumaA))?
-            }
-
-            (F32(b), ColorModel::Rgb) => {
-                ImageBuffer::<Rgb<f32>, _>::from_raw(width, height, b.into_owned())
-                    .map(DynamicImage::ImageRgb32F)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgb))?
-            }
-            (F32(b), ColorModel::Rgba) => {
-                ImageBuffer::<Rgba<f32>, _>::from_raw(width, height, b.into_owned())
-                    .map(DynamicImage::ImageRgba32F)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgba))?
-            }
-            (F32(_), ColorModel::Luma) => {
-                return Err(ValidationError::UnsupportedModelBitDepth {
-                    model: ColorModel::Luma,
-                    bit_depth: BitDepth::Float32,
-                }
-                .into());
-            }
-            (F32(_), ColorModel::LumaA) => {
-                return Err(ValidationError::UnsupportedModelBitDepth {
-                    model: ColorModel::LumaA,
-                    bit_depth: BitDepth::Float32,
-                }
-                .into());
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::GrayscaleAlpha))?
             }
         };
 
@@ -149,7 +106,7 @@ impl Image {
 
 #[cfg(test)]
 mod tests {
-    use {super::*, crate::ImageError};
+    use super::*;
 
     // ------ helpers ------
 
@@ -158,9 +115,6 @@ mod tests {
     }
     fn seq_u16(n: usize) -> Vec<u16> {
         (0..n).map(|i| i as u16).collect()
-    }
-    fn seq_f32(n: usize) -> Vec<f32> {
-        (0..n).map(|i| (i as f32) / 255.0).collect()
     }
 
     fn assert_src_rawpixels(img: &Image) {
@@ -216,7 +170,7 @@ mod tests {
     fn from_raw_pixels_l8_ok() -> Result<()> {
         let (w, h, c) = (3, 2, 1);
         let pixels = seq_u8((w * h * c) as usize);
-        let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Luma)?;
+        let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Grayscale)?;
         assert_src_rawpixels(&img);
         assert_eq!(img.width(), w);
         assert_eq!(img.height(), h);
@@ -236,7 +190,7 @@ mod tests {
     fn from_raw_pixels_la8_ok() -> Result<()> {
         let (w, h, c) = (3, 2, 2);
         let pixels = seq_u8((w * h * c) as usize);
-        let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::LumaA)?;
+        let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::GrayscaleAlpha)?;
         assert_src_rawpixels(&img);
         assert_eq!(img.width(), w);
         assert_eq!(img.height(), h);
@@ -304,86 +258,5 @@ mod tests {
         let pixels = seq_u16(0);
         assert!(Image::from_raw_pixels(&pixels, 0, 2, ColorModel::Rgb).is_err());
         assert!(Image::from_raw_pixels(&pixels, 2, 0, ColorModel::Rgb).is_err());
-    }
-
-    // ------ f32 variants ------
-
-    #[test]
-    fn from_raw_pixels_f32_rgba32f_ok() -> Result<()> {
-        let (w, h, c) = (2, 2, 4);
-        let pixels = seq_f32((w * h * c) as usize);
-        let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgba)?;
-        assert_src_rawpixels(&img);
-        assert_eq!(img.width(), w);
-        assert_eq!(img.height(), h);
-
-        let raw = {
-            let data = img.data.borrow();
-            match &*data {
-                ImageData::RawPixels(di) => di.to_rgba32f().into_raw(),
-                _ => panic!("expected RawPixels"),
-            }
-        };
-        assert_eq!(raw, pixels);
-        Ok(())
-    }
-
-    #[test]
-    fn from_raw_pixels_f32_rgb32f_ok() -> Result<()> {
-        let (w, h, c) = (2, 2, 3);
-        let pixels = seq_f32((w * h * c) as usize);
-        let img = Image::from_raw_pixels(&pixels, w, h, ColorModel::Rgb)?;
-        assert_src_rawpixels(&img);
-
-        let raw = {
-            let data = img.data.borrow();
-            match &*data {
-                ImageData::RawPixels(di) => di.to_rgb32f().into_raw(),
-                _ => panic!("expected RawPixels"),
-            }
-        };
-        assert_eq!(raw, pixels);
-        Ok(())
-    }
-
-    #[test]
-    fn from_raw_pixels_f32_luma_unsupported() {
-        let (w, h, c) = (2, 2, 1);
-        let pixels = seq_f32((w * h * c) as usize);
-        let err = Image::from_raw_pixels(&pixels, w, h, ColorModel::Luma).unwrap_err();
-        match err {
-            ImageError::Validation(ValidationError::UnsupportedModelBitDepth {
-                model,
-                bit_depth,
-            }) => {
-                assert_eq!(model, ColorModel::Luma);
-                assert_eq!(bit_depth, BitDepth::Float32);
-            }
-            _ => panic!("expected UnsupportedModelBitDepth for Luma + f32"),
-        }
-    }
-
-    #[test]
-    fn from_raw_pixels_f32_lumaa_unsupported() {
-        let (w, h, c) = (2, 2, 2);
-        let pixels = seq_f32((w * h * c) as usize);
-        let err = Image::from_raw_pixels(&pixels, w, h, ColorModel::LumaA).unwrap_err();
-        match err {
-            ImageError::Validation(ValidationError::UnsupportedModelBitDepth {
-                model,
-                bit_depth,
-            }) => {
-                assert_eq!(model, ColorModel::LumaA);
-                assert_eq!(bit_depth, BitDepth::Float32);
-            }
-            _ => panic!("expected UnsupportedModelBitDepth for LumaA + f32"),
-        }
-    }
-
-    #[test]
-    fn from_raw_pixels_f32_zero_dims_err() {
-        let pixels = seq_f32(0);
-        assert!(Image::from_raw_pixels(&pixels, 0, 1, ColorModel::Rgb).is_err());
-        assert!(Image::from_raw_pixels(&pixels, 1, 0, ColorModel::Rgb).is_err());
     }
 }
