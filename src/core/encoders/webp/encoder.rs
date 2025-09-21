@@ -1,9 +1,8 @@
-use crate::{constants::DEFAULT_WEBP_QUALITY, enums::WebPColorType, CompressionType};
+use crate::{constants::DEFAULT_WEBP_QUALITY, CompressionType};
 
 pub struct WebPEncoder {
     pub(super) quality: u8,
     pub(super) compression_type: CompressionType,
-    pub(super) color_type: Option<WebPColorType>,
 }
 
 impl WebPEncoder {
@@ -12,24 +11,15 @@ impl WebPEncoder {
     }
 
     pub fn lossy(quality: u8) -> Self {
-        Self { color_type: None, quality, compression_type: CompressionType::Lossy }
+        Self { quality, compression_type: CompressionType::Lossy }
     }
 
     pub fn lossless() -> Self {
-        Self {
-            color_type: None,
-            quality: DEFAULT_WEBP_QUALITY,
-            compression_type: CompressionType::Lossless,
-        }
+        Self { quality: DEFAULT_WEBP_QUALITY, compression_type: CompressionType::Lossless }
     }
 
     pub fn with_compression_type(mut self, compression_type: CompressionType) -> Self {
         self.compression_type = compression_type;
-        self
-    }
-
-    pub fn with_color_type(mut self, color_type: WebPColorType) -> Self {
-        self.color_type = Some(color_type);
         self
     }
 

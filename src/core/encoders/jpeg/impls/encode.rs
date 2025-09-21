@@ -35,7 +35,7 @@ impl JpegEncoder {
 mod tests {
     use {
         super::*,
-        crate::test_utils::{create_image_data, create_rgb_data},
+        crate::test_utils::{create_image_data, create_rgb8_data},
         strum::IntoEnumIterator,
     };
 
@@ -44,7 +44,7 @@ mod tests {
         let encoder = JpegEncoder::new();
         let mut output = Vec::new();
         let (width, height) = (12, 12);
-        let rgb_data = create_rgb_data(width, height);
+        let rgb_data = create_rgb8_data(width, height);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, JpegColorType::Rgb8);
 
@@ -58,7 +58,7 @@ mod tests {
         let encoder = JpegEncoder::progressive();
         let mut output = Vec::new();
         let (width, height) = (12, 12);
-        let rgb_data = create_rgb_data(width, height);
+        let rgb_data = create_rgb8_data(width, height);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, JpegColorType::Rgb8);
 
@@ -71,7 +71,7 @@ mod tests {
     fn test_encode_different_qualities() {
         let qualities = [1, 25, 50, 75, 100];
         let (width, height) = (12, 12);
-        let image_data = create_rgb_data(width, height);
+        let image_data = create_rgb8_data(width, height);
 
         for &quality in &qualities {
             let encoder = JpegEncoder::new().with_quality(quality);
@@ -90,7 +90,7 @@ mod tests {
     fn test_encode_progressive_different_qualities() {
         let qualities = [1, 25, 50, 75, 100];
         let (width, height) = (12, 12);
-        let image_data = create_rgb_data(width, height);
+        let image_data = create_rgb8_data(width, height);
 
         for &quality in &qualities {
             let encoder = JpegEncoder::progressive().with_quality(quality);
@@ -111,7 +111,7 @@ mod tests {
         for ct in JpegColorType::iter() {
             let mut output = Vec::new();
             let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, ct.channels());
+            let rgb_data = create_image_data(width, height, (&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 
@@ -127,7 +127,7 @@ mod tests {
         for ct in JpegColorType::iter() {
             let mut output = Vec::new();
             let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, ct.channels());
+            let rgb_data = create_image_data(width, height, (&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 
@@ -142,7 +142,7 @@ mod tests {
         let encoder = JpegEncoder::progressive();
         let mut output = Vec::new();
         let (width, height) = (12, 12);
-        let rgb_data = create_rgb_data(width, height);
+        let rgb_data = create_rgb8_data(width, height);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, JpegColorType::Rgb8);
 

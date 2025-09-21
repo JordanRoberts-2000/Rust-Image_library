@@ -33,7 +33,7 @@ impl WebPEncoder {
 mod tests {
     use {
         super::*,
-        crate::test_utils::{create_image_data, create_rgb_data},
+        crate::test_utils::{create_image_data, create_rgb8_data},
         strum::IntoEnumIterator,
     };
 
@@ -42,7 +42,7 @@ mod tests {
         let encoder = WebPEncoder::lossy(80);
         let mut output = Vec::new();
         let (width, height) = (12, 12);
-        let rgb_data = create_rgb_data(width, height);
+        let rgb_data = create_rgb8_data(width, height);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, WebPColorType::Rgb8);
 
@@ -55,7 +55,7 @@ mod tests {
         let encoder = WebPEncoder::lossless();
         let mut output = Vec::new();
         let (width, height) = (12, 12);
-        let rgb_data = create_rgb_data(width, height);
+        let rgb_data = create_rgb8_data(width, height);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, WebPColorType::Rgb8);
 
@@ -67,7 +67,7 @@ mod tests {
     fn test_encode_lossy_different_qualities() {
         let qualities = [1, 25, 50, 75, 100];
         let (width, height) = (12, 12);
-        let image_data = create_rgb_data(width, height);
+        let image_data = create_rgb8_data(width, height);
 
         for &quality in &qualities {
             let encoder = WebPEncoder::lossy(quality);
@@ -87,7 +87,7 @@ mod tests {
         for ct in WebPColorType::iter() {
             let mut output = Vec::new();
             let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, ct.channels());
+            let rgb_data = create_image_data(width, height, (&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 
@@ -102,7 +102,7 @@ mod tests {
         for ct in WebPColorType::iter() {
             let mut output = Vec::new();
             let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, ct.channels());
+            let rgb_data = create_image_data(width, height, (&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 

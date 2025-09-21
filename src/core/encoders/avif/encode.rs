@@ -20,7 +20,7 @@ impl AvifEncoder {
 mod tests {
     use {
         super::*,
-        crate::test_utils::{create_image_data, create_rgb_data},
+        crate::test_utils::{create_image_data, create_rgb8_data},
         strum::IntoEnumIterator,
     };
 
@@ -29,7 +29,7 @@ mod tests {
         let encoder = AvifEncoder::new();
         let mut output = Vec::new();
         let (width, height) = (12, 12);
-        let rgb_data = create_rgb_data(width, height);
+        let rgb_data = create_rgb8_data(width, height);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, AvifColorType::Rgb8);
 
@@ -43,7 +43,7 @@ mod tests {
         for ct in AvifColorType::iter() {
             let mut output = Vec::new();
             let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, ct.channels());
+            let rgb_data = create_image_data(width, height, (&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 
