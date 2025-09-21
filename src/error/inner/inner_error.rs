@@ -89,8 +89,8 @@ pub enum InnerError {
     #[error("Directory traversal error: {0}")]
     WalkDir(WalkDirError),
 
-    #[error("Source file size unavailable (only available for local files)")]
-    SourceFileSizeUnavailable,
+    #[error("source is not a local file")]
+    SourceIsNotFile,
 
     #[error("File name collision detected: '{0}'")]
     FileNameCollision(String),
