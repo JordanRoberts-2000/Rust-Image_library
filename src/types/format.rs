@@ -1,5 +1,5 @@
 use {
-    crate::{ImageError, ValidationError},
+    crate::{InnerError, ValidationError},
     std::path::Path,
     strum::VariantNames,
     strum_macros::{Display, VariantNames},
@@ -54,7 +54,7 @@ impl TryFrom<&str> for ImageFormat {
 }
 
 impl TryFrom<image::ImageFormat> for ImageFormat {
-    type Error = ImageError;
+    type Error = InnerError;
 
     fn try_from(fmt: image::ImageFormat) -> Result<Self, Self::Error> {
         match fmt {
@@ -62,7 +62,7 @@ impl TryFrom<image::ImageFormat> for ImageFormat {
             image::ImageFormat::Jpeg => Ok(ImageFormat::Jpeg),
             image::ImageFormat::WebP => Ok(ImageFormat::WebP),
             image::ImageFormat::Avif => Ok(ImageFormat::Avif),
-            other => Err(ImageError::UnsupportedFormat(other)),
+            other => Err(InnerError::UnsupportedFormat(other)),
         }
     }
 }
@@ -79,7 +79,7 @@ impl From<ImageFormat> for image::ImageFormat {
 }
 
 impl ImageFormat {
-    pub fn try_from_path(path: impl AsRef<Path>) -> Result<Self, ImageError> {
+    pub fn try_from_path(path: impl AsRef<Path>) -> Result<Self, InnerError> {
         let path = path.as_ref();
 
         match path.extension() {

@@ -1,5 +1,5 @@
 use {
-    crate::{CompressionType, EncodingError, Result, WebPColorType, WebPEncoder},
+    crate::{CompressionType, EncodingError, WebPColorType, WebPEncoder},
     image::codecs::webp::WebPEncoder as LosslessEncoder,
     std::io::Write,
     webp::Encoder as LossyEncoder,
@@ -9,7 +9,7 @@ impl WebPEncoder {
     pub fn encode(
         &self, mut writer: impl Write, bytes: &[u8], width: u32, height: u32,
         color_type: WebPColorType,
-    ) -> Result<()> {
+    ) -> Result<(), EncodingError> {
         match self.compression_type {
             CompressionType::Lossy => {
                 let encoder =

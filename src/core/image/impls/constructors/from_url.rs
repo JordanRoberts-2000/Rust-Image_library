@@ -1,8 +1,8 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
+        image::{ImageConfig, ImageData, ImageMetadata},
         utils::BlockingHttpClient,
-        Image, Result,
+        ErrorKind, Image, ImageSrc, Result, ResultCtx,
     },
     std::cell::RefCell,
     url::Url,
@@ -10,14 +10,18 @@ use {
 
 impl Image {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
-        let url = Url::parse(url.as_ref())?;
-        let response = BlockingHttpClient::fetch_url(&url)?;
+        let url = Url::parse(url.as_ref()).ctx(ErrorKind::Validate, None)?;
+        let src = ImageSrc::Url(url.clone());
 
-        let bytes = BlockingHttpClient::parse_response(response)?;
-        let metadata = ImageMetadata::from_bytes(&bytes)?;
+        let response =
+            BlockingHttpClient::fetch_url(&url).ctx(ErrorKind::FetchingUrl, Some(&src.clone()))?;
+        let bytes = BlockingHttpClient::parse_response(response)
+            .ctx(ErrorKind::Validate, Some(&src.clone()))?;
+        let metadata =
+            ImageMetadata::from_bytes(&bytes).ctx(ErrorKind::ReadMetadata, Some(&src.clone()))?;
 
         Ok(Self {
-            src: ImageSrc::Url(url),
+            src,
             data: RefCell::new(ImageData::EncodedBytes(bytes)),
             config: ImageConfig::default(),
             metadata,

@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{utils, ImageConfig, ImageData, ImageMetadata, ImageSrc},
-        Image, Result,
+        image::{utils, ImageConfig, ImageData, ImageMetadata},
+        ErrorKind, Image, ImageSrc, Result, ResultCtx,
     },
     fs_ext::fsx,
     std::{cell::RefCell, path::Path},
@@ -11,13 +11,15 @@ impl Image {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
 
-        fsx::file::assert_exists(path)?;
+        fsx::file::assert_exists(path).ctx(ErrorKind::Open, None)?;
+        let src = ImageSrc::File(path.to_owned());
 
-        let metadata = ImageMetadata::from_path(path)?;
+        let metadata =
+            ImageMetadata::from_path(path).ctx(ErrorKind::ReadMetadata, Some(&src.clone()))?;
         let (file_name, parent_dir) = utils::file_info(path);
 
         Ok(Self {
-            src: ImageSrc::File(path.to_owned()),
+            src,
             data: RefCell::new(ImageData::File(path.to_owned())),
             config: ImageConfig { file_name, output_dir: parent_dir, ..Default::default() },
             metadata,

@@ -6,7 +6,7 @@ impl Image {
         self.resolve_color_type(&*img)
     }
 
-    pub fn has_alpha(&self) -> Result<bool> {
+    pub fn has_transparency(&self) -> Result<bool> {
         let color_type = self.color_type()?;
         Ok(color_type.has_alpha())
     }

@@ -1,5 +1,8 @@
 use {
-    super::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
+    crate::{
+        image::{ImageConfig, ImageData, ImageMetadata},
+        ImageSrc,
+    },
     std::cell::RefCell,
 };
 

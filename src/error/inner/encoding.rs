@@ -1,5 +1,10 @@
+use std::io;
+
 #[derive(thiserror::Error, Debug)]
 pub enum EncodingError {
+    #[error(transparent)]
+    Io(#[from] io::Error),
+
     #[error("Failed to encode to format 'png'")]
     PngEncoding(image::ImageError),
 

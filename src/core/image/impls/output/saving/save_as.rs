@@ -1,5 +1,5 @@
 use {
-    crate::{image::ImageSrc, Image, ImageError, ImageFormat, Result},
+    crate::{ErrorKind, Image, ImageFormat, ImageSrc, InnerError, Result, ResultCtx},
     fs_ext::fsx::file,
     std::{io, path::Path},
 };
@@ -14,21 +14,25 @@ impl Image {
                 path.set_extension(ext);
                 ext
             }
-            Some(os_str) => {
-                os_str.to_str().ok_or_else(|| ImageError::ExtensionMissing(path.to_path_buf()))?
-            }
+            Some(os_str) => os_str
+                .to_str()
+                .ok_or_else(|| InnerError::ExtensionMissing(path.to_path_buf()))
+                .ctx(ErrorKind::Save, self.error_src())?,
         };
 
         let format = ImageFormat::try_from(ext)
-            .map_err(|_| ImageError::InvalidExtension(ext.to_string()))?;
+            .map_err(|_| InnerError::InvalidExtension(ext.to_string()))
+            .ctx(ErrorKind::Save, self.error_src())?;
 
         file::atomic::overwrite(&path, |file| {
-            self.encode(file, format).map_err(|e| io::Error::new(io::ErrorKind::Other, e))
-        })?;
+            self.encode(file, format)
+                .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))
+        })
+        .ctx(ErrorKind::Save, self.error_src())?;
 
         if self.config.remove_source {
             if let ImageSrc::File(path) = &self.src {
-                file::trash_or_remove(path)?;
+                file::trash_or_remove(path).ctx(ErrorKind::Save, self.error_src())?;
             }
         }
 

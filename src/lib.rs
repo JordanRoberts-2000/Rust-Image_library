@@ -18,9 +18,9 @@ pub use {
         image::{AvifConfig, Image, JpegConfig, PngConfig, WebpConfig},
         // images::enums::{ArchiveFormat, CollisionStrategy},
     },
-    error::{ImageError, ValidationError},
+    error::{ErrorKind, ImageError, InnerError, ValidationError},
     types::{
         AvifColorType, BitDepth, ColorModel, ColorType, CompressionType, CropEdge, ImageFormat,
-        JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
+        ImageSrc, JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
     },
 };

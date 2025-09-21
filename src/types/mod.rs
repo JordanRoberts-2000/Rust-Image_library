@@ -9,6 +9,7 @@ mod bit_depth;
 mod compression;
 mod crop_edge;
 mod format;
+mod image_src;
 mod rgb;
 
 pub use {
@@ -23,5 +24,6 @@ pub use {
     compression::{CompressionType, PngCompressionType},
     crop_edge::CropEdge,
     format::ImageFormat,
+    image_src::ImageSrc,
     rgb::Rgb,
 };

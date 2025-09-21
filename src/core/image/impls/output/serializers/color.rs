@@ -1,5 +1,5 @@
 use {
-    crate::{Image, ImageError, Result, Rgb},
+    crate::{ErrorKind, Image, InnerError, Result, ResultCtx, Rgb},
     color_thief::{get_palette, ColorFormat},
 };
 
@@ -16,7 +16,8 @@ impl Image {
         };
 
         Ok(palette
-            .map_err(ImageError::GetColors)?
+            .map_err(InnerError::GetColors)
+            .ctx(ErrorKind::Serialize, self.error_src())?
             .into_iter()
             .map(|color| Rgb { r: color.r, g: color.g, b: color.b })
             .collect())
@@ -24,6 +25,10 @@ impl Image {
 
     pub fn dominant_color(&self) -> Result<Rgb> {
         let palette = self.palette()?;
-        palette.get(0).cloned().ok_or_else(|| ImageError::EmptyPalette)
+        palette
+            .get(0)
+            .cloned()
+            .ok_or_else(|| InnerError::EmptyPalette)
+            .ctx(ErrorKind::Serialize, self.error_src())
     }
 }

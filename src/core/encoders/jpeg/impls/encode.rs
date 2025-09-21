@@ -1,5 +1,5 @@
 use {
-    crate::{EncodingError, JpegColorType, JpegEncoder, Result},
+    crate::{EncodingError, JpegColorType, JpegEncoder},
     image::codecs::jpeg::JpegEncoder as Encoder,
     std::io::Write,
 };
@@ -7,7 +7,7 @@ use {
 impl JpegEncoder {
     pub fn encode(
         &self, writer: impl Write, bytes: &[u8], width: u32, height: u32, color_type: JpegColorType,
-    ) -> Result<()> {
+    ) -> Result<(), EncodingError> {
         #[cfg(feature = "progressive-jpeg")]
         {
             if self.progressive {
@@ -25,9 +25,7 @@ impl JpegEncoder {
 
         Encoder::new_with_quality(writer, self.quality)
             .encode(bytes, width, height, color_type.into())
-            .map_err(EncodingError::JpegEncoding)?;
-
-        Ok(())
+            .map_err(EncodingError::JpegEncoding)
     }
 }
 

@@ -4,11 +4,6 @@ mod saving {
     mod save_as;
     mod save_to_folder;
 }
-mod metadata {
-    mod color;
-    mod dimensions;
-    mod format;
-    mod properties;
-    mod size;
-}
+mod color_properties;
+mod metadata;
 mod output;

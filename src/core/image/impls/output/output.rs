@@ -1,5 +1,5 @@
 use {
-    crate::{image::ImageSrc, Image},
+    crate::{Image, ImageSrc},
     std::path::PathBuf,
     url::Url,
 };
@@ -28,6 +28,10 @@ impl Image {
         )
     }
 
+    pub fn src(&self) -> &ImageSrc {
+        &self.src
+    }
+
     pub fn source_path(&self) -> Option<PathBuf> {
         match &self.src {
             ImageSrc::File(path) => Some(path.to_owned()),
@@ -40,5 +44,9 @@ impl Image {
             ImageSrc::Url(url) => Some(url.to_owned()),
             _ => None,
         }
+    }
+
+    pub(crate) fn error_src(&self) -> Option<&ImageSrc> {
+        Some(&self.src)
     }
 }

@@ -1,4 +1,4 @@
-use crate::{image::utils::greatest_common_divisor, Image};
+use crate::{image::utils::greatest_common_divisor, Image, ImageFormat};
 
 impl Image {
     pub fn width(&self) -> u32 {
@@ -22,6 +22,10 @@ impl Image {
         let x = self.width() / gcd;
         let y = self.height() / gcd;
         format!("{}:{}", x, y)
+    }
+
+    pub fn format(&self) -> ImageFormat {
+        self.metadata.format
     }
 }
 

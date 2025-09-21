@@ -1,7 +1,7 @@
 #[cfg(feature = "progressive-jpeg")]
 use mozjpeg::{Compress, ScanMode};
 use {
-    crate::{EncodingError, JpegColorType, JpegEncoder, Result},
+    crate::{EncodingError, JpegColorType, JpegEncoder},
     std::io::Write,
 };
 
@@ -10,7 +10,7 @@ impl JpegEncoder {
     pub(super) fn encode_progressive(
         &self, mut writer: impl Write, bytes: &[u8], width: u32, height: u32,
         color_type: JpegColorType,
-    ) -> Result<()> {
+    ) -> Result<(), EncodingError> {
         let mut comp = Compress::new(color_type.into());
 
         comp.set_size(width as usize, height as usize);

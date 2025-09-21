@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
-        Image, Result,
+        image::{ImageConfig, ImageData, ImageMetadata},
+        ErrorKind, Image, ImageSrc, Result, ResultCtx,
     },
     std::{borrow::Cow, cell::RefCell},
 };
@@ -12,7 +12,8 @@ impl Image {
             Cow::Owned(v) => v,
             Cow::Borrowed(b) => b.to_vec(),
         };
-        let metadata = ImageMetadata::from_bytes(&bytes)?;
+        let metadata = ImageMetadata::from_bytes(&bytes)
+            .ctx(ErrorKind::ReadMetadata, Some(&ImageSrc::Bytes))?;
 
         Ok(Self {
             src: ImageSrc::Bytes,

@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
-        ColorModel, Image, ImageFormat, Result, ValidationError,
+        image::{ImageConfig, ImageData, ImageMetadata},
+        ColorModel, ErrorKind, Image, ImageFormat, ImageSrc, Result, ResultCtx, ValidationError,
     },
     image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
     std::{borrow::Cow, cell::RefCell},
@@ -55,43 +55,51 @@ impl Image {
             (U8(b), ColorModel::Rgb) => {
                 ImageBuffer::<Rgb<u8>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageRgb8)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgb))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgb))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
             (U8(b), ColorModel::Rgba) => {
                 ImageBuffer::<Rgba<u8>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageRgba8)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgba))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgba))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
             (U8(b), ColorModel::Grayscale) => {
                 ImageBuffer::<Luma<u8>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLuma8)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Grayscale))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Grayscale))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
             (U8(b), ColorModel::GrayscaleAlpha) => {
                 ImageBuffer::<LumaA<u8>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLumaA8)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::GrayscaleAlpha))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::GrayscaleAlpha))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
 
             (U16(b), ColorModel::Rgb) => {
                 ImageBuffer::<Rgb<u16>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageRgb16)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgb))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgb))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
             (U16(b), ColorModel::Rgba) => {
                 ImageBuffer::<Rgba<u16>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageRgba16)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgba))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Rgba))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
             (U16(b), ColorModel::Grayscale) => {
                 ImageBuffer::<Luma<u16>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLuma16)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Grayscale))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::Grayscale))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
             (U16(b), ColorModel::GrayscaleAlpha) => {
                 ImageBuffer::<LumaA<u16>, _>::from_raw(width, height, b.into_owned())
                     .map(DynamicImage::ImageLumaA16)
-                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::GrayscaleAlpha))?
+                    .ok_or_else(|| ValidationError::InvalidBuffer(ColorModel::GrayscaleAlpha))
+                    .ctx(ErrorKind::Validate, Some(&ImageSrc::RawPixels))?
             }
         };
 
@@ -99,7 +107,8 @@ impl Image {
             src: ImageSrc::RawPixels,
             data: RefCell::new(ImageData::RawPixels(img)),
             config: ImageConfig::default(),
-            metadata: ImageMetadata::new(width, height, ImageFormat::default())?,
+            metadata: ImageMetadata::new(width, height, ImageFormat::default())
+                .ctx(ErrorKind::ReadMetadata, Some(&ImageSrc::RawPixels))?,
         })
     }
 }

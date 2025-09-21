@@ -1,14 +1,15 @@
 use {
     crate::{
-        image::utils::alpha_is_unused, AvifColorType, ColorType, Image, ImageFormat, JpegColorType,
-        PngColorType, Result, WebPColorType,
+        image::utils::alpha_is_unused, AvifColorType, ColorType, ErrorKind, Image, ImageFormat,
+        JpegColorType, PngColorType, Result, ResultCtx, WebPColorType,
     },
     image::DynamicImage,
 };
 
 impl Image {
     pub(crate) fn resolve_color_type(&self, img: &DynamicImage) -> Result<ColorType> {
-        let color_type: ColorType = img.color().try_into()?;
+        let color_type: ColorType =
+            img.color().try_into().ctx(ErrorKind::ConformColor, self.error_src())?;
 
         let mut output: ColorType = match self.format() {
             ImageFormat::WebP => WebPColorType::try_from(color_type).unwrap_or_default().into(),
