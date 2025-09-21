@@ -6,6 +6,7 @@ mod color_types {
     pub mod webp;
 }
 mod bit_depth;
+mod blur;
 mod compression;
 mod crop_edge;
 mod format;
@@ -14,6 +15,7 @@ mod rgb;
 
 pub use {
     bit_depth::BitDepth,
+    blur::Blur,
     color_types::{
         avif::AvifColorType,
         core::{ColorModel, ColorType},

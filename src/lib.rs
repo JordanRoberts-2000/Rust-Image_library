@@ -20,7 +20,7 @@ pub use {
     },
     error::{ErrorKind, ImageError, InnerError, ValidationError},
     types::{
-        AvifColorType, BitDepth, ColorModel, ColorType, CompressionType, CropEdge, ImageFormat,
-        ImageSrc, JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
+        AvifColorType, BitDepth, Blur, ColorModel, ColorType, CompressionType, CropEdge,
+        ImageFormat, ImageSrc, JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
     },
 };
