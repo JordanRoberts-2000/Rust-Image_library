@@ -1,22 +1,22 @@
 use {
     crate::{
-        image::{
-            enums::{ImageData, ImageSrc},
-            ImageConfig,
-        },
-        Image, ImageMetadata, Result,
+        image::{ImageConfig, ImageData, ImageMetadata, ImageSrc},
+        Image, Result,
     },
-    std::cell::RefCell,
+    std::{borrow::Cow, cell::RefCell},
 };
 
 impl Image {
-    pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self> {
-        let bytes = bytes.as_ref();
-        let metadata = ImageMetadata::from_bytes(bytes)?;
+    pub fn from_bytes<'a>(bytes: impl Into<Cow<'a, [u8]>>) -> Result<Self> {
+        let bytes = match bytes.into() {
+            Cow::Owned(v) => v,
+            Cow::Borrowed(b) => b.to_vec(),
+        };
+        let metadata = ImageMetadata::from_bytes(&bytes)?;
 
         Ok(Self {
             src: ImageSrc::Bytes,
-            data: RefCell::new(ImageData::EncodedBytes(bytes.to_vec())),
+            data: RefCell::new(ImageData::EncodedBytes(bytes)),
             config: ImageConfig::default(),
             metadata,
         })
