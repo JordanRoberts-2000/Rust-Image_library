@@ -1,8 +1,8 @@
 use crate::{constants::DEFAULT_WEBP_QUALITY, CompressionType};
 
 pub struct WebPEncoder {
-    pub(super) quality: u8,
-    pub(super) compression_type: CompressionType,
+    pub(crate) quality: u8,
+    pub(crate) compression_type: CompressionType,
 }
 
 impl WebPEncoder {

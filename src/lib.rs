@@ -1,4 +1,5 @@
 mod error;
+pub mod tokio;
 mod types;
 mod core {
     pub mod encoders;

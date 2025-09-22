@@ -5,4 +5,6 @@
 /target
 /playground
 /src/main.rs
-/src/tokio
+/src/tokio/image_async
+
+/docs

@@ -2,8 +2,8 @@ use crate::constants::DEFAULT_JPEG_QUALITY;
 
 #[derive(Debug, Clone)]
 pub struct JpegEncoder {
-    pub(super) quality: u8,
-    pub(super) progressive: bool,
+    pub(crate) quality: u8,
+    pub(crate) progressive: bool,
 }
 
 impl JpegEncoder {

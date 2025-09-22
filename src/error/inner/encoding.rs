@@ -35,4 +35,7 @@ pub enum EncodingError {
     #[cfg(feature = "progressive-jpeg")]
     #[error("Failed to write JPEG scanlines{0}")]
     JpegWriteScanlines(std::io::Error),
+
+    #[error("background encoding task failed: {0}")]
+    Join(#[from] tokio::task::JoinError),
 }

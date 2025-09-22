@@ -1,6 +1,6 @@
 use image::codecs::png::{CompressionType as ImgPngCompressionType, FilterType};
 
-#[derive(Debug, serde::Deserialize, Clone, Default, PartialEq)]
+#[derive(Debug, serde::Deserialize, Clone, Default, PartialEq, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum CompressionType {
     #[default]

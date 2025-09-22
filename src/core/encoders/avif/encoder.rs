@@ -1,8 +1,8 @@
 use crate::constants::{DEFAULT_AVIF_QUALITY, DEFAULT_AVIF_SPEED};
 
 pub struct AvifEncoder {
-    pub(super) quality: u8,
-    pub(super) speed: u8,
+    pub(crate) quality: u8,
+    pub(crate) speed: u8,
 }
 
 impl AvifEncoder {
