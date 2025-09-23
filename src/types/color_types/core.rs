@@ -3,14 +3,6 @@ use {
     strum_macros::EnumIter,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ColorModel {
-    Rgb,
-    Rgba,
-    Grayscale,
-    GrayscaleAlpha,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum ColorType {
     Rgb8,

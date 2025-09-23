@@ -11,16 +11,14 @@ mod compression;
 mod crop_edge;
 mod format;
 mod image_src;
+pub mod pixel;
 mod rgb;
 
 pub use {
     bit_depth::BitDepth,
     blur::Blur,
     color_types::{
-        avif::AvifColorType,
-        core::{ColorModel, ColorType},
-        jpeg::JpegColorType,
-        png::PngColorType,
+        avif::AvifColorType, core::ColorType, jpeg::JpegColorType, png::PngColorType,
         webp::WebPColorType,
     },
     compression::{CompressionType, PngCompressionType},

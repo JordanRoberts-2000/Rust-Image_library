@@ -7,12 +7,13 @@ mod core {
     // pub mod images;
 }
 pub(crate) mod constants;
-pub mod utils;
+mod traits;
+pub(crate) mod utils;
 
 #[cfg(test)]
 pub(crate) mod test_utils;
 
-pub(crate) use {core::image, error::*};
+pub(crate) use {core::image, error::*, traits::PixelFormat};
 pub use {
     core::{
         encoders::{AvifEncoder, JpegEncoder, PngEncoder, WebPEncoder},
@@ -21,7 +22,7 @@ pub use {
     },
     error::{ErrorKind, ImageError, InnerError, ValidationError},
     types::{
-        AvifColorType, BitDepth, Blur, ColorModel, ColorType, CompressionType, CropEdge,
-        ImageFormat, ImageSrc, JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
+        pixel, AvifColorType, BitDepth, Blur, ColorType, CompressionType, CropEdge, ImageFormat,
+        ImageSrc, JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
     },
 };

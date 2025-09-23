@@ -1,5 +1,5 @@
 use {
-    crate::{BitDepth, ColorModel, ImageFormat},
+    crate::{ColorType, ImageFormat},
     std::path::PathBuf,
 };
 
@@ -44,14 +44,9 @@ pub enum ValidationError {
     #[error("Index {0} out of bounds")]
     IndexOutOfBounds(usize),
 
-    #[error("Invalid buffer: pixels could not be read for color model {0:?}")]
-    InvalidBuffer(ColorModel),
+    #[error("Invalid buffer: pixels could not be read with color-type '{0:?}'")]
+    InvalidBuffer(ColorType),
 
     #[error("unsupported file extension: {0}")]
     UnsupportedExtension(String),
-
-    #[error(
-        "unsupported color model/bit-depth combination: model={model:?}, bit_depth={bit_depth:?}"
-    )]
-    UnsupportedModelBitDepth { model: ColorModel, bit_depth: BitDepth },
 }
