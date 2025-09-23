@@ -1,7 +1,7 @@
 use {
     crate::{
         image::{ImageConfig, ImageData, ImageMetadata},
-        utils::BlockingHttpClient,
+        utils::http,
         ErrorKind, Image, ImageSrc, Result, ResultCtx,
     },
     std::cell::RefCell,
@@ -13,10 +13,9 @@ impl Image {
         let url = Url::parse(url.as_ref()).ctx(ErrorKind::Validate, None)?;
         let src = ImageSrc::Url(url.clone());
 
-        let response =
-            BlockingHttpClient::fetch_url(&url).ctx(ErrorKind::FetchingUrl, Some(&src.clone()))?;
-        let bytes = BlockingHttpClient::parse_response(response)
-            .ctx(ErrorKind::Validate, Some(&src.clone()))?;
+        let bytes =
+            http::blocking::download_image(&url).ctx(ErrorKind::FetchingUrl, Some(&src.clone()))?;
+
         let metadata =
             ImageMetadata::from_bytes(&bytes).ctx(ErrorKind::ReadMetadata, Some(&src.clone()))?;
 
