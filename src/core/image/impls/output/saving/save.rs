@@ -1,6 +1,6 @@
 use {
     crate::{ErrorKind, Image, ImageSrc, Result, ResultCtx},
-    fs_ext::fsx::file,
+    fs_ext::file,
     std::io,
 };
 
