@@ -1,8 +1,4 @@
-pub mod blocking;
-pub mod enums;
-pub mod types {
-    mod from_folder_config;
-    mod images_config;
+mod core;
+mod impls;
 
-    pub use {from_folder_config::FromFolderConfig, images_config::ImagesConfig};
-}
+pub use core::Images;

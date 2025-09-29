@@ -4,7 +4,7 @@ mod types;
 mod core {
     pub mod encoders;
     pub mod image;
-    // pub mod images;
+    pub mod images;
 }
 pub(crate) mod constants;
 mod traits;
@@ -18,6 +18,7 @@ pub use {
     core::{
         encoders::{AvifEncoder, JpegEncoder, PngEncoder, WebPEncoder},
         image::{AvifConfig, Image, JpegConfig, PngConfig, WebpConfig},
+        images::Images,
         // images::enums::{ArchiveFormat, CollisionStrategy},
     },
     error::{ErrorKind, ImageError, InnerError, ValidationError},
