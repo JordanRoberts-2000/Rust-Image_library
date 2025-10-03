@@ -1,4 +1,4 @@
-use crate::Image;
+use crate::{images::ImagesBuilder, Image};
 
 const DEFAULT_CAPACITY: usize = 8;
 
@@ -17,5 +17,9 @@ impl Images {
 
     pub fn from_vec(images: Vec<Image>) -> Self {
         Self { inner: images }
+    }
+
+    pub fn builder() -> ImagesBuilder {
+        ImagesBuilder::new()
     }
 }
