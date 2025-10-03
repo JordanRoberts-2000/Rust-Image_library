@@ -1,11 +1,9 @@
 use {
-    crate::{ImageError, ValidationError},
+    crate::{utils::normalise_ext, ImageError, ValidationError},
     std::path::{Path, PathBuf},
     strum::IntoEnumIterator,
     strum_macros::EnumIter,
 };
-
-const SUPPORTED_EXTS: &[&str] = &["webp", "png", "jpeg", "jpg", "avif"];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, EnumIter, Hash)]
 pub enum ImageFormat {
@@ -17,8 +15,8 @@ pub enum ImageFormat {
 }
 
 impl ImageFormat {
-    pub fn supported_exts() -> &'static [&'static str] {
-        SUPPORTED_EXTS
+    pub fn supported_exts() -> Vec<&'static str> {
+        ImageFormat::variants().iter().flat_map(|fmt| fmt.extensions()).copied().collect()
     }
 
     pub fn variants() -> Vec<Self> {
@@ -26,8 +24,8 @@ impl ImageFormat {
     }
 
     pub fn is_supported_ext(ext: &str) -> bool {
-        let e = ext.trim_start_matches('.').to_ascii_lowercase();
-        SUPPORTED_EXTS.contains(&e.as_str())
+        let normalised = normalise_ext(ext);
+        ImageFormat::supported_exts().contains(&normalised.as_str())
     }
 
     pub fn to_mime_type(&self) -> &'static str {
@@ -62,7 +60,8 @@ impl TryFrom<&str> for ImageFormat {
     type Error = ImageError;
 
     fn try_from(ext: &str) -> Result<Self, Self::Error> {
-        match ext.to_ascii_lowercase().as_str() {
+        let normalised = normalise_ext(ext);
+        match normalised.as_str() {
             "webp" => Ok(ImageFormat::WebP),
             "png" => Ok(ImageFormat::Png),
             "jpg" | "jpeg" => Ok(ImageFormat::Jpeg),
@@ -85,19 +84,17 @@ impl TryFrom<&Path> for ImageFormat {
     fn try_from(path: &Path) -> Result<Self, Self::Error> {
         match path.extension() {
             Some(extension) => {
-                let ext_str = extension
-                    .to_str()
-                    .ok_or_else(|| {
-                        ValidationError::InvalidExtensionFormat(extension.to_os_string())
-                    })?
-                    .to_lowercase();
+                let ext_str = extension.to_str().ok_or_else(|| {
+                    ValidationError::InvalidExtensionFormat(extension.to_os_string())
+                })?;
+                let normalised = normalise_ext(ext_str);
 
-                match ext_str.as_str() {
+                match normalised.as_str() {
                     "jpg" | "jpeg" => Ok(ImageFormat::Jpeg),
                     "png" => Ok(ImageFormat::Png),
                     "webp" => Ok(ImageFormat::WebP),
                     "avif" => Ok(ImageFormat::Avif),
-                    _ => Err(ValidationError::UnsupportedExtension(ext_str).into()),
+                    _ => Err(ValidationError::UnsupportedExtension(ext_str.to_owned()).into()),
                 }
             }
             None => Err(ValidationError::MissingExtensionForPath(path.to_path_buf()).into()),
@@ -134,5 +131,140 @@ impl From<ImageFormat> for image::ImageFormat {
             ImageFormat::Jpeg => image::ImageFormat::Jpeg,
             ImageFormat::Avif => image::ImageFormat::Avif,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_supported_exts() {
+        let exts = ImageFormat::supported_exts();
+        assert!(exts.contains(&"png"));
+        assert!(exts.contains(&"jpeg"));
+        assert!(exts.contains(&"jpg"));
+        assert!(exts.contains(&"webp"));
+        assert!(exts.contains(&"avif"));
+        assert_eq!(exts.len(), 5);
+    }
+
+    #[test]
+    fn test_is_supported_ext() {
+        assert!(ImageFormat::is_supported_ext("png"));
+        assert!(ImageFormat::is_supported_ext("PNG"));
+        assert!(ImageFormat::is_supported_ext(".png"));
+        assert!(ImageFormat::is_supported_ext("jpeg"));
+        assert!(ImageFormat::is_supported_ext("jpg"));
+        assert!(ImageFormat::is_supported_ext("webp"));
+        assert!(ImageFormat::is_supported_ext("avif"));
+        assert!(!ImageFormat::is_supported_ext("gif"));
+        assert!(!ImageFormat::is_supported_ext("bmp"));
+    }
+
+    #[test]
+    fn test_to_mime_type() {
+        assert_eq!(ImageFormat::Png.to_mime_type(), "image/png");
+        assert_eq!(ImageFormat::Jpeg.to_mime_type(), "image/jpeg");
+        assert_eq!(ImageFormat::WebP.to_mime_type(), "image/webp");
+        assert_eq!(ImageFormat::Avif.to_mime_type(), "image/avif");
+    }
+
+    #[test]
+    fn test_extension() {
+        assert_eq!(ImageFormat::Png.extension(), "png");
+        assert_eq!(ImageFormat::Jpeg.extension(), "jpeg");
+        assert_eq!(ImageFormat::WebP.extension(), "webp");
+        assert_eq!(ImageFormat::Avif.extension(), "avif");
+    }
+
+    #[test]
+    fn test_extensions() {
+        assert_eq!(ImageFormat::Png.extensions(), &["png"]);
+        assert_eq!(ImageFormat::Jpeg.extensions(), &["jpeg", "jpg"]);
+        assert_eq!(ImageFormat::WebP.extensions(), &["webp"]);
+        assert_eq!(ImageFormat::Avif.extensions(), &["avif"]);
+    }
+
+    #[test]
+    fn test_try_from_str() {
+        assert_eq!(ImageFormat::try_from("png").unwrap(), ImageFormat::Png);
+        assert_eq!(ImageFormat::try_from("PNG").unwrap(), ImageFormat::Png);
+        assert_eq!(ImageFormat::try_from(".png").unwrap(), ImageFormat::Png);
+        assert_eq!(ImageFormat::try_from("jpeg").unwrap(), ImageFormat::Jpeg);
+        assert_eq!(ImageFormat::try_from("jpg").unwrap(), ImageFormat::Jpeg);
+        assert_eq!(ImageFormat::try_from("webp").unwrap(), ImageFormat::WebP);
+        assert_eq!(ImageFormat::try_from("avif").unwrap(), ImageFormat::Avif);
+        assert!(ImageFormat::try_from("gif").is_err());
+    }
+
+    #[test]
+    fn test_try_from_string() {
+        assert_eq!(ImageFormat::try_from("png".to_string()).unwrap(), ImageFormat::Png);
+        assert_eq!(ImageFormat::try_from("JPEG".to_string()).unwrap(), ImageFormat::Jpeg);
+        assert!(ImageFormat::try_from("tiff".to_string()).is_err());
+    }
+
+    #[test]
+    fn test_try_from_path() {
+        assert_eq!(ImageFormat::try_from(Path::new("image.png")).unwrap(), ImageFormat::Png);
+        assert_eq!(ImageFormat::try_from(Path::new("image.PNG")).unwrap(), ImageFormat::Png);
+        assert_eq!(
+            ImageFormat::try_from(Path::new("/path/to/image.jpeg")).unwrap(),
+            ImageFormat::Jpeg
+        );
+        assert_eq!(
+            ImageFormat::try_from(Path::new("/path/to/image.jpg")).unwrap(),
+            ImageFormat::Jpeg
+        );
+        assert_eq!(ImageFormat::try_from(Path::new("image.webp")).unwrap(), ImageFormat::WebP);
+        assert_eq!(ImageFormat::try_from(Path::new("image.avif")).unwrap(), ImageFormat::Avif);
+        assert!(ImageFormat::try_from(Path::new("image.gif")).is_err());
+        assert!(ImageFormat::try_from(Path::new("image")).is_err());
+    }
+
+    #[test]
+    fn test_try_from_pathbuf() {
+        assert_eq!(ImageFormat::try_from(PathBuf::from("image.png")).unwrap(), ImageFormat::Png);
+        assert_eq!(ImageFormat::try_from(PathBuf::from("image.jpg")).unwrap(), ImageFormat::Jpeg);
+    }
+
+    #[test]
+    fn test_try_from_image_format() {
+        assert_eq!(ImageFormat::try_from(image::ImageFormat::Png).unwrap(), ImageFormat::Png);
+        assert_eq!(ImageFormat::try_from(image::ImageFormat::Jpeg).unwrap(), ImageFormat::Jpeg);
+        assert_eq!(ImageFormat::try_from(image::ImageFormat::WebP).unwrap(), ImageFormat::WebP);
+        assert_eq!(ImageFormat::try_from(image::ImageFormat::Avif).unwrap(), ImageFormat::Avif);
+        assert!(ImageFormat::try_from(image::ImageFormat::Gif).is_err());
+    }
+
+    #[test]
+    fn test_into_image_format() {
+        let fmt: image::ImageFormat = ImageFormat::Png.into();
+        assert_eq!(fmt, image::ImageFormat::Png);
+
+        let fmt: image::ImageFormat = ImageFormat::Jpeg.into();
+        assert_eq!(fmt, image::ImageFormat::Jpeg);
+
+        let fmt: image::ImageFormat = ImageFormat::WebP.into();
+        assert_eq!(fmt, image::ImageFormat::WebP);
+
+        let fmt: image::ImageFormat = ImageFormat::Avif.into();
+        assert_eq!(fmt, image::ImageFormat::Avif);
+    }
+
+    #[test]
+    fn test_variants() {
+        let variants = ImageFormat::variants();
+        assert_eq!(variants.len(), 4);
+        assert!(variants.contains(&ImageFormat::Png));
+        assert!(variants.contains(&ImageFormat::Jpeg));
+        assert!(variants.contains(&ImageFormat::WebP));
+        assert!(variants.contains(&ImageFormat::Avif));
+    }
+
+    #[test]
+    fn test_default() {
+        assert_eq!(ImageFormat::default(), ImageFormat::Png);
     }
 }
