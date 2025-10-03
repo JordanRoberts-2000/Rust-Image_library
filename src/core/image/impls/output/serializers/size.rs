@@ -1,5 +1,5 @@
 use {
-    crate::{ErrorKind, Image, ImageError, ImageFormat, ImageSrc, InnerError, Result, ResultCtx},
+    crate::{ErrorKind, Image, ImageError, ImageFormat, ImageSrc, Result, WithSrc},
     fs_ext::file,
 };
 
@@ -23,12 +23,8 @@ impl Image {
 
     pub fn source_file_size(&self) -> Result<u64> {
         match &self.src {
-            ImageSrc::File(path) => Ok(file::size(path).ctx(ErrorKind::Open, self.error_src())?),
-            _ => Err(ImageError::new(
-                ErrorKind::Open,
-                self.error_src().cloned(),
-                InnerError::SourceIsNotFile,
-            )),
+            ImageSrc::File(path) => Ok(file::size(path).with_src(self.error_src())?),
+            _ => Err(ImageError::new(ErrorKind::SourceIsNotFile, self.error_src().cloned())),
         }
     }
 }

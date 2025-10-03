@@ -1,7 +1,7 @@
 use {
     crate::{
         image::{ImageConfig, ImageData, ImageMetadata},
-        ErrorKind, Image, ImageSrc, Result, ResultCtx,
+        Image, ImageSrc, Result, WithSrc,
     },
     fs_ext::{file, PathExt},
     std::{cell::RefCell, path::Path},
@@ -11,13 +11,12 @@ impl Image {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
 
-        file::assert_exists(path).ctx(ErrorKind::Open, None)?;
+        file::assert_exists(path)?;
         let src = ImageSrc::File(path.to_owned());
 
-        let metadata =
-            ImageMetadata::from_path(path).ctx(ErrorKind::ReadMetadata, Some(&src.clone()))?;
+        let metadata = ImageMetadata::from_path(path).with_src(Some(&src))?;
 
-        let file_name = path.utf8_stem().ctx(ErrorKind::Validate, Some(&src.clone()))?.to_owned();
+        let file_name = path.utf8_stem().with_src(Some(&src))?.to_owned();
         let parent_dir = path.parent_or_current();
 
         Ok(Self {

@@ -1,7 +1,7 @@
 use {
     crate::{
         image::{ImageConfig, ImageData, ImageMetadata},
-        ErrorKind, Image, ImageFormat, ImageSrc, PixelFormat, Result, ResultCtx,
+        Image, ImageFormat, ImageSrc, PixelFormat, Result, WithSrc,
     },
     std::{borrow::Cow, cell::RefCell},
 };
@@ -18,11 +18,11 @@ impl Image {
             Cow::Borrowed(s) => s.to_vec(),
         };
 
-        let img = F::create_image_from_raw(pixels, width, height)
-            .ctx(ErrorKind::Deserialize, Some(&ImageSrc::RawPixels))?;
+        let img =
+            F::create_image_from_raw(pixels, width, height).with_src(Some(&ImageSrc::RawPixels))?;
 
         let metadata = ImageMetadata::new(width, height, ImageFormat::default())
-            .ctx(ErrorKind::ReadMetadata, Some(&ImageSrc::RawPixels))?;
+            .with_src(Some(&ImageSrc::RawPixels))?;
 
         Ok(Self {
             src: ImageSrc::RawPixels,

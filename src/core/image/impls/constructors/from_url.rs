@@ -2,7 +2,7 @@ use {
     crate::{
         image::{ImageConfig, ImageData, ImageMetadata},
         utils::http,
-        ErrorKind, Image, ImageSrc, Result, ResultCtx,
+        Image, ImageSrc, Result, WithSrc,
     },
     std::cell::RefCell,
     url::Url,
@@ -10,14 +10,12 @@ use {
 
 impl Image {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
-        let url = Url::parse(url.as_ref()).ctx(ErrorKind::Validate, None)?;
+        let url = Url::parse(url.as_ref())?;
         let src = ImageSrc::Url(url.clone());
 
-        let bytes =
-            http::blocking::download_image(&url).ctx(ErrorKind::FetchingUrl, Some(&src.clone()))?;
+        let bytes = http::blocking::download_image(&url).with_src(Some(&src))?;
 
-        let metadata =
-            ImageMetadata::from_bytes(&bytes).ctx(ErrorKind::ReadMetadata, Some(&src.clone()))?;
+        let metadata = ImageMetadata::from_bytes(&bytes).with_src(Some(&src))?;
 
         Ok(Self {
             src,

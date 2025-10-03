@@ -11,9 +11,6 @@ pub enum ValidationError {
     #[error("path doesn't lead to a directory: {0}")]
     NotADirectory(PathBuf),
 
-    #[error("missing file extension: `{0}`")]
-    MissingExtension(PathBuf),
-
     #[error("path doesn't lead to a file: {0}")]
     NotAFile(PathBuf),
 
@@ -47,6 +44,28 @@ pub enum ValidationError {
     #[error("Invalid buffer: pixels could not be read with color-type '{0:?}'")]
     InvalidBuffer(ColorType),
 
-    #[error("unsupported file extension: {0}")]
+    #[error("Color type '{0:?}' not supported")]
+    UnsupportedColorType(image::ColorType),
+
+    #[error("{}", ext_unsupported_error(.0))]
     UnsupportedExtension(String),
+
+    #[error("{}", format_unsupported_error(.0))]
+    UnsupportedFormat(image::ImageFormat),
+
+    #[error("Missing file extension on path '{0:?}'")]
+    MissingExtension(PathBuf),
+
+    #[error("Path missing file name: '{0:?}'")]
+    MissingFileName(PathBuf),
+}
+
+fn ext_unsupported_error(ext: &String) -> String {
+    let supported = ImageFormat::supported_exts().join(",");
+    format!("unsupported ext: '{ext}'; supported extentions are: {supported}")
+}
+
+fn format_unsupported_error(format: &image::ImageFormat) -> String {
+    let supported = ImageFormat::supported_exts().join(",");
+    format!("unsupported image format: '{format:?}'; supported formats are: {supported}")
 }

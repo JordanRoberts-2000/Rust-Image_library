@@ -1,14 +1,20 @@
-use crate::{ErrorKind, ImageError, ImageSrc, InnerError, Result};
+use crate::{ImageError, ImageSrc};
 
-pub trait ResultCtx<T> {
-    fn ctx(self, kind: ErrorKind, src: Option<&ImageSrc>) -> Result<T>;
+pub trait WithSrc<T> {
+    fn with_src(self, src: Option<&ImageSrc>) -> Result<T, ImageError>;
 }
 
-impl<T, E> ResultCtx<T> for std::result::Result<T, E>
+impl<T, E> WithSrc<T> for Result<T, E>
 where
-    E: Into<InnerError>,
+    E: Into<ImageError>,
 {
-    fn ctx(self, kind: ErrorKind, src: Option<&ImageSrc>) -> Result<T> {
-        self.map_err(|e| ImageError::new(kind, src.cloned(), e))
+    fn with_src(self, src: Option<&ImageSrc>) -> Result<T, ImageError> {
+        self.map_err(|e| {
+            let err: ImageError = e.into();
+            match src {
+                Some(s) => err.with_src(s.clone()),
+                None => err,
+            }
+        })
     }
 }

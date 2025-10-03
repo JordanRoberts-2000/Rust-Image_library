@@ -1,7 +1,7 @@
 use {
     crate::{
         image::{ImageConfig, ImageData, ImageMetadata},
-        ErrorKind, Image, ImageSrc, InnerError, Result, ResultCtx,
+        ErrorKind, Image, ImageSrc, Result, WithSrc,
     },
     base64::Engine,
     std::cell::RefCell,
@@ -16,11 +16,10 @@ impl Image {
 
         let bytes = base64::engine::general_purpose::STANDARD
             .decode(base_64)
-            .map_err(|e| InnerError::Base64DecodeFailed(e, base_64.to_string()))
-            .ctx(ErrorKind::Decode, None)?;
+            .map_err(|e| ErrorKind::Base64DecodeFailed(e, base_64.to_string()))
+            .with_src(Some(&src))?;
 
-        let metadata =
-            ImageMetadata::from_bytes(&bytes).ctx(ErrorKind::ReadMetadata, Some(&src.clone()))?;
+        let metadata = ImageMetadata::from_bytes(&bytes)?;
 
         Ok(Self {
             src,
@@ -67,13 +66,10 @@ mod tests {
         let bad = "not base64 !!!";
 
         match Image::from_base64(bad) {
-            Err(err) => {
-                assert_eq!(err.kind(), ErrorKind::Decode, "wrong error kind");
-                match err.inner() {
-                    InnerError::Base64DecodeFailed(_, s) => assert_eq!(s, bad),
-                    other => panic!("expected Base64DecodeFailed, got {other:?}"),
-                }
-            }
+            Err(err) => match err.kind() {
+                ErrorKind::Base64DecodeFailed(_, s) => assert_eq!(s, bad),
+                other => panic!("expected Base64DecodeFailed, got {other:?}"),
+            },
             Ok(_) => panic!("expected error"),
         }
     }

@@ -1,13 +1,17 @@
+#[cfg(feature = "tokio")]
+use tokio::task::JoinError;
 use {
-    crate::{EncodingError, ImageFormat, ValidationError},
+    crate::{EncodingError, ValidationError},
     std::{io, path::PathBuf},
-    tokio::task::JoinError,
     url::Url,
-    walkdir::Error as WalkDirError,
 };
 
 #[derive(thiserror::Error, Debug)]
-pub enum InnerError {
+pub enum ErrorKind {
+    #[cfg(feature = "tokio")]
+    #[error("Failed to join blocking task: {0}")]
+    TaskJoinError(JoinError),
+
     #[error("IO error: {0}")]
     Io(#[from] io::Error),
 
@@ -17,12 +21,6 @@ pub enum InnerError {
     #[error("Encoding error: {0}")]
     Encoding(#[from] EncodingError),
 
-    #[error("Color type '{0:?}' not supported")]
-    UnsupportedColorType(image::ColorType),
-
-    #[error("Failed to join blocking task: {0}")]
-    TaskJoinError(JoinError),
-
     #[error("URL parse error: {0}")]
     UrlParse(#[from] url::ParseError),
 
@@ -31,9 +29,6 @@ pub enum InnerError {
 
     #[error("Failed to decode base64: {0}")]
     Base64DecodeFailed(base64::DecodeError, String),
-
-    #[error("Failed to decode image '{id}' to format '{format:?}': {source}")]
-    Decoding { id: String, source: image::ImageError, format: ImageFormat },
 
     #[error("Failed to open file '{path:?}': {source}")]
     Open { source: std::io::Error, path: PathBuf },
@@ -50,12 +45,6 @@ pub enum InnerError {
     #[error("Failed to read response bytes from '{url}': {source}")]
     ResponseReadFailed { url: Url, source: reqwest::Error },
 
-    #[error("{}", format_unsupported_error(.0))]
-    UnsupportedFormat(image::ImageFormat),
-
-    #[error("{}", ext_unsupported_error(.0))]
-    InvalidExtension(String),
-
     #[error("Failed to detect image format from byte stream: {0}")]
     FormatDetectionFailed(std::io::Error),
 
@@ -64,9 +53,6 @@ pub enum InnerError {
 
     #[error("Failed to read image dimensions: {0}")]
     DimensionsFailed(image::ImageError),
-
-    #[error("Missing file extension on path '{0:?}'")]
-    ExtensionMissing(PathBuf),
 
     #[error("Failed to save to '{path:?}': {source}")]
     Save { source: image::ImageError, path: PathBuf },
@@ -80,28 +66,12 @@ pub enum InnerError {
     #[error("Failed to encode blurhash: {0}")]
     BlurHash(blurhash::Error),
 
-    #[error("Path missing file name: '{0:?}'")]
-    MissingFileName(PathBuf),
-
     #[error("Request failed with status {status_code}: {message}")]
     FailedRequest { url: Url, status_code: u16, message: String },
-
-    #[error("Directory traversal error: {0}")]
-    WalkDir(WalkDirError),
 
     #[error("source is not a local file")]
     SourceIsNotFile,
 
     #[error("File name collision detected: '{0}'")]
     FileNameCollision(String),
-}
-
-pub fn format_unsupported_error(format: &image::ImageFormat) -> String {
-    let supported = ImageFormat::supported().join(",");
-    format!("unsupported image format: '{format:?}'; supported formats are: {supported}")
-}
-
-pub fn ext_unsupported_error(ext: &String) -> String {
-    let supported = ImageFormat::supported().join(",");
-    format!("unsupported ext: '{ext}'; supported extentions are: {supported}")
 }

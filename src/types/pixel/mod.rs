@@ -1,5 +1,5 @@
 use {
-    crate::{ColorType, InnerError, PixelFormat, ValidationError},
+    crate::{ColorType, PixelFormat, Result, ValidationError},
     image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
 };
 
@@ -12,7 +12,7 @@ impl PixelFormat for Rgb8 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer =
             ImageBuffer::<Rgb<Self::Channel>, Vec<Self::Channel>>::from_raw(width, height, pixels)
                 .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Rgb8))?;
@@ -31,7 +31,7 @@ impl PixelFormat for Rgba8 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer =
             ImageBuffer::<Rgba<Self::Channel>, Vec<Self::Channel>>::from_raw(width, height, pixels)
                 .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Rgba8))?;
@@ -48,7 +48,7 @@ impl PixelFormat for Rgb16 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer =
             ImageBuffer::<Rgb<Self::Channel>, Vec<Self::Channel>>::from_raw(width, height, pixels)
                 .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Rgb16))?;
@@ -67,7 +67,7 @@ impl PixelFormat for Rgba16 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer =
             ImageBuffer::<Rgba<Self::Channel>, Vec<Self::Channel>>::from_raw(width, height, pixels)
                 .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Rgba16))?;
@@ -85,7 +85,7 @@ impl PixelFormat for L8 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer =
             ImageBuffer::<Luma<Self::Channel>, Vec<Self::Channel>>::from_raw(width, height, pixels)
                 .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Grayscale8))?;
@@ -103,7 +103,7 @@ impl PixelFormat for La8 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer = ImageBuffer::<LumaA<Self::Channel>, Vec<Self::Channel>>::from_raw(
             width, height, pixels,
         )
@@ -122,7 +122,7 @@ impl PixelFormat for L16 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer =
             ImageBuffer::<Luma<Self::Channel>, Vec<Self::Channel>>::from_raw(width, height, pixels)
                 .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Grayscale16))?;
@@ -140,7 +140,7 @@ impl PixelFormat for La16 {
 
     fn create_image_from_raw(
         pixels: Vec<Self::Channel>, width: u32, height: u32,
-    ) -> Result<DynamicImage, InnerError> {
+    ) -> Result<DynamicImage> {
         let buffer = ImageBuffer::<LumaA<Self::Channel>, Vec<Self::Channel>>::from_raw(
             width, height, pixels,
         )

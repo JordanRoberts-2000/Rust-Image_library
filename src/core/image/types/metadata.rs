@@ -1,5 +1,5 @@
 use {
-    crate::{ImageFormat, InnerError, ValidationError},
+    crate::{ErrorKind, ImageFormat, Result, ValidationError},
     image::ImageReader,
     std::{
         io::{BufRead, Cursor, Seek},
@@ -16,7 +16,7 @@ pub struct ImageMetadata {
 }
 
 impl ImageMetadata {
-    pub fn new(width: u32, height: u32, format: ImageFormat) -> Result<Self, InnerError> {
+    pub fn new(width: u32, height: u32, format: ImageFormat) -> Result<Self> {
         Ok(Self {
             format,
             width: NonZeroU32::new(width).ok_or(ValidationError::InvalidWidth)?,
@@ -24,29 +24,32 @@ impl ImageMetadata {
         })
     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, InnerError> {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
         let reader = ImageReader::new(Cursor::new(bytes))
             .with_guessed_format()
-            .map_err(InnerError::FormatDetectionFailed)?;
+            .map_err(ErrorKind::FormatDetectionFailed)?;
 
         Self::from_reader(reader)
     }
 
-    pub fn from_path(path: &Path) -> Result<Self, InnerError> {
+    pub fn from_path(path: &Path) -> Result<Self> {
         let reader = ImageReader::open(path)
-            .map_err(|e| InnerError::Open { source: e, path: path.to_path_buf() })?;
+            .map_err(|e| ErrorKind::Open { source: e, path: path.to_path_buf() })?;
 
         Self::from_reader(reader)
     }
 
-    fn from_reader<R>(reader: ImageReader<R>) -> Result<Self, InnerError>
+    fn from_reader<R>(reader: ImageReader<R>) -> Result<Self>
     where
         R: BufRead + Seek,
     {
-        let format =
-            reader.format().ok_or(InnerError::UnknownFormat).and_then(ImageFormat::try_from)?;
+        let format = reader
+            .format()
+            .ok_or(ErrorKind::UnknownFormat)
+            .map_err(Into::into)
+            .and_then(ImageFormat::try_from)?;
 
-        let (width, height) = reader.into_dimensions().map_err(InnerError::DimensionsFailed)?;
+        let (width, height) = reader.into_dimensions().map_err(ErrorKind::DimensionsFailed)?;
 
         Ok(Self {
             format,

@@ -1,5 +1,8 @@
 use {
-    crate::{AvifColorType, BitDepth, InnerError, JpegColorType, PngColorType, WebPColorType},
+    crate::{
+        AvifColorType, BitDepth, ImageError, JpegColorType, PngColorType, ValidationError,
+        WebPColorType,
+    },
     strum_macros::EnumIter,
 };
 
@@ -76,7 +79,7 @@ impl From<ColorType> for image::ColorType {
 }
 
 impl TryFrom<image::ColorType> for ColorType {
-    type Error = InnerError;
+    type Error = ImageError;
 
     fn try_from(ct: image::ColorType) -> Result<Self, Self::Error> {
         Ok(match ct {
@@ -88,7 +91,7 @@ impl TryFrom<image::ColorType> for ColorType {
             image::ColorType::La16 => ColorType::GrayscaleAlpha16,
             image::ColorType::Rgb16 => ColorType::Rgb16,
             image::ColorType::Rgba16 => ColorType::Rgba16,
-            _ => return Err(InnerError::UnsupportedColorType(ct)),
+            _ => return Err(ValidationError::UnsupportedColorType(ct).into()),
         })
     }
 }
@@ -110,7 +113,7 @@ impl From<ColorType> for PngColorType {
 }
 
 impl TryFrom<ColorType> for WebPColorType {
-    type Error = InnerError;
+    type Error = ImageError;
 
     fn try_from(color_type: ColorType) -> Result<Self, Self::Error> {
         match color_type {
@@ -118,31 +121,31 @@ impl TryFrom<ColorType> for WebPColorType {
             ColorType::Rgba8 => Ok(WebPColorType::Rgba8),
             ColorType::Grayscale8 => Ok(WebPColorType::Grayscale8),
             ColorType::GrayscaleAlpha8 => Ok(WebPColorType::GrayscaleAlpha8),
-            other => Err(InnerError::UnsupportedColorType(other.into())),
+            other => Err(ValidationError::UnsupportedColorType(other.into()).into()),
         }
     }
 }
 
 impl TryFrom<ColorType> for JpegColorType {
-    type Error = InnerError;
+    type Error = ImageError;
 
     fn try_from(color_type: ColorType) -> Result<Self, Self::Error> {
         match color_type {
             ColorType::Rgb8 => Ok(JpegColorType::Rgb8),
             ColorType::Grayscale8 => Ok(JpegColorType::Grayscale8),
-            other => Err(InnerError::UnsupportedColorType(other.into())),
+            other => Err(ValidationError::UnsupportedColorType(other.into()).into()),
         }
     }
 }
 
 impl TryFrom<ColorType> for AvifColorType {
-    type Error = InnerError;
+    type Error = ImageError;
 
     fn try_from(color_type: ColorType) -> Result<Self, Self::Error> {
         match color_type {
             ColorType::Rgb8 => Ok(AvifColorType::Rgb8),
             ColorType::Rgba8 => Ok(AvifColorType::Rgba8),
-            other => Err(InnerError::UnsupportedColorType(other.into())),
+            other => Err(ValidationError::UnsupportedColorType(other.into()).into()),
         }
     }
 }

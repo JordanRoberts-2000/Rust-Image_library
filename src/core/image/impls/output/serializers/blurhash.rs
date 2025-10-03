@@ -1,4 +1,4 @@
-use crate::{ErrorKind, Image, InnerError, Result, ResultCtx};
+use crate::{ErrorKind, Image, Result, WithSrc};
 
 impl Image {
     pub fn blurhash(&self) -> Result<String> {
@@ -6,7 +6,7 @@ impl Image {
         let img = self.processed_image()?;
 
         blurhash::encode(4, 3, w, h, img.to_rgba8().as_raw())
-            .map_err(InnerError::BlurHash)
-            .ctx(ErrorKind::Encode, self.error_src())
+            .map_err(ErrorKind::BlurHash)
+            .with_src(self.error_src())
     }
 }

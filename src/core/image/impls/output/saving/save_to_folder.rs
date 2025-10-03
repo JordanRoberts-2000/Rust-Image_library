@@ -1,12 +1,12 @@
 use {
-    crate::{ErrorKind, Image, ImageSrc, Result, ResultCtx},
+    crate::{Image, ImageSrc, Result, WithSrc},
     fs_ext::{dir, file},
     std::{io, path::Path},
 };
 
 impl Image {
     pub fn save_to_folder(&self, folder_path: impl AsRef<Path>) -> Result<()> {
-        dir::assert_exists(&folder_path).ctx(ErrorKind::Save, self.error_src())?;
+        dir::assert_exists(&folder_path).with_src(self.error_src())?;
 
         let path = folder_path.as_ref().join(self.file_name());
 
@@ -14,11 +14,11 @@ impl Image {
             self.encode(file, self.format())
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))
         })
-        .ctx(ErrorKind::Save, self.error_src())?;
+        .with_src(self.error_src())?;
 
         if self.config.remove_source {
             if let ImageSrc::File(path) = &self.src {
-                file::trash_or_remove(path).ctx(ErrorKind::Save, self.error_src())?;
+                file::trash_or_remove(path).with_src(self.error_src())?;
             }
         }
 

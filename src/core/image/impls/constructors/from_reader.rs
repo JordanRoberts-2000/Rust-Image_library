@@ -1,7 +1,7 @@
 use {
     crate::{
         image::{ImageConfig, ImageData, ImageMetadata},
-        ErrorKind, Image, ImageSrc, Result, ResultCtx,
+        Image, ImageSrc, Result, WithSrc,
     },
     std::{cell::RefCell, io::Read},
 };
@@ -9,10 +9,9 @@ use {
 impl Image {
     pub fn from_reader(reader: &mut (impl Read + ?Sized)) -> Result<Self> {
         let mut bytes = Vec::new();
-        reader.read_to_end(&mut bytes).ctx(ErrorKind::Read, Some(&ImageSrc::Reader))?;
+        reader.read_to_end(&mut bytes).with_src(Some(&ImageSrc::Reader))?;
 
-        let metadata = ImageMetadata::from_bytes(&bytes)
-            .ctx(ErrorKind::ReadMetadata, Some(&ImageSrc::Reader))?;
+        let metadata = ImageMetadata::from_bytes(&bytes).with_src(Some(&ImageSrc::Reader))?;
 
         Ok(Self {
             src: ImageSrc::Reader,
