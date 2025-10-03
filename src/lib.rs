@@ -1,5 +1,4 @@
 mod error;
-pub mod tokio;
 mod types;
 mod core {
     pub mod encoders;
@@ -10,20 +9,26 @@ pub(crate) mod constants;
 mod traits;
 pub(crate) mod utils;
 
+#[cfg(feature = "tokio")]
+pub mod tokio;
+
 #[cfg(test)]
 pub(crate) mod test_utils;
 
-pub(crate) use {core::image, error::*, traits::PixelFormat};
 pub use {
     core::{
         encoders::{AvifEncoder, JpegEncoder, PngEncoder, WebPEncoder},
         image::{AvifConfig, Image, JpegConfig, PngConfig, WebpConfig},
-        images::Images,
-        // images::enums::{ArchiveFormat, CollisionStrategy},
+        images::{FormatFilter, FromFolderConfig, Images, ImagesBuilder},
     },
-    error::{ErrorKind, ImageError, InnerError, ValidationError},
+    error::{ErrorKind, ImageError, ValidationError},
     types::{
         pixel, AvifColorType, BitDepth, Blur, ColorType, CompressionType, CropEdge, ImageFormat,
         ImageSrc, JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
     },
+};
+pub(crate) use {
+    core::{image, images},
+    error::*,
+    traits::PixelFormat,
 };
