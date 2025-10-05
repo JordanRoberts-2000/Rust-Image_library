@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata},
-        Image, ImageSrc, Result, WithSrc,
+        image::{ImageConfig, ImageData},
+        Image, ImageMetadata, ImageSrc, Result, WithSrc,
     },
     fs_ext::{file, PathExt},
     std::{cell::RefCell, path::Path},
@@ -32,30 +32,32 @@ impl Image {
 mod tests {
     use {
         super::*,
-        crate::test_utils::write_png,
+        crate::{test_utils::image_file, ImageFormat},
         std::{io::Write as _, path::PathBuf},
-        tempfile::tempdir,
+        strum::IntoEnumIterator,
+        tempfile::{tempdir, TempDir},
     };
 
     #[test]
     fn from_file_ok() -> Result<()> {
-        let dir = tempdir().expect("failed to create tempdir");
-        let path = dir.path().join("pixel.png");
+        let temp_dir = TempDir::new().unwrap();
 
-        write_png(&path);
+        for format in ImageFormat::iter() {
+            let path = image_file(&temp_dir, format);
 
-        let img = Image::from_file(&path)?;
+            let img = Image::from_file(&path)?;
 
-        match &img.src {
-            ImageSrc::File(p) => assert_eq!(p, &path),
-            _ => panic!("expected ImageSrc::File"),
-        }
+            match &img.src {
+                ImageSrc::File(p) => assert_eq!(p, &path),
+                _ => panic!("expected ImageSrc::File"),
+            }
 
-        {
-            let data = img.data.borrow();
-            match &*data {
-                ImageData::File(p) => assert_eq!(p, &path),
-                _ => panic!("expected ImageData::File"),
+            {
+                let data = img.data.borrow();
+                match &*data {
+                    ImageData::File(p) => assert_eq!(p, &path),
+                    _ => panic!("expected ImageData::File"),
+                }
             }
         }
 

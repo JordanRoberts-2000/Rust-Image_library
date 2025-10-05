@@ -18,7 +18,10 @@ impl AvifEncoder {
 mod tests {
     use {
         super::*,
-        crate::test_utils::{create_image_data, create_rgb8_data},
+        crate::{
+            test_utils::{raw_pixel_data, MOCK_IMAGE_DIMENSIONS},
+            ColorType,
+        },
         strum::IntoEnumIterator,
     };
 
@@ -26,8 +29,8 @@ mod tests {
     fn test_encode() {
         let encoder = AvifEncoder::new();
         let mut output = Vec::new();
-        let (width, height) = (12, 12);
-        let rgb_data = create_rgb8_data(width, height);
+        let (width, height) = MOCK_IMAGE_DIMENSIONS;
+        let rgb_data = raw_pixel_data(ColorType::Rgb8);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, AvifColorType::Rgb8);
 
@@ -40,10 +43,10 @@ mod tests {
         let encoder = AvifEncoder::new();
         for ct in AvifColorType::iter() {
             let mut output = Vec::new();
-            let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, (&ct).into());
+            let (width, height) = MOCK_IMAGE_DIMENSIONS;
+            let raw_pixels = raw_pixel_data((&ct).into());
 
-            let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
+            let result = encoder.encode(&mut output, &raw_pixels, width, height, ct);
 
             assert!(result.is_ok());
             assert!(!output.is_empty(), "Output should contain encoded data");

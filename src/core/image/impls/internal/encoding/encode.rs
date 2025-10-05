@@ -4,7 +4,7 @@ use {
 };
 
 impl Image {
-    pub fn encode(&self, writer: impl Write, format: ImageFormat) -> Result<()> {
+    pub(crate) fn encode(&self, writer: impl Write, format: ImageFormat) -> Result<()> {
         let img = self.processed_image()?;
 
         match format {

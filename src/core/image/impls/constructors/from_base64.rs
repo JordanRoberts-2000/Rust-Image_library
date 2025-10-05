@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata},
-        ErrorKind, Image, ImageSrc, Result, WithSrc,
+        image::{ImageConfig, ImageData},
+        ErrorKind, Image, ImageMetadata, ImageSrc, Result, WithSrc,
     },
     base64::Engine,
     std::cell::RefCell,
@@ -34,27 +34,30 @@ impl Image {
 mod tests {
     use {
         super::*,
-        crate::{image::ImageData, test_utils::png_bytes, ImageSrc},
+        crate::{image::ImageData, test_utils::encoded_bytes, ImageFormat, ImageSrc},
         base64::engine::general_purpose::STANDARD,
+        strum::IntoEnumIterator,
     };
 
     #[test]
     fn from_base64_ok() -> Result<()> {
-        let bytes = png_bytes();
-        let b64 = STANDARD.encode(&bytes);
+        for format in ImageFormat::iter() {
+            let bytes = encoded_bytes(format);
+            let b64 = STANDARD.encode(&bytes);
 
-        let img = Image::from_base64(&b64)?;
+            let img = Image::from_base64(&b64)?;
 
-        match img.src {
-            ImageSrc::Base64(_) => {}
-            _ => panic!("expected ImageSrc::Base64"),
-        }
+            match img.src {
+                ImageSrc::Base64(_) => {}
+                _ => panic!("expected ImageSrc::Base64"),
+            }
 
-        {
-            let data = img.data.borrow();
-            match &*data {
-                ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
-                _ => panic!("expected ImageData::EncodedBytes"),
+            {
+                let data = img.data.borrow();
+                match &*data {
+                    ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
+                    _ => panic!("expected ImageData::EncodedBytes"),
+                }
             }
         }
 
@@ -76,16 +79,18 @@ mod tests {
 
     #[test]
     fn preview_stores_first_10_chars() -> Result<()> {
-        let bytes = png_bytes();
-        let b64 = STANDARD.encode(&bytes);
-        let img = Image::from_base64(&b64)?;
+        for format in ImageFormat::iter() {
+            let bytes = encoded_bytes(format);
+            let b64 = STANDARD.encode(&bytes);
+            let img = Image::from_base64(&b64)?;
 
-        match img.src {
-            ImageSrc::Base64(preview) => {
-                assert_eq!(preview.len(), 10);
-                assert_eq!(preview, &b64[..10]);
+            match img.src {
+                ImageSrc::Base64(preview) => {
+                    assert_eq!(preview.len(), 10);
+                    assert_eq!(preview, &b64[..10]);
+                }
+                _ => panic!("expected ImageSrc::Base64"),
             }
-            _ => panic!("expected ImageSrc::Base64"),
         }
 
         Ok(())

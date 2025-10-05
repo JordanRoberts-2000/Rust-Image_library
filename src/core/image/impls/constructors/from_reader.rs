@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata},
-        Image, ImageSrc, Result, WithSrc,
+        image::{ImageConfig, ImageData},
+        Image, ImageMetadata, ImageSrc, Result, WithSrc,
     },
     std::{cell::RefCell, io::Read},
 };
@@ -26,27 +26,30 @@ impl Image {
 mod tests {
     use {
         super::*,
-        crate::test_utils::png_bytes,
+        crate::{test_utils::encoded_bytes, ImageFormat},
         std::io::{Cursor, Read},
+        strum::IntoEnumIterator,
     };
 
     #[test]
     fn from_reader_ok() -> Result<()> {
-        let bytes = png_bytes();
+        for format in ImageFormat::iter() {
+            let bytes = encoded_bytes(format);
 
-        let mut cur = Cursor::new(bytes.clone());
-        let img = Image::from_reader(&mut cur)?;
+            let mut cur = Cursor::new(bytes.clone());
+            let img = Image::from_reader(&mut cur)?;
 
-        match img.src {
-            ImageSrc::Reader => {}
-            _ => panic!("expected ImageSrc::Reader"),
-        }
+            match img.src {
+                ImageSrc::Reader => {}
+                _ => panic!("expected ImageSrc::Reader"),
+            }
 
-        {
-            let data = img.data.borrow();
-            match &*data {
-                ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
-                _ => panic!("expected ImageData::EncodedBytes"),
+            {
+                let data = img.data.borrow();
+                match &*data {
+                    ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
+                    _ => panic!("expected ImageData::EncodedBytes"),
+                }
             }
         }
 
@@ -55,19 +58,25 @@ mod tests {
 
     #[test]
     fn from_reader_accepts_non_static_reader_slice() -> Result<()> {
-        let bytes = png_bytes();
-        let slice = &bytes[..]; // non-'static borrow
-        let mut cur = Cursor::new(slice); // Cursor<&[u8]> implements Read
-        let _ = Image::from_reader(&mut cur)?;
+        for format in ImageFormat::iter() {
+            let bytes = encoded_bytes(format);
+            let slice = &bytes[..]; // non-'static borrow
+            let mut cur = Cursor::new(slice); // Cursor<&[u8]> implements Read
+            let _ = Image::from_reader(&mut cur)?;
+        }
+
         Ok(())
     }
 
     #[test]
     fn from_reader_accepts_dyn_read_trait_object() -> Result<()> {
-        let bytes = png_bytes();
-        let mut cur = Cursor::new(bytes.clone());
-        let r: &mut dyn Read = &mut cur; // trait object (unsized)
-        Image::from_reader(r)?;
+        for format in ImageFormat::iter() {
+            let bytes = encoded_bytes(format);
+            let mut cur = Cursor::new(bytes.clone());
+            let r: &mut dyn Read = &mut cur; // trait object (unsized)
+            Image::from_reader(r)?;
+        }
+
         Ok(())
     }
 

@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata},
-        ImageSrc,
+        image::{ImageConfig, ImageData},
+        ImageMetadata, ImageSrc,
     },
     std::cell::RefCell,
 };

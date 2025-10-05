@@ -23,7 +23,10 @@ impl PngEncoder {
 mod tests {
     use {
         super::*,
-        crate::test_utils::{create_image_data, create_rgb8_data},
+        crate::{
+            test_utils::{raw_pixel_data, MOCK_IMAGE_DIMENSIONS},
+            ColorType,
+        },
         strum::IntoEnumIterator,
     };
 
@@ -31,8 +34,8 @@ mod tests {
     fn test_encode() {
         let encoder = PngEncoder::new();
         let mut output = Vec::new();
-        let (width, height) = (12, 12);
-        let rgb_data = create_rgb8_data(width, height);
+        let (width, height) = MOCK_IMAGE_DIMENSIONS;
+        let rgb_data = raw_pixel_data(ColorType::Rgb8);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, PngColorType::Rgb8);
 
@@ -44,8 +47,8 @@ mod tests {
     fn test_encode_fast() {
         let encoder = PngEncoder::fast();
         let mut output = Vec::new();
-        let (width, height) = (12, 12);
-        let rgb_data = create_rgb8_data(width, height);
+        let (width, height) = MOCK_IMAGE_DIMENSIONS;
+        let rgb_data = raw_pixel_data(ColorType::Rgb8);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, PngColorType::Rgb8);
 
@@ -57,8 +60,8 @@ mod tests {
     fn test_encode_best_compression() {
         let encoder = PngEncoder::best_compression();
         let mut output = Vec::new();
-        let (width, height) = (12, 12);
-        let rgb_data = create_rgb8_data(width, height);
+        let (width, height) = MOCK_IMAGE_DIMENSIONS;
+        let rgb_data = raw_pixel_data(ColorType::Rgb8);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, PngColorType::Rgb8);
 
@@ -71,8 +74,8 @@ mod tests {
         let encoder = PngEncoder::new();
         for ct in PngColorType::iter() {
             let mut output = Vec::new();
-            let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, (&ct).into());
+            let (width, height) = MOCK_IMAGE_DIMENSIONS;
+            let rgb_data = raw_pixel_data((&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 
@@ -86,8 +89,8 @@ mod tests {
         let encoder = PngEncoder::fast();
         for ct in PngColorType::iter() {
             let mut output = Vec::new();
-            let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, (&ct).into());
+            let (width, height) = MOCK_IMAGE_DIMENSIONS;
+            let rgb_data = raw_pixel_data((&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 
@@ -101,8 +104,8 @@ mod tests {
         let encoder = PngEncoder::best_compression();
         for ct in PngColorType::iter() {
             let mut output = Vec::new();
-            let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, (&ct).into());
+            let (width, height) = MOCK_IMAGE_DIMENSIONS;
+            let rgb_data = raw_pixel_data((&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 

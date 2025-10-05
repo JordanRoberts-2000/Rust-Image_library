@@ -33,7 +33,10 @@ impl WebPEncoder {
 mod tests {
     use {
         super::*,
-        crate::test_utils::{create_image_data, create_rgb8_data},
+        crate::{
+            test_utils::{raw_pixel_data, MOCK_IMAGE_DIMENSIONS},
+            ColorType,
+        },
         strum::IntoEnumIterator,
     };
 
@@ -41,8 +44,8 @@ mod tests {
     fn test_encode_lossy() {
         let encoder = WebPEncoder::lossy(80);
         let mut output = Vec::new();
-        let (width, height) = (12, 12);
-        let rgb_data = create_rgb8_data(width, height);
+        let (width, height) = MOCK_IMAGE_DIMENSIONS;
+        let rgb_data = raw_pixel_data(ColorType::Rgb8);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, WebPColorType::Rgb8);
 
@@ -54,8 +57,8 @@ mod tests {
     fn test_encode_lossless() {
         let encoder = WebPEncoder::lossless();
         let mut output = Vec::new();
-        let (width, height) = (12, 12);
-        let rgb_data = create_rgb8_data(width, height);
+        let (width, height) = MOCK_IMAGE_DIMENSIONS;
+        let rgb_data = raw_pixel_data(ColorType::Rgb8);
 
         let result = encoder.encode(&mut output, &rgb_data, width, height, WebPColorType::Rgb8);
 
@@ -66,8 +69,8 @@ mod tests {
     #[test]
     fn test_encode_lossy_different_qualities() {
         let qualities = [1, 25, 50, 75, 100];
-        let (width, height) = (12, 12);
-        let image_data = create_rgb8_data(width, height);
+        let (width, height) = MOCK_IMAGE_DIMENSIONS;
+        let image_data = raw_pixel_data(ColorType::Rgb8);
 
         for &quality in &qualities {
             let encoder = WebPEncoder::lossy(quality);
@@ -86,8 +89,8 @@ mod tests {
         let encoder = WebPEncoder::lossy(80);
         for ct in WebPColorType::iter() {
             let mut output = Vec::new();
-            let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, (&ct).into());
+            let (width, height) = MOCK_IMAGE_DIMENSIONS;
+            let rgb_data = raw_pixel_data((&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 
@@ -101,8 +104,8 @@ mod tests {
         let encoder = WebPEncoder::lossless();
         for ct in WebPColorType::iter() {
             let mut output = Vec::new();
-            let (width, height) = (12, 12);
-            let rgb_data = create_image_data(width, height, (&ct).into());
+            let (width, height) = MOCK_IMAGE_DIMENSIONS;
+            let rgb_data = raw_pixel_data((&ct).into());
 
             let result = encoder.encode(&mut output, &rgb_data, width, height, ct);
 

@@ -1,8 +1,8 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata},
+        image::{ImageConfig, ImageData},
         utils::http,
-        Image, ImageSrc, Result, WithSrc,
+        Image, ImageMetadata, ImageSrc, Result, WithSrc,
     },
     std::cell::RefCell,
     url::Url,
@@ -13,7 +13,7 @@ impl Image {
         let url = Url::parse(url.as_ref())?;
         let src = ImageSrc::Url(url.clone());
 
-        let bytes = http::blocking::download_image(&url).with_src(Some(&src))?;
+        let bytes = http::download_image(&url).with_src(Some(&src))?;
 
         let metadata = ImageMetadata::from_bytes(&bytes).with_src(Some(&src))?;
 
@@ -28,31 +28,40 @@ impl Image {
 
 #[cfg(test)]
 mod tests {
-    use {super::*, crate::test_utils::png_bytes, httpmock::prelude::*, url::Url};
+    use {
+        super::*,
+        crate::{test_utils::encoded_bytes, ImageFormat},
+        httpmock::prelude::*,
+        strum::IntoEnumIterator,
+        url::Url,
+    };
 
     #[test]
     fn from_url_happy_path_sets_fields_and_preserves_bytes() -> Result<()> {
         let server = MockServer::start();
-        let bytes = png_bytes();
 
-        let _m = server.mock(|when, then| {
-            when.method(GET).path("/img.png");
-            then.status(200).header("content-type", "image/png").body(bytes.clone());
-        });
+        for format in ImageFormat::iter() {
+            let bytes = encoded_bytes(format);
 
-        let url = Url::parse(&format!("{}/img.png", server.base_url())).unwrap();
-        let img = Image::from_url(&url)?;
+            let _m = server.mock(|when, then| {
+                when.method(GET).path("/img.png");
+                then.status(200).header("content-type", "image/png").body(bytes.clone());
+            });
 
-        match &img.src {
-            ImageSrc::Url(u) => assert_eq!(u, &url),
-            _ => panic!("expected ImageSrc::Url"),
-        }
+            let url = Url::parse(&format!("{}/img.png", server.base_url())).unwrap();
+            let img = Image::from_url(&url)?;
 
-        {
-            let data = img.data.borrow();
-            match &*data {
-                ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
-                _ => panic!("expected ImageData::EncodedBytes"),
+            match &img.src {
+                ImageSrc::Url(u) => assert_eq!(u, &url),
+                _ => panic!("expected ImageSrc::Url"),
+            }
+
+            {
+                let data = img.data.borrow();
+                match &*data {
+                    ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
+                    _ => panic!("expected ImageData::EncodedBytes"),
+                }
             }
         }
 

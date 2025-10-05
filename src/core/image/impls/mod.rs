@@ -8,9 +8,16 @@ mod constructors {
 }
 mod internal {
     mod encoding;
+    mod getters;
     mod processing;
-    mod resolve_color_type;
+    mod setters;
 }
-mod configure;
+mod helpers;
 mod output;
-mod transformations;
+mod configuration {
+    mod format;
+    mod io;
+    mod naming;
+    mod optimizations;
+    mod transformations;
+}

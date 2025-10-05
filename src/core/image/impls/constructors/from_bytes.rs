@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{ImageConfig, ImageData, ImageMetadata},
-        Image, ImageSrc, Result, WithSrc,
+        image::{ImageConfig, ImageData},
+        Image, ImageMetadata, ImageSrc, Result, WithSrc,
     },
     std::{borrow::Cow, cell::RefCell},
 };
@@ -25,24 +25,30 @@ impl Image {
 
 #[cfg(test)]
 mod tests {
-    use {super::*, crate::test_utils::png_bytes};
+    use {
+        super::*,
+        crate::{test_utils::encoded_bytes, ImageFormat},
+        strum::IntoEnumIterator,
+    };
 
     #[test]
     fn from_bytes_ok() -> Result<()> {
-        let bytes = png_bytes();
+        for format in ImageFormat::iter() {
+            let bytes = encoded_bytes(format);
 
-        let img = Image::from_bytes(&bytes)?;
+            let img = Image::from_bytes(&bytes)?;
 
-        match img.src {
-            ImageSrc::Bytes => {}
-            _ => panic!("expected ImageSrc::Bytes"),
-        }
+            match img.src {
+                ImageSrc::Bytes => {}
+                _ => panic!("expected ImageSrc::Bytes"),
+            }
 
-        {
-            let data = img.data.borrow();
-            match &*data {
-                ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
-                _ => panic!("expected ImageData::EncodedBytes"),
+            {
+                let data = img.data.borrow();
+                match &*data {
+                    ImageData::EncodedBytes(b) => assert_eq!(b, &bytes),
+                    _ => panic!("expected ImageData::EncodedBytes"),
+                }
             }
         }
 
