@@ -28,7 +28,7 @@ impl ImageFormat {
         ImageFormat::supported_exts().contains(&normalised.as_str())
     }
 
-    pub fn to_mime_type(&self) -> &'static str {
+    pub fn mime_type(&self) -> &'static str {
         match self {
             ImageFormat::WebP => "image/webp",
             ImageFormat::Png => "image/png",
@@ -134,6 +134,17 @@ impl From<ImageFormat> for image::ImageFormat {
     }
 }
 
+impl From<&ImageFormat> for image::ImageFormat {
+    fn from(fmt: &ImageFormat) -> image::ImageFormat {
+        match fmt {
+            ImageFormat::WebP => image::ImageFormat::WebP,
+            ImageFormat::Png => image::ImageFormat::Png,
+            ImageFormat::Jpeg => image::ImageFormat::Jpeg,
+            ImageFormat::Avif => image::ImageFormat::Avif,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -164,10 +175,10 @@ mod tests {
 
     #[test]
     fn test_to_mime_type() {
-        assert_eq!(ImageFormat::Png.to_mime_type(), "image/png");
-        assert_eq!(ImageFormat::Jpeg.to_mime_type(), "image/jpeg");
-        assert_eq!(ImageFormat::WebP.to_mime_type(), "image/webp");
-        assert_eq!(ImageFormat::Avif.to_mime_type(), "image/avif");
+        assert_eq!(ImageFormat::Png.mime_type(), "image/png");
+        assert_eq!(ImageFormat::Jpeg.mime_type(), "image/jpeg");
+        assert_eq!(ImageFormat::WebP.mime_type(), "image/webp");
+        assert_eq!(ImageFormat::Avif.mime_type(), "image/avif");
     }
 
     #[test]

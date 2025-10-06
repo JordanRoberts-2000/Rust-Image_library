@@ -4,6 +4,7 @@ mod core {
     pub mod encoders;
     pub mod image;
     pub mod images;
+    pub mod metadata;
 }
 pub(crate) mod constants;
 mod traits;
@@ -20,6 +21,7 @@ pub use {
         encoders::{AvifEncoder, JpegEncoder, PngEncoder, WebPEncoder},
         image::{AvifConfig, Image, JpegConfig, PngConfig, WebpConfig},
         images::{FormatFilter, FromFolderConfig, Images, ImagesBuilder},
+        metadata::ImageMetadata,
     },
     error::{ErrorKind, ImageError, ValidationError},
     types::{
@@ -28,7 +30,7 @@ pub use {
     },
 };
 pub(crate) use {
-    core::{image, images},
+    core::{image, images, metadata},
     error::*,
     traits::PixelFormat,
 };

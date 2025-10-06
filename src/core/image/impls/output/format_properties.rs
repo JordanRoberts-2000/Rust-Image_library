@@ -2,7 +2,7 @@ use crate::{BitDepth, ColorType, Image, Result};
 
 impl Image {
     pub fn color_type(&self) -> Result<ColorType> {
-        let img = self.processed_image()?;
+        let img = self.processed_image();
         self.resolve_color_type(&*img)
     }
 

@@ -5,7 +5,7 @@ use {
 
 impl Image {
     pub(crate) fn encode(&self, writer: impl Write, format: ImageFormat) -> Result<()> {
-        let img = self.processed_image()?;
+        let img = self.processed_image();
 
         match format {
             ImageFormat::Png => self.png_encode(writer, img),

@@ -1,16 +1,24 @@
 use {
-    crate::{ErrorKind, Result},
+    crate::{ErrorKind, ImageFormat, Result},
     image::{DynamicImage, ImageReader},
     std::path::Path,
 };
 
-pub fn from_path(path: impl AsRef<Path>) -> Result<DynamicImage> {
-    ImageReader::open(&path)
-        .map_err(|e| ErrorKind::Open { source: e, path: path.as_ref().to_path_buf() })?
+pub fn from_path(path: impl AsRef<Path>) -> Result<(DynamicImage, ImageFormat)> {
+    let p = path.as_ref();
+
+    let reader = ImageReader::open(p)
+        .map_err(|e| ErrorKind::Open { source: e, path: p.to_path_buf() })?
         .with_guessed_format()
-        .map_err(ErrorKind::FormatDetectionFailed)?
-        .decode()
-        .map_err(|e| ErrorKind::DecodeFile { source: e, path: path.as_ref().to_path_buf() }.into())
+        .map_err(ErrorKind::FormatDetectionFailed)?;
+
+    let ext_fmt = reader.format().ok_or(ErrorKind::UnknownFormat)?;
+    let format = ImageFormat::try_from(ext_fmt)?;
+
+    let img =
+        reader.decode().map_err(|e| ErrorKind::DecodeFile { source: e, path: p.to_path_buf() })?;
+
+    Ok((img, format))
 }
 
 #[cfg(test)]
@@ -37,10 +45,11 @@ mod tests {
         for fmt in ImageFormat::iter() {
             let p = image_file(&tmp, fmt);
 
-            let img = from_path(&p)
+            let (img, returned_fmt) = from_path(&p)
                 .unwrap_or_else(|e| panic!("from_path failed for {fmt:?} at {}: {e}", p.display()));
 
             assert_eq!(img.dimensions(), MOCK_IMAGE_DIMENSIONS, "wrong dimensions for {fmt:?}");
+            assert_eq!(fmt, returned_fmt, "wrong format for {fmt:?}");
         }
     }
 

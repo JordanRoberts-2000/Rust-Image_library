@@ -1,5 +1,5 @@
 use {
-    crate::{ErrorKind, ImageMetadata, Result},
+    crate::{ErrorKind, ImageMetadata, ImageSrc, Result, WithSrc},
     image::ImageReader,
     std::io::Cursor,
 };
@@ -8,7 +8,8 @@ impl ImageMetadata {
     pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self> {
         let reader = ImageReader::new(Cursor::new(bytes))
             .with_guessed_format()
-            .map_err(ErrorKind::FormatDetectionFailed)?;
+            .map_err(ErrorKind::FormatDetectionFailed)
+            .with_src(ImageSrc::Bytes)?;
 
         Self::from_image_reader(reader)
     }

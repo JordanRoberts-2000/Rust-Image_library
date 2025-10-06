@@ -8,7 +8,7 @@ use {
 
 impl Image {
     pub(crate) fn resolve_color_type(&self, img: &DynamicImage) -> Result<ColorType> {
-        let color_type: ColorType = img.color().try_into().with_src(self.error_src())?;
+        let color_type: ColorType = img.color().try_into().with_src(self.src())?;
 
         let mut output: ColorType = match self.format() {
             ImageFormat::WebP => WebPColorType::try_from(color_type).unwrap_or_default().into(),

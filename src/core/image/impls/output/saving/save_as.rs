@@ -17,20 +17,20 @@ impl Image {
             Some(os_str) => os_str
                 .to_str()
                 .ok_or_else(|| ValidationError::MissingExtension(path.to_path_buf()))
-                .with_src(self.error_src())?,
+                .with_src(self.src())?,
         };
 
-        let format = ImageFormat::try_from(ext).with_src(self.error_src())?;
+        let format = ImageFormat::try_from(ext).with_src(self.src())?;
 
         file::atomic::overwrite(&path, |file| {
             self.encode(file, format)
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))
         })
-        .with_src(self.error_src())?;
+        .with_src(self.src())?;
 
         if self.config.remove_source {
             if let ImageSrc::File(path) = &self.src {
-                file::trash_or_remove(path).with_src(self.error_src())?;
+                file::trash_or_remove(path).with_src(self.src())?;
             }
         }
 

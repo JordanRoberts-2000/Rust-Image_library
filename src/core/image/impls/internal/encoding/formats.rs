@@ -16,7 +16,7 @@ impl Image {
         let color_type: PngColorType = self.resolve_color_type(&*img)?.into();
         let bytes = color_type.bytes(&*img);
 
-        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.error_src())
+        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.src())
     }
 
     pub(crate) fn jpeg_encode(&self, writer: impl Write, img: Ref<'_, DynamicImage>) -> Result<()> {
@@ -26,10 +26,10 @@ impl Image {
             JpegEncoder::new().set_progressive(config.progressive).with_quality(config.quality);
 
         let color_type: JpegColorType =
-            self.resolve_color_type(&*img)?.try_into().with_src(self.error_src())?;
+            self.resolve_color_type(&*img)?.try_into().with_src(self.src())?;
         let bytes = color_type.bytes(&*img);
 
-        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.error_src())
+        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.src())
     }
 
     pub(crate) fn webp_encode(&self, writer: impl Write, img: Ref<'_, DynamicImage>) -> Result<()> {
@@ -42,10 +42,10 @@ impl Image {
         };
 
         let color_type: WebPColorType =
-            self.resolve_color_type(&*img)?.try_into().with_src(self.error_src())?;
+            self.resolve_color_type(&*img)?.try_into().with_src(self.src())?;
         let bytes = color_type.bytes(&*img);
 
-        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.error_src())
+        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.src())
     }
 
     pub(crate) fn avif_encode(&self, writer: impl Write, img: Ref<'_, DynamicImage>) -> Result<()> {
@@ -54,9 +54,9 @@ impl Image {
         let encoder = AvifEncoder::new().with_speed(config.speed).with_quality(config.quality);
 
         let color_type: AvifColorType =
-            self.resolve_color_type(&*img)?.try_into().with_src(self.error_src())?;
+            self.resolve_color_type(&*img)?.try_into().with_src(self.src())?;
         let bytes = color_type.bytes(&*img);
 
-        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.error_src())
+        encoder.encode(writer, &bytes, w, h, color_type).with_src(self.src())
     }
 }

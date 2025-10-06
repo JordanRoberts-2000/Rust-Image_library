@@ -1,8 +1,6 @@
 use {
-    crate::{
-        image::{ImageConfig, ImageData},
-        ImageMetadata, ImageSrc,
-    },
+    crate::{image::ImageConfig, ImageMetadata, ImageSrc},
+    image::DynamicImage,
     std::cell::RefCell,
 };
 
@@ -10,6 +8,6 @@ use {
 pub struct Image {
     pub(super) src: ImageSrc,
     pub(super) config: ImageConfig,
-    pub(super) data: RefCell<ImageData>,
+    pub(super) decoded: RefCell<DynamicImage>,
     pub(super) metadata: ImageMetadata,
 }

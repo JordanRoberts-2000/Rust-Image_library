@@ -17,14 +17,14 @@ impl Image {
     }
 
     pub fn pixel_data_size(&self) -> Result<u64> {
-        let img = self.processed_image()?;
+        let img = self.processed_image();
         Ok(img.as_bytes().len() as u64)
     }
 
     pub fn source_file_size(&self) -> Result<u64> {
         match &self.src {
-            ImageSrc::File(path) => Ok(file::size(path).with_src(self.error_src())?),
-            _ => Err(ImageError::new(ErrorKind::SourceIsNotFile, self.error_src().cloned())),
+            ImageSrc::File(path) => Ok(file::size(path).with_src(self.src())?),
+            _ => Err(ImageError::new(ErrorKind::SourceIsNotFile, Some(self.src()))),
         }
     }
 }

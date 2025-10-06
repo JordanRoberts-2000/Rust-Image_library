@@ -1,10 +1,22 @@
 use {
-    crate::{ErrorKind, Result},
-    image::{load_from_memory, DynamicImage},
+    crate::{ErrorKind, ImageFormat, Result},
+    image::{DynamicImage, ImageReader},
+    std::io::Cursor,
 };
 
-pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<DynamicImage> {
-    load_from_memory(bytes.as_ref()).map_err(|e| ErrorKind::DecodeFromMemory(e).into())
+pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<(DynamicImage, ImageFormat)> {
+    let b = bytes.as_ref();
+
+    let reader = ImageReader::new(Cursor::new(b))
+        .with_guessed_format()
+        .map_err(ErrorKind::FormatDetectionFailed)?;
+
+    let ext_fmt = reader.format().ok_or(ErrorKind::UnknownFormat)?;
+    let format = ImageFormat::try_from(ext_fmt)?;
+
+    let img = reader.decode().map_err(ErrorKind::DecodeFromMemory)?;
+
+    Ok((img, format))
 }
 
 #[cfg(test)]
@@ -23,13 +35,14 @@ mod tests {
 
     #[test]
     fn from_bytes_all_supported_formats_ok() {
-        for format in ImageFormat::iter() {
-            let bytes = encoded_bytes(format);
+        for fmt in ImageFormat::iter() {
+            let bytes = encoded_bytes(fmt);
 
-            let img = from_bytes(&bytes)
-                .unwrap_or_else(|e| panic!("from_bytes failed for {format:?}: {e}"));
+            let (img, returned_fmt) =
+                from_bytes(&bytes).unwrap_or_else(|e| panic!("from_bytes failed for {fmt:?}: {e}"));
 
-            assert_eq!(img.dimensions(), MOCK_IMAGE_DIMENSIONS, "wrong dimensions for {format:?}");
+            assert_eq!(img.dimensions(), MOCK_IMAGE_DIMENSIONS, "wrong dimensions for {fmt:?}");
+            assert_eq!(fmt, returned_fmt, "wrong format for {fmt:?}");
         }
     }
 

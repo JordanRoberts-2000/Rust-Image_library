@@ -9,7 +9,6 @@ mod constructors {
 mod internal {
     mod encoding;
     mod getters;
-    mod processing;
     mod setters;
 }
 mod helpers;

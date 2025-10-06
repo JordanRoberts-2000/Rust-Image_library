@@ -5,7 +5,7 @@ use {
 
 impl Image {
     pub fn palette(&self) -> Result<Vec<Rgb>> {
-        let img = self.processed_image()?;
+        let img = self.processed_image();
 
         let palette = if img.color().has_alpha() {
             let rgba_img = img.to_rgba8();
@@ -17,7 +17,7 @@ impl Image {
 
         Ok(palette
             .map_err(ErrorKind::GetColors)
-            .with_src(self.error_src())?
+            .with_src(self.src())?
             .into_iter()
             .map(|color| Rgb { r: color.r, g: color.g, b: color.b })
             .collect())
@@ -25,6 +25,6 @@ impl Image {
 
     pub fn dominant_color(&self) -> Result<Rgb> {
         let palette = self.palette()?;
-        palette.get(0).cloned().ok_or_else(|| ErrorKind::EmptyPalette).with_src(self.error_src())
+        palette.get(0).cloned().ok_or_else(|| ErrorKind::EmptyPalette).with_src(self.src())
     }
 }

@@ -1,12 +1,15 @@
 use {
-    std::{fmt, path::PathBuf},
+    std::{
+        fmt,
+        path::{Path, PathBuf},
+    },
     url::Url,
 };
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ImageSrc {
     File(PathBuf),
-    Url(Url),
+    Url(String),
     Base64(String),
     Bytes,
     RawPixels,
@@ -23,5 +26,33 @@ impl fmt::Display for ImageSrc {
             ImageSrc::RawPixels => f.write_str("raw pixels"),
             ImageSrc::Reader => f.write_str("reader"),
         }
+    }
+}
+
+impl From<PathBuf> for ImageSrc {
+    #[inline]
+    fn from(path: PathBuf) -> Self {
+        ImageSrc::File(path)
+    }
+}
+
+impl From<&Path> for ImageSrc {
+    #[inline]
+    fn from(path: &Path) -> Self {
+        ImageSrc::File(path.to_path_buf())
+    }
+}
+
+impl From<Url> for ImageSrc {
+    #[inline]
+    fn from(url: Url) -> Self {
+        ImageSrc::Url(url.to_string())
+    }
+}
+
+impl From<&Url> for ImageSrc {
+    #[inline]
+    fn from(url: &Url) -> Self {
+        ImageSrc::Url(url.to_string())
     }
 }

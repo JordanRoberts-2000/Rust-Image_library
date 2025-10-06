@@ -1,16 +1,15 @@
 use {
-    crate::{utils::http, ImageMetadata, ImageSrc, Result, WithSrc},
+    crate::{utils::http, ImageMetadata, Result, WithSrc},
     url::Url,
 };
 
 impl ImageMetadata {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
         let url = Url::parse(url.as_ref())?;
-        let src = ImageSrc::Url(url.clone());
 
-        let bytes = http::download_image(&url).with_src(Some(&src))?;
+        let bytes = http::download_image(&url).with_src(&url)?;
 
-        Self::from_bytes(&bytes).with_src(Some(&src))
+        Self::from_bytes(&bytes).with_src(&url)
     }
 }
 
