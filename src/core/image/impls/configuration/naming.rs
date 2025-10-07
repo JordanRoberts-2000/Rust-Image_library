@@ -1,7 +1,7 @@
 use crate::Image;
 
 impl Image {
-    pub fn with_file_name(&mut self, file_name: impl AsRef<str>) -> &mut Self {
+    pub fn set_file_name(&mut self, file_name: impl AsRef<str>) -> &mut Self {
         self.config.file_name = file_name.as_ref().to_string();
         self
     }

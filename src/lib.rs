@@ -20,7 +20,7 @@ pub use {
     core::{
         encoders::{AvifEncoder, JpegEncoder, PngEncoder, WebPEncoder},
         image::{AvifConfig, Image, JpegConfig, PngConfig, WebpConfig},
-        images::{FormatFilter, FromFolderConfig, Images, ImagesBuilder},
+        images::{archive_formats, Archive, FormatFilter, FromFolderConfig, Images, ImagesBuilder},
         metadata::ImageMetadata,
     },
     error::{ErrorKind, ImageError, ValidationError},
