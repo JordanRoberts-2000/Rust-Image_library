@@ -2,7 +2,7 @@ use {
     crate::{
         encoding::{
             macros::{forward_color_type_impls, forward_transparency_impls},
-            AlphaChannelOps, BitDepth, ColorType, ColorTypeOps,
+            AlphaChannelOps, ColorType, ColorTypeOps,
         },
         ImageError, ValidationError,
     },
@@ -43,7 +43,7 @@ impl ColorTypeOps for AvifColorType {
         ColorType::from(*self).channels()
     }
 
-    fn bit_depth(&self) -> BitDepth {
+    fn bit_depth(&self) -> u8 {
         ColorType::from(*self).bit_depth()
     }
 

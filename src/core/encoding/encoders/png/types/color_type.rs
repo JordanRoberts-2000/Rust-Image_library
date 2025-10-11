@@ -1,7 +1,7 @@
 use {
     crate::encoding::{
         macros::{forward_color_type_impls, forward_grayscale_impls, forward_transparency_impls},
-        AlphaChannelOps, BitDepth, ColorType, ColorTypeOps, GrayscaleOps,
+        AlphaChannelOps, ColorType, ColorTypeOps, GrayscaleOps,
     },
     image::DynamicImage,
     std::borrow::Cow,
@@ -82,7 +82,7 @@ impl ColorTypeOps for PngColorType {
         ColorType::from(*self).channels()
     }
     #[inline]
-    fn bit_depth(&self) -> BitDepth {
+    fn bit_depth(&self) -> u8 {
         ColorType::from(*self).bit_depth()
     }
     #[inline]

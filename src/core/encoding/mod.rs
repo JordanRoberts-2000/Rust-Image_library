@@ -2,13 +2,13 @@ mod encoders {
     pub mod avif;
     pub mod jpeg;
     pub mod png;
+    pub mod tiff;
     pub mod webp;
 }
 mod error;
 pub(crate) mod macros;
 pub(crate) mod utils;
 mod types {
-    pub mod bit_depth;
     pub mod color_type;
     pub mod compression;
     pub mod quality;
@@ -23,9 +23,7 @@ pub(crate) use traits::{
     encoder_ops::EncoderOps,
 };
 pub use {
-    encoders::{avif::*, jpeg::*, png::*, webp::*},
+    encoders::{avif::*, jpeg::*, png::*, tiff::*, webp::*},
     error::{EncodingError, EncodingErrorKind, EncodingValidationError},
-    types::{
-        bit_depth::BitDepth, color_type::ColorType, compression::CompressionType, quality::Quality,
-    },
+    types::{color_type::ColorType, compression::CompressionType, quality::Quality},
 };

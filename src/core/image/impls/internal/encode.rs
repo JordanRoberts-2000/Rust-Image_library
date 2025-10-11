@@ -1,6 +1,6 @@
 use {
     crate::{
-        encoding::{AvifEncoder, JpegEncoder, PngEncoder, WebpEncoder},
+        encoding::{AvifEncoder, JpegEncoder, PngEncoder, TiffEncoder, WebpEncoder},
         image::types::ResolvedColorType,
         Image, ImageFormat, Result,
     },
@@ -26,6 +26,7 @@ impl Image {
             ResolvedColorType::Avif(ct) => {
                 AvifEncoder::from(self.config.avif()).encode(writer, ct.bytes(&*img), w, h, ct)
             }
+            ResolvedColorType::Tiff(ct) => TiffEncoder::encode(writer, ct.bytes(&*img), w, h, ct),
         }?;
 
         Ok(())

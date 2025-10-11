@@ -1,6 +1,8 @@
 use {
     crate::{
-        encoding::{AvifColorType, ColorType, JpegColorType, PngColorType, WebpColorType},
+        encoding::{
+            AvifColorType, ColorType, JpegColorType, PngColorType, TiffColorType, WebpColorType,
+        },
         image::{types::ResolvedColorType, utils::alpha_is_unused},
         Image, ImageFormat, Result,
     },
@@ -57,6 +59,10 @@ impl Image {
                     ct = ct.remove_alpha();
                 }
                 Ok(ResolvedColorType::Avif(ct))
+            }
+
+            ImageFormat::Tiff => {
+                Ok(ResolvedColorType::Tiff(TiffColorType::try_from(base).unwrap_or_default()))
             }
         }
     }

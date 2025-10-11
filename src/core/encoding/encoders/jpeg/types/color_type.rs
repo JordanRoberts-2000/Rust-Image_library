@@ -4,7 +4,7 @@ use {
     crate::{
         encoding::{
             macros::{forward_color_type_impls, forward_grayscale_impls},
-            BitDepth, ColorType, ColorTypeOps, GrayscaleOps,
+            ColorType, ColorTypeOps, GrayscaleOps,
         },
         ImageError, ValidationError,
     },
@@ -34,7 +34,7 @@ impl ColorTypeOps for JpegColorType {
         ColorType::from(*self).channels()
     }
 
-    fn bit_depth(&self) -> BitDepth {
+    fn bit_depth(&self) -> u8 {
         ColorType::from(*self).bit_depth()
     }
 

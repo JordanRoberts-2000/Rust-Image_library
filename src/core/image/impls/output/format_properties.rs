@@ -1,7 +1,4 @@
-use crate::{
-    encoding::{BitDepth, ColorType},
-    Image, Result,
-};
+use crate::{encoding::ColorType, Image, Result};
 
 impl Image {
     pub fn color_type(&self) -> Result<ColorType> {
@@ -19,7 +16,7 @@ impl Image {
         Ok(color_type.is_grayscale())
     }
 
-    pub fn bit_depth(&self) -> Result<BitDepth> {
+    pub fn bit_depth(&self) -> Result<u8> {
         let color_type = self.color_type()?;
         Ok(color_type.bit_depth())
     }

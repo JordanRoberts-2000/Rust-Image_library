@@ -4,7 +4,7 @@ use {
             macros::{
                 forward_color_type_impls, forward_grayscale_impls, forward_transparency_impls,
             },
-            AlphaChannelOps, BitDepth, ColorTypeOps, GrayscaleOps,
+            AlphaChannelOps, ColorTypeOps, GrayscaleOps,
         },
         ImageError, ValidationError,
     },
@@ -76,17 +76,17 @@ impl ColorTypeOps for ColorType {
     }
 
     #[inline]
-    fn bit_depth(&self) -> BitDepth {
+    fn bit_depth(&self) -> u8 {
         match *self {
             ColorType::Rgb8
             | ColorType::Rgba8
             | ColorType::Grayscale8
-            | ColorType::GrayscaleAlpha8 => BitDepth::Eight,
+            | ColorType::GrayscaleAlpha8 => 8,
 
             ColorType::Rgb16
             | ColorType::Rgba16
             | ColorType::Grayscale16
-            | ColorType::GrayscaleAlpha16 => BitDepth::Sixteen,
+            | ColorType::GrayscaleAlpha16 => 16,
         }
     }
 

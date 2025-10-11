@@ -1,10 +1,13 @@
-use crate::encoding::{AvifColorType, ColorType, JpegColorType, PngColorType, WebpColorType};
+use crate::encoding::{
+    AvifColorType, ColorType, JpegColorType, PngColorType, TiffColorType, WebpColorType,
+};
 
 pub enum ResolvedColorType {
     Png(PngColorType),
     Jpeg(JpegColorType),
     Webp(WebpColorType),
     Avif(AvifColorType),
+    Tiff(TiffColorType),
 }
 
 impl From<ResolvedColorType> for ColorType {
@@ -14,6 +17,7 @@ impl From<ResolvedColorType> for ColorType {
             ResolvedColorType::Jpeg(ct) => ct.into(),
             ResolvedColorType::Webp(ct) => ct.into(),
             ResolvedColorType::Avif(ct) => ct.into(),
+            ResolvedColorType::Tiff(ct) => ct.into(),
         }
     }
 }

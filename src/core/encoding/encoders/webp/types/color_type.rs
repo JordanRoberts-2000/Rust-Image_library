@@ -4,7 +4,7 @@ use {
             macros::{
                 forward_color_type_impls, forward_grayscale_impls, forward_transparency_impls,
             },
-            AlphaChannelOps, BitDepth, ColorType, ColorTypeOps, GrayscaleOps,
+            AlphaChannelOps, ColorType, ColorTypeOps, GrayscaleOps,
         },
         ImageError, ValidationError,
     },
@@ -60,7 +60,7 @@ impl ColorTypeOps for WebpColorType {
         ColorType::from(*self).channels()
     }
 
-    fn bit_depth(&self) -> BitDepth {
+    fn bit_depth(&self) -> u8 {
         ColorType::from(*self).bit_depth()
     }
 

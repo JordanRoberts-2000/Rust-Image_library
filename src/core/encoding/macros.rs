@@ -22,8 +22,16 @@ macro_rules! forward_color_type_impls {
             <Self as $crate::encoding::ColorTypeOps>::channels(self)
         }
         #[inline]
-        pub fn bit_depth(&self) -> $crate::encoding::BitDepth {
+        pub fn bit_depth(&self) -> u8 {
             <Self as $crate::encoding::ColorTypeOps>::bit_depth(self)
+        }
+        #[inline]
+        pub fn bytes_per_pixel(&self) -> usize {
+            <Self as $crate::encoding::ColorTypeOps>::bytes_per_pixel(self)
+        }
+        #[inline]
+        pub fn buffer_size(&self, w: u32, h: u32) -> u64 {
+            <Self as $crate::encoding::ColorTypeOps>::buffer_size(self, w, h)
         }
         #[inline]
         pub fn supports_grayscale() -> bool {
