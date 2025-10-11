@@ -1,6 +1,9 @@
 use {
     crate::{utils::normalise_ext, ImageError, ValidationError},
-    std::path::{Path, PathBuf},
+    std::{
+        fmt,
+        path::{Path, PathBuf},
+    },
     strum::IntoEnumIterator,
     strum_macros::EnumIter,
 };
@@ -16,10 +19,10 @@ pub enum ImageFormat {
 
 impl ImageFormat {
     pub fn supported_exts() -> Vec<&'static str> {
-        ImageFormat::variants().iter().flat_map(|fmt| fmt.extensions()).copied().collect()
+        ImageFormat::all().iter().flat_map(|fmt| fmt.extensions()).copied().collect()
     }
 
-    pub fn variants() -> Vec<Self> {
+    pub fn all() -> Vec<Self> {
         ImageFormat::iter().collect()
     }
 
@@ -68,6 +71,18 @@ impl TryFrom<&str> for ImageFormat {
             "avif" => Ok(ImageFormat::Avif),
             _ => Err(ValidationError::UnsupportedExtension(ext.to_string()).into()),
         }
+    }
+}
+
+impl fmt::Display for ImageFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            ImageFormat::WebP => "webp",
+            ImageFormat::Png => "png",
+            ImageFormat::Jpeg => "jpeg",
+            ImageFormat::Avif => "avif",
+        };
+        f.write_str(s)
     }
 }
 
@@ -265,13 +280,13 @@ mod tests {
     }
 
     #[test]
-    fn test_variants() {
-        let variants = ImageFormat::variants();
-        assert_eq!(variants.len(), 4);
-        assert!(variants.contains(&ImageFormat::Png));
-        assert!(variants.contains(&ImageFormat::Jpeg));
-        assert!(variants.contains(&ImageFormat::WebP));
-        assert!(variants.contains(&ImageFormat::Avif));
+    fn test_all() {
+        let all = ImageFormat::all();
+        assert_eq!(all.len(), 4);
+        assert!(all.contains(&ImageFormat::Png));
+        assert!(all.contains(&ImageFormat::Jpeg));
+        assert!(all.contains(&ImageFormat::WebP));
+        assert!(all.contains(&ImageFormat::Avif));
     }
 
     #[test]

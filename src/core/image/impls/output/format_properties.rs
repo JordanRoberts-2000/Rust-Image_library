@@ -1,9 +1,12 @@
-use crate::{BitDepth, ColorType, Image, Result};
+use crate::{
+    encoding::{BitDepth, ColorType},
+    Image, Result,
+};
 
 impl Image {
     pub fn color_type(&self) -> Result<ColorType> {
         let img = self.processed_image();
-        self.resolve_color_type(&*img)
+        self.resolve_color_type(&*img, self.format()).map(Into::into)
     }
 
     pub fn has_transparency(&self) -> Result<bool> {

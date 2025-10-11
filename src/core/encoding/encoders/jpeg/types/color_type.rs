@@ -1,7 +1,13 @@
 #[cfg(feature = "progressive-jpeg")]
 use mozjpeg::ColorSpace;
 use {
-    crate::{BitDepth, ColorType, ImageError, ValidationError},
+    crate::{
+        encoding::{
+            macros::{forward_color_type_impls, forward_grayscale_impls},
+            BitDepth, ColorType, ColorTypeOps, GrayscaleOps,
+        },
+        ImageError, ValidationError,
+    },
     image::DynamicImage,
     std::{borrow::Cow, fmt},
     strum_macros::EnumIter,
@@ -15,20 +21,52 @@ pub enum JpegColorType {
 }
 
 impl JpegColorType {
-    pub(crate) fn raw_pixels<'a>(self, img: &'a DynamicImage) -> Cow<'a, [u8]> {
-        ColorType::from(self).raw_pixels(img)
+    forward_grayscale_impls!();
+    forward_color_type_impls!();
+
+    pub(crate) fn bytes<'a>(&self, img: &'a DynamicImage) -> Cow<'a, [u8]> {
+        ColorType::from(*self).bytes(img)
+    }
+}
+
+impl ColorTypeOps for JpegColorType {
+    fn channels(&self) -> u8 {
+        ColorType::from(*self).channels()
     }
 
-    pub fn channels(self) -> u8 {
-        ColorType::from(self).channels()
+    fn bit_depth(&self) -> BitDepth {
+        ColorType::from(*self).bit_depth()
     }
 
-    pub fn bit_depth(self) -> BitDepth {
-        ColorType::from(self).bit_depth()
+    fn supports_grayscale() -> bool {
+        true
     }
 
-    pub fn is_grayscale(self) -> bool {
-        ColorType::from(self).is_grayscale()
+    fn supports_transparency() -> bool {
+        false
+    }
+}
+
+impl GrayscaleOps for JpegColorType {
+    #[inline]
+    fn is_grayscale(&self) -> bool {
+        matches!(self, JpegColorType::Grayscale8)
+    }
+
+    #[inline]
+    fn to_grayscale(self) -> Self {
+        match self {
+            JpegColorType::Rgb8 => JpegColorType::Grayscale8,
+            other => other,
+        }
+    }
+
+    #[inline]
+    fn to_color(self) -> Self {
+        match self {
+            JpegColorType::Grayscale8 => JpegColorType::Rgb8,
+            other => other,
+        }
     }
 }
 

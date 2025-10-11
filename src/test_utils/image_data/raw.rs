@@ -1,4 +1,7 @@
-use crate::{test_utils::MOCK_IMAGE_DIMENSIONS, BitDepth, ColorType};
+use crate::{
+    encoding::{BitDepth, ColorType},
+    test_utils::MOCK_IMAGE_DIMENSIONS,
+};
 
 pub fn raw_pixel_data(color_type: ColorType) -> Vec<u8> {
     let (w, h) = MOCK_IMAGE_DIMENSIONS;

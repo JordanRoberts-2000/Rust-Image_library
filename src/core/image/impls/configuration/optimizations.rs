@@ -1,8 +1,8 @@
-use crate::{CompressionType, Image};
+use crate::{encoding::CompressionType, Image};
 
 impl Image {
-    pub fn quality(&mut self, quality: u32) -> &mut Self {
-        self.config.quality = Some(quality.clamp(1, 100));
+    pub fn quality(&mut self, quality: u8) -> &mut Self {
+        self.config.quality = Some(quality);
         self
     }
 

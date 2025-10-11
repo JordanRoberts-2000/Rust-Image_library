@@ -6,8 +6,8 @@ use {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Image {
-    pub(super) src: ImageSrc,
-    pub(super) config: ImageConfig,
-    pub(super) decoded: RefCell<DynamicImage>,
-    pub(super) metadata: ImageMetadata,
+    pub(crate) src: ImageSrc,
+    pub(crate) config: ImageConfig,
+    pub(crate) decoded: RefCell<DynamicImage>,
+    pub(crate) metadata: ImageMetadata,
 }

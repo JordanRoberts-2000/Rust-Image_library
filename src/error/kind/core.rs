@@ -1,7 +1,7 @@
 #[cfg(feature = "tokio")]
 use tokio::task::JoinError;
 use {
-    crate::{EncodingError, ValidationError},
+    crate::{encoding::EncodingError, ValidationError},
     std::{io, path::PathBuf},
     url::Url,
 };

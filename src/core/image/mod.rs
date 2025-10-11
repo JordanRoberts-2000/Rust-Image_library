@@ -4,8 +4,5 @@ mod traits;
 mod types;
 pub mod utils;
 
+pub use core::Image;
 pub(crate) use types::{ImageConfig, TransformOp};
-pub use {
-    core::Image,
-    types::{AvifConfig, JpegConfig, PngConfig, WebpConfig},
-};

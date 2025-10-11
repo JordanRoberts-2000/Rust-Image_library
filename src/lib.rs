@@ -1,7 +1,7 @@
 mod error;
 mod types;
 mod core {
-    pub mod encoders;
+    pub mod encoding;
     pub mod image;
     pub mod images;
     pub mod metadata;
@@ -18,16 +18,13 @@ pub(crate) mod test_utils;
 
 pub use {
     core::{
-        encoders::{AvifEncoder, JpegEncoder, PngEncoder, WebPEncoder},
-        image::{AvifConfig, Image, JpegConfig, PngConfig, WebpConfig},
+        encoding,
+        image::Image,
         images::{archive_formats, Archive, FormatFilter, FromFolderConfig, Images, ImagesBuilder},
         metadata::ImageMetadata,
     },
     error::{ErrorKind, ImageError, ValidationError},
-    types::{
-        pixel, AvifColorType, BitDepth, Blur, ColorType, CompressionType, CropEdge, ImageFormat,
-        ImageSrc, JpegColorType, PngColorType, PngCompressionType, Rgb, WebPColorType,
-    },
+    types::{pixels, Blur, CropEdge, ImageFormat, ImageSrc, Rgb},
 };
 pub(crate) use {
     core::{image, images, metadata},

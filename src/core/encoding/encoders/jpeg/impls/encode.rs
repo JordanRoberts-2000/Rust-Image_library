@@ -1,15 +1,20 @@
 use {
-    crate::encoding::{utils, EncodingErrorKind, JpegColorType, JpegEncoder},
+    crate::{
+        encoding::{EncoderOps, EncodingErrorKind, JpegColorType, JpegEncoder},
+        ImageFormat,
+    },
     image::codecs::jpeg::JpegEncoder as ImageEncoder,
     std::io::Write,
 };
 
-impl JpegEncoder {
-    pub(crate) fn encode_inner(
-        &self, writer: impl Write, bytes: &[u8], width: u32, height: u32, color_type: JpegColorType,
-    ) -> Result<(), EncodingErrorKind> {
-        utils::validate_buffer(&bytes, width, height, color_type)?;
+impl EncoderOps for JpegEncoder {
+    type ColorType = JpegColorType;
+    const IMAGE_FORMAT: ImageFormat = ImageFormat::Jpeg;
 
+    fn encode_impl(
+        &self, writer: impl Write, bytes: &[u8], width: u32, height: u32,
+        color_type: Self::ColorType,
+    ) -> Result<(), EncodingErrorKind> {
         #[cfg(feature = "progressive-jpeg")]
         {
             if self.progressive {
@@ -36,8 +41,8 @@ mod tests {
     use {
         super::*,
         crate::{
+            encoding::ColorType,
             test_utils::{raw_pixel_data, MOCK_IMAGE_DIMENSIONS},
-            ColorType,
         },
         strum::IntoEnumIterator,
     };
@@ -91,8 +96,6 @@ mod tests {
     #[cfg(feature = "progressive-jpeg")]
     #[test]
     fn test_encode_progressive_different_qualities() {
-        use crate::ColorType;
-
         let qualities = [1, 25, 50, 75, 100];
         let (width, height) = MOCK_IMAGE_DIMENSIONS;
         let image_data = raw_pixel_data(ColorType::Rgb8);

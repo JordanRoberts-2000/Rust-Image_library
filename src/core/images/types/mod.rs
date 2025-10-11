@@ -13,11 +13,3 @@ pub use {
     from_folder_config::FromFolderConfig,
     images_builder::ImagesBuilder,
 };
-
-#[derive(Debug, Clone, Copy, Default, PartialEq)]
-pub enum CollisionStrategy {
-    #[default]
-    Dedupe,
-    RemoveDuplicates,
-    Error,
-}

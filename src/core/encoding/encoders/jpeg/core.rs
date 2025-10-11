@@ -1,9 +1,7 @@
 use {
     crate::{
         constants::DEFAULT_JPEG_QUALITY,
-        encoding::{EncodingError, JpegColorType},
-        types::Quality,
-        ImageFormat,
+        encoding::{EncoderOps, EncodingError, JpegColorType, Quality},
     },
     std::io::Write,
 };
@@ -36,11 +34,10 @@ impl JpegEncoder {
     }
 
     pub fn encode(
-        &self, writer: impl Write, bytes: impl AsRef<[u8]>, width: u32, height: u32,
-        color_type: impl Into<JpegColorType>,
+        &self, writer: impl Write, bytes: impl AsRef<[u8]>, w: u32, h: u32,
+        ct: impl Into<JpegColorType>,
     ) -> Result<(), EncodingError> {
-        self.encode_inner(writer, bytes.as_ref(), width, height, color_type.into())
-            .map_err(|kind| EncodingError::new(ImageFormat::Jpeg, kind))
+        <Self as EncoderOps>::encode(&self, writer, bytes, w, h, ct)
     }
 }
 

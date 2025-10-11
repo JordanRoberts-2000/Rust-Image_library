@@ -1,5 +1,5 @@
 use {
-    crate::{ColorType, PixelFormat, Result, ValidationError},
+    crate::{encoding::ColorType, PixelFormat, Result, ValidationError},
     image::{DynamicImage, ImageBuffer, Luma, LumaA, Rgb, Rgba},
 };
 

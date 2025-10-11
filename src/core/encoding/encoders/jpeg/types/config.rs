@@ -1,6 +1,9 @@
-use crate::{constants::DEFAULT_JPEG_QUALITY, encoding::JpegEncoder, types::Quality};
+use crate::{
+    constants::DEFAULT_JPEG_QUALITY,
+    encoding::{JpegEncoder, Quality},
+};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct JpegConfig {
     pub quality: Quality,
     pub progressive: bool,

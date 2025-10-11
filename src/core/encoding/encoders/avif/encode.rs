@@ -1,16 +1,22 @@
 use {
-    crate::{AvifColorType, AvifEncoder, EncodingError},
+    crate::{
+        encoding::{AvifColorType, AvifEncoder, EncoderOps, EncodingErrorKind},
+        ImageFormat,
+    },
     image::{codecs::avif::AvifEncoder as Encoder, ImageEncoder},
     std::io::Write,
 };
 
-impl AvifEncoder {
-    pub fn encode(
-        &self, writer: impl Write, bytes: &[u8], width: u32, height: u32, color_type: AvifColorType,
-    ) -> Result<(), EncodingError> {
-        Encoder::new_with_speed_quality(writer, self.speed, self.quality)
-            .write_image(bytes, width, height, color_type.into())
-            .map_err(|err| EncodingError::AvifEncoding { err })
+impl EncoderOps for AvifEncoder {
+    type ColorType = AvifColorType;
+    const IMAGE_FORMAT: ImageFormat = ImageFormat::Avif;
+
+    fn encode_impl(
+        &self, writer: impl Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
+    ) -> Result<(), EncodingErrorKind> {
+        Encoder::new_with_speed_quality(writer, self.speed.into(), self.quality.into())
+            .write_image(bytes, w, h, ct.into())
+            .map_err(|e| EncodingErrorKind::Encode(Box::new(e)))
     }
 }
 
@@ -19,8 +25,8 @@ mod tests {
     use {
         super::*,
         crate::{
+            encoding::ColorType,
             test_utils::{raw_pixel_data, MOCK_IMAGE_DIMENSIONS},
-            ColorType,
         },
         strum::IntoEnumIterator,
     };
@@ -44,7 +50,7 @@ mod tests {
         for ct in AvifColorType::iter() {
             let mut output = Vec::new();
             let (width, height) = MOCK_IMAGE_DIMENSIONS;
-            let raw_pixels = raw_pixel_data((&ct).into());
+            let raw_pixels = raw_pixel_data(ct.into());
 
             let result = encoder.encode(&mut output, &raw_pixels, width, height, ct);
 

@@ -1,13 +1,5 @@
 use image::codecs::png::{CompressionType as ImgPngCompressionType, FilterType};
 
-#[derive(Debug, serde::Deserialize, Clone, Default, PartialEq, Copy)]
-#[serde(rename_all = "lowercase")]
-pub enum CompressionType {
-    #[default]
-    Lossy,
-    Lossless,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PngCompressionType {
     Default,

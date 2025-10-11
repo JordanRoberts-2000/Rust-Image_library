@@ -7,7 +7,7 @@ mod constructors {
     mod from_url;
 }
 mod internal {
-    mod encoding;
+    mod encode;
     mod getters;
     mod setters;
 }

@@ -1,4 +1,12 @@
+mod core;
 mod encode;
-mod encoder;
+mod types {
+    pub mod color_type;
+    pub mod config;
+    pub mod speed;
+}
 
-pub use encoder::AvifEncoder;
+pub use {
+    core::AvifEncoder,
+    types::{color_type::AvifColorType, config::AvifConfig, speed::AvifSpeed},
+};

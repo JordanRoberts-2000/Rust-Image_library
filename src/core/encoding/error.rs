@@ -1,5 +1,5 @@
 use {
-    crate::{ColorType, ImageFormat},
+    crate::{encoding::ColorType, ImageFormat},
     std::{error::Error, io},
 };
 

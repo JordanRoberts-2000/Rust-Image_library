@@ -1,7 +1,9 @@
 use {
     crate::{
-        constants::DEFAULT_IMAGE_FILE_NAME, image::TransformOp, AvifConfig, CompressionType,
-        JpegConfig, PngConfig, WebpConfig,
+        constants::DEFAULT_IMAGE_FILE_NAME,
+        encoding::{AvifConfig, CompressionType, JpegConfig, PngConfig, WebpConfig},
+        image::TransformOp,
+        ImageFormat,
     },
     std::{cell::RefCell, path::PathBuf},
 };
@@ -10,8 +12,7 @@ use {
 pub struct ImageConfig {
     pub pipeline: RefCell<Vec<TransformOp>>,
 
-    pub quality: Option<u32>,
-    pub compression: CompressionType,
+    pub target_format: Option<ImageFormat>,
     pub file_name: String,
     pub output_dir: PathBuf,
     pub prefix: Option<String>,
@@ -21,6 +22,8 @@ pub struct ImageConfig {
     pub remove_unused_transparency: bool,
     pub remove_source: bool,
 
+    pub quality: Option<u8>,
+    pub compression: CompressionType,
     pub jpeg: Option<JpegConfig>,
     pub png: Option<PngConfig>,
     pub avif: Option<AvifConfig>,
@@ -34,6 +37,7 @@ impl Default for ImageConfig {
 
             quality: None,
             compression: CompressionType::Lossy,
+            target_format: None,
             file_name: DEFAULT_IMAGE_FILE_NAME.to_string(),
             output_dir: PathBuf::from("."),
             prefix: None,

@@ -1,4 +1,11 @@
+mod core;
 mod encode;
-mod encoder;
+mod types {
+    pub mod color_type;
+    pub mod config;
+}
 
-pub use encoder::WebPEncoder;
+pub use {
+    core::WebpEncoder,
+    types::{color_type::WebpColorType, config::WebpConfig},
+};

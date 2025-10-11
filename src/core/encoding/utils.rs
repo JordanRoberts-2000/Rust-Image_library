@@ -1,7 +1,4 @@
-use crate::{
-    encoding::{EncodingErrorKind, EncodingValidationError},
-    ColorType,
-};
+use crate::encoding::{ColorType, EncodingErrorKind, EncodingValidationError};
 
 pub fn validate_buffer(
     bytes: &[u8], width: u32, height: u32, color_type: impl Into<ColorType>,

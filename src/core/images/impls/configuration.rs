@@ -1,4 +1,7 @@
-use crate::{AvifConfig, Blur, CropEdge, ImageFormat, Images, JpegConfig, WebpConfig};
+use crate::{
+    encoding::{AvifConfig, JpegConfig, WebpConfig},
+    Blur, CropEdge, ImageFormat, Images,
+};
 
 impl Images {
     pub fn configure_jpeg(&mut self, config: JpegConfig) -> &mut Self {
@@ -64,7 +67,7 @@ impl Images {
         self
     }
 
-    pub fn quality(&mut self, quality: u32) -> &mut Self {
+    pub fn quality(&mut self, quality: u8) -> &mut Self {
         for image in &mut self.inner {
             image.quality(quality);
         }

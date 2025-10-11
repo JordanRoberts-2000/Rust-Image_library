@@ -1,6 +1,5 @@
 mod kind {
     pub mod core;
-    pub mod encoding;
     pub mod validation;
 }
 mod error;
@@ -8,7 +7,7 @@ mod traits;
 
 pub use {
     error::ImageError,
-    kind::{core::ErrorKind, encoding::EncodingError, validation::ValidationError},
+    kind::{core::ErrorKind, validation::ValidationError},
     traits::WithSrc,
 };
 

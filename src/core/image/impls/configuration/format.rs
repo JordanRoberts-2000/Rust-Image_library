@@ -1,4 +1,7 @@
-use crate::{AvifConfig, Image, ImageFormat, JpegConfig, WebpConfig};
+use crate::{
+    encoding::{AvifConfig, JpegConfig, WebpConfig},
+    Image, ImageFormat,
+};
 
 impl Image {
     pub fn configure_jpeg(&mut self, config: JpegConfig) -> &mut Self {
