@@ -1,72 +1,42 @@
 use {
     crate::{
-        encoding::{
-            macros::{
-                forward_color_type_impls, forward_grayscale_impls, forward_transparency_impls,
-            },
-            AlphaChannelOps, ColorTypeOps, GrayscaleOps,
-        },
+        encoding::{AlphaChannelOps, BitDepthOps, ColorTypeOps, GrayscaleOps},
         ImageError, ValidationError,
     },
     bytemuck::cast_slice,
     image::DynamicImage,
+    inherent::inherent,
     std::{borrow::Cow, fmt},
     strum_macros::EnumIter,
+    subenum::subenum,
 };
 
+#[subenum(AvifColorType, JpegColorType, PngColorType, WebpColorType, TiffColorType)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum ColorType {
+    #[subenum(AvifColorType, JpegColorType, PngColorType, WebpColorType, TiffColorType)]
     Rgb8,
-    Rgb16,
+    #[subenum(AvifColorType, PngColorType, WebpColorType, TiffColorType)]
     Rgba8,
-    Rgba16,
+    #[subenum(JpegColorType, PngColorType, WebpColorType, TiffColorType)]
     Grayscale8,
+    #[subenum(PngColorType, WebpColorType)]
     GrayscaleAlpha8,
+
+    #[subenum(PngColorType, TiffColorType)]
+    Rgb16,
+    #[subenum(PngColorType, TiffColorType)]
+    Rgba16,
+    #[subenum(PngColorType, TiffColorType)]
     Grayscale16,
+    #[subenum(PngColorType)]
     GrayscaleAlpha16,
 }
 
-impl AlphaChannelOps for ColorType {
-    #[inline]
-    fn has_alpha(&self) -> bool {
-        matches!(
-            *self,
-            ColorType::Rgba8
-                | ColorType::Rgba16
-                | ColorType::GrayscaleAlpha8
-                | ColorType::GrayscaleAlpha16
-        )
-    }
-
-    #[inline]
-    fn remove_alpha(self) -> Self {
-        match self {
-            ColorType::Rgba8 => ColorType::Rgb8,
-            ColorType::Rgba16 => ColorType::Rgb16,
-            ColorType::GrayscaleAlpha8 => ColorType::Grayscale8,
-            ColorType::GrayscaleAlpha16 => ColorType::Grayscale16,
-            other => other,
-        }
-    }
-
-    #[inline]
-    fn ensure_alpha(self) -> Self {
-        match self {
-            ColorType::Rgb8 => ColorType::Rgba8,
-            ColorType::Rgb16 => ColorType::Rgba16,
-            ColorType::Grayscale8 => ColorType::GrayscaleAlpha8,
-            ColorType::Grayscale16 => ColorType::GrayscaleAlpha16,
-            with_alpha @ (ColorType::Rgba8
-            | ColorType::Rgba16
-            | ColorType::GrayscaleAlpha8
-            | ColorType::GrayscaleAlpha16) => with_alpha,
-        }
-    }
-}
-
+#[inherent]
 impl ColorTypeOps for ColorType {
     #[inline]
-    fn channels(&self) -> u8 {
+    pub fn channels(&self) -> u8 {
         match *self {
             ColorType::Rgb8 | ColorType::Rgb16 => 3,
             ColorType::Rgba8 | ColorType::Rgba16 => 4,
@@ -76,7 +46,7 @@ impl ColorTypeOps for ColorType {
     }
 
     #[inline]
-    fn bit_depth(&self) -> u8 {
+    pub fn bit_depth(&self) -> u8 {
         match *self {
             ColorType::Rgb8
             | ColorType::Rgba8
@@ -91,19 +61,84 @@ impl ColorTypeOps for ColorType {
     }
 
     #[inline]
-    fn supports_grayscale() -> bool {
+    pub fn supports_grayscale() -> bool {
         true
     }
 
     #[inline]
-    fn supports_transparency() -> bool {
+    pub fn supports_transparency() -> bool {
         true
     }
 }
 
+#[inherent]
+impl BitDepthOps for ColorType {
+    #[inline]
+    fn to_minimal_bit_depth(self) -> Self {
+        match self {
+            ColorType::Rgb16 => ColorType::Rgb8,
+            ColorType::Rgba16 => ColorType::Rgba8,
+            ColorType::Grayscale16 => ColorType::Grayscale8,
+            ColorType::GrayscaleAlpha16 => ColorType::GrayscaleAlpha8,
+            other => other,
+        }
+    }
+
+    #[inline]
+    fn to_maximal_bit_depth(self) -> Self {
+        match self {
+            ColorType::Rgb8 => ColorType::Rgb16,
+            ColorType::Rgba8 => ColorType::Rgba16,
+            ColorType::Grayscale8 => ColorType::Grayscale16,
+            ColorType::GrayscaleAlpha8 => ColorType::GrayscaleAlpha16,
+            other => other,
+        }
+    }
+}
+
+#[inherent]
+impl AlphaChannelOps for ColorType {
+    #[inline]
+    pub fn has_alpha(&self) -> bool {
+        matches!(
+            *self,
+            ColorType::Rgba8
+                | ColorType::Rgba16
+                | ColorType::GrayscaleAlpha8
+                | ColorType::GrayscaleAlpha16
+        )
+    }
+
+    #[inline]
+    pub fn remove_alpha(self) -> Self {
+        match self {
+            ColorType::Rgba8 => ColorType::Rgb8,
+            ColorType::Rgba16 => ColorType::Rgb16,
+            ColorType::GrayscaleAlpha8 => ColorType::Grayscale8,
+            ColorType::GrayscaleAlpha16 => ColorType::Grayscale16,
+            other => other,
+        }
+    }
+
+    #[inline]
+    pub fn ensure_alpha(self) -> Self {
+        match self {
+            ColorType::Rgb8 => ColorType::Rgba8,
+            ColorType::Rgb16 => ColorType::Rgba16,
+            ColorType::Grayscale8 => ColorType::GrayscaleAlpha8,
+            ColorType::Grayscale16 => ColorType::GrayscaleAlpha16,
+            with_alpha @ (ColorType::Rgba8
+            | ColorType::Rgba16
+            | ColorType::GrayscaleAlpha8
+            | ColorType::GrayscaleAlpha16) => with_alpha,
+        }
+    }
+}
+
+#[inherent]
 impl GrayscaleOps for ColorType {
     #[inline]
-    fn is_grayscale(&self) -> bool {
+    pub fn is_grayscale(&self) -> bool {
         matches!(
             *self,
             ColorType::Grayscale8
@@ -114,7 +149,7 @@ impl GrayscaleOps for ColorType {
     }
 
     #[inline]
-    fn to_grayscale(self) -> Self {
+    pub fn to_grayscale(self) -> Self {
         match self {
             ColorType::Rgb8 => ColorType::Grayscale8,
             ColorType::Rgb16 => ColorType::Grayscale16,
@@ -128,7 +163,7 @@ impl GrayscaleOps for ColorType {
     }
 
     #[inline]
-    fn to_color(self) -> Self {
+    pub fn to_color(self) -> Self {
         match self {
             ColorType::Grayscale8 => ColorType::Rgb8,
             ColorType::Grayscale16 => ColorType::Rgb16,
@@ -142,21 +177,6 @@ impl GrayscaleOps for ColorType {
 }
 
 impl ColorType {
-    forward_grayscale_impls!();
-    forward_color_type_impls!();
-    forward_transparency_impls!();
-
-    #[inline]
-    pub fn to_minimal_bit_depth(self) -> Self {
-        match self {
-            ColorType::Rgb16 => ColorType::Rgb8,
-            ColorType::Rgba16 => ColorType::Rgba8,
-            ColorType::Grayscale16 => ColorType::Grayscale8,
-            ColorType::GrayscaleAlpha16 => ColorType::GrayscaleAlpha8,
-            other => other,
-        }
-    }
-
     pub(crate) fn bytes<'a>(&self, img: &'a DynamicImage) -> Cow<'a, [u8]> {
         match *self {
             ColorType::Grayscale8 => {

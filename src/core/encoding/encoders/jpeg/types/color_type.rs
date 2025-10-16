@@ -1,60 +1,54 @@
 #[cfg(feature = "progressive-jpeg")]
 use mozjpeg::ColorSpace;
 use {
-    crate::{
-        encoding::{
-            macros::{forward_color_type_impls, forward_grayscale_impls},
-            ColorType, ColorTypeOps, GrayscaleOps,
-        },
-        ImageError, ValidationError,
-    },
-    image::DynamicImage,
-    std::{borrow::Cow, fmt},
-    strum_macros::EnumIter,
+    crate::encoding::{ColorType, ColorTypeOps, GrayscaleOps, JpegColorType},
+    inherent::inherent,
+    std::fmt,
 };
 
-#[derive(Debug, Clone, Default, Copy, Eq, PartialEq, EnumIter)]
-pub enum JpegColorType {
-    Grayscale8,
-    #[default]
-    Rgb8,
-}
-
 impl JpegColorType {
-    forward_grayscale_impls!();
-    forward_color_type_impls!();
+    pub fn from_color_type_lossy(ct: ColorType) -> Self {
+        match ct {
+            ColorType::Grayscale8
+            | ColorType::Grayscale16
+            | ColorType::GrayscaleAlpha8
+            | ColorType::GrayscaleAlpha16 => JpegColorType::Grayscale8,
 
-    pub(crate) fn bytes<'a>(&self, img: &'a DynamicImage) -> Cow<'a, [u8]> {
-        ColorType::from(*self).bytes(img)
+            ColorType::Rgb8 | ColorType::Rgb16 | ColorType::Rgba8 | ColorType::Rgba16 => {
+                JpegColorType::Rgb8
+            }
+        }
     }
 }
 
+#[inherent]
 impl ColorTypeOps for JpegColorType {
-    fn channels(&self) -> u8 {
+    pub fn channels(&self) -> u8 {
         ColorType::from(*self).channels()
     }
 
-    fn bit_depth(&self) -> u8 {
+    pub fn bit_depth(&self) -> u8 {
         ColorType::from(*self).bit_depth()
     }
 
-    fn supports_grayscale() -> bool {
+    pub fn supports_grayscale() -> bool {
         true
     }
 
-    fn supports_transparency() -> bool {
+    pub fn supports_transparency() -> bool {
         false
     }
 }
 
+#[inherent]
 impl GrayscaleOps for JpegColorType {
     #[inline]
-    fn is_grayscale(&self) -> bool {
+    pub fn is_grayscale(&self) -> bool {
         matches!(self, JpegColorType::Grayscale8)
     }
 
     #[inline]
-    fn to_grayscale(self) -> Self {
+    pub fn to_grayscale(self) -> Self {
         match self {
             JpegColorType::Rgb8 => JpegColorType::Grayscale8,
             other => other,
@@ -62,7 +56,7 @@ impl GrayscaleOps for JpegColorType {
     }
 
     #[inline]
-    fn to_color(self) -> Self {
+    pub fn to_color(self) -> Self {
         match self {
             JpegColorType::Grayscale8 => JpegColorType::Rgb8,
             other => other,
@@ -91,27 +85,6 @@ impl From<JpegColorType> for ColorSpace {
         match color_type {
             JpegColorType::Grayscale8 => ColorSpace::JCS_GRAYSCALE,
             JpegColorType::Rgb8 => ColorSpace::JCS_RGB,
-        }
-    }
-}
-
-impl From<JpegColorType> for ColorType {
-    fn from(color_type: JpegColorType) -> Self {
-        match color_type {
-            JpegColorType::Grayscale8 => ColorType::Grayscale8,
-            JpegColorType::Rgb8 => ColorType::Rgb8,
-        }
-    }
-}
-
-impl TryFrom<ColorType> for JpegColorType {
-    type Error = ImageError;
-
-    fn try_from(color_type: ColorType) -> Result<Self, Self::Error> {
-        match color_type {
-            ColorType::Rgb8 => Ok(JpegColorType::Rgb8),
-            ColorType::Grayscale8 => Ok(JpegColorType::Grayscale8),
-            other => Err(ValidationError::UnsupportedColorType(other.into()).into()),
         }
     }
 }

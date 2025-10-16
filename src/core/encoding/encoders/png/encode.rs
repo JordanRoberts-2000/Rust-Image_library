@@ -1,20 +1,20 @@
 use {
     crate::{
-        encoding::{EncoderOps, EncodingErrorKind, PngColorType, PngEncoder},
+        encoding::{Encoder, EncodingErrorKind, PngColorType, PngEncoder},
         ImageFormat,
     },
-    image::{codecs::png::PngEncoder as Encoder, ImageEncoder},
+    image::{codecs::png::PngEncoder as ImagePngEncoder, ImageEncoder},
     std::io::Write,
 };
 
-impl EncoderOps for PngEncoder {
+impl Encoder for PngEncoder {
     type ColorType = PngColorType;
     const IMAGE_FORMAT: ImageFormat = ImageFormat::Png;
 
     fn encode_impl(
-        &self, writer: impl Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
+        &self, writer: &mut dyn Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
     ) -> Result<(), EncodingErrorKind> {
-        let encoder = Encoder::new_with_quality(
+        let encoder = ImagePngEncoder::new_with_quality(
             writer,
             self.compression_type.into(),
             self.compression_type.filter(),

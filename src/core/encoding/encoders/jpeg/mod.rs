@@ -8,7 +8,4 @@ mod types {
     pub mod config;
 }
 
-pub use {
-    core::JpegEncoder,
-    types::{color_type::JpegColorType, config::JpegConfig},
-};
+pub use {core::JpegEncoder, types::config::JpegConfig};

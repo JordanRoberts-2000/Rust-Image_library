@@ -8,5 +8,5 @@ mod types {
 
 pub use {
     core::AvifEncoder,
-    types::{color_type::AvifColorType, config::AvifConfig, speed::AvifSpeed},
+    types::{config::AvifConfig, speed::AvifSpeed},
 };

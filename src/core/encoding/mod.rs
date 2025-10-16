@@ -6,7 +6,6 @@ mod encoders {
     pub mod webp;
 }
 mod error;
-pub(crate) mod macros;
 pub(crate) mod utils;
 mod types {
     pub mod color_type;
@@ -15,15 +14,19 @@ mod types {
 }
 mod traits {
     pub mod color_type_ops;
-    pub mod encoder_ops;
+    pub mod encoder;
 }
 
-pub(crate) use traits::{
-    color_type_ops::{AlphaChannelOps, ColorTypeOps, GrayscaleOps},
-    encoder_ops::EncoderOps,
-};
+pub(crate) use traits::color_type_ops::{AlphaChannelOps, BitDepthOps, ColorTypeOps, GrayscaleOps};
 pub use {
     encoders::{avif::*, jpeg::*, png::*, tiff::*, webp::*},
     error::{EncodingError, EncodingErrorKind, EncodingValidationError},
-    types::{color_type::ColorType, compression::CompressionType, quality::Quality},
+    traits::encoder::Encoder,
+    types::{
+        color_type::{
+            AvifColorType, ColorType, JpegColorType, PngColorType, TiffColorType, WebpColorType,
+        },
+        compression::CompressionType,
+        quality::Quality,
+    },
 };

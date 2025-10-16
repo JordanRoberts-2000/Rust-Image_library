@@ -1,68 +1,61 @@
 use {
-    crate::{
-        encoding::{
-            macros::{forward_color_type_impls, forward_transparency_impls},
-            AlphaChannelOps, ColorType, ColorTypeOps,
-        },
-        ImageError, ValidationError,
-    },
-    image::{self, DynamicImage},
-    std::borrow::Cow,
-    strum_macros::EnumIter,
+    crate::encoding::{AlphaChannelOps, AvifColorType, ColorType, ColorTypeOps},
+    inherent::inherent,
 };
 
-#[derive(Debug, Clone, Default, Copy, Eq, PartialEq, EnumIter)]
-pub enum AvifColorType {
-    #[default]
-    Rgba8,
-    Rgb8,
+impl AvifColorType {
+    pub fn from_color_type_lossy(ct: ColorType) -> Self {
+        match ct {
+            ColorType::Rgb8 => AvifColorType::Rgb8,
+            ColorType::Rgba8 => AvifColorType::Rgba8,
+            ColorType::Rgb16 => AvifColorType::Rgb8,
+            ColorType::Rgba16 => AvifColorType::Rgba8,
+            ColorType::Grayscale8 => AvifColorType::Rgb8,
+            ColorType::GrayscaleAlpha8 => AvifColorType::Rgba8,
+            ColorType::Grayscale16 => AvifColorType::Rgb8,
+            ColorType::GrayscaleAlpha16 => AvifColorType::Rgba8,
+        }
+    }
 }
 
+#[inherent]
+impl ColorTypeOps for AvifColorType {
+    pub fn channels(&self) -> u8 {
+        ColorType::from(*self).channels()
+    }
+
+    pub fn bit_depth(&self) -> u8 {
+        ColorType::from(*self).bit_depth()
+    }
+
+    pub fn supports_grayscale() -> bool {
+        false
+    }
+
+    pub fn supports_transparency() -> bool {
+        true
+    }
+}
+
+#[inherent]
 impl AlphaChannelOps for AvifColorType {
-    fn has_alpha(&self) -> bool {
+    pub fn has_alpha(&self) -> bool {
         ColorType::from(*self).has_alpha()
     }
 
-    fn remove_alpha(self) -> Self {
+    pub fn remove_alpha(self) -> Self {
         match self {
             AvifColorType::Rgba8 => AvifColorType::Rgb8,
             other => other,
         }
     }
 
-    fn ensure_alpha(self) -> Self {
+    pub fn ensure_alpha(self) -> Self {
         match self {
             AvifColorType::Rgb8 => AvifColorType::Rgba8,
             other => other,
         }
     }
-}
-
-impl ColorTypeOps for AvifColorType {
-    fn channels(&self) -> u8 {
-        ColorType::from(*self).channels()
-    }
-
-    fn bit_depth(&self) -> u8 {
-        ColorType::from(*self).bit_depth()
-    }
-
-    fn supports_grayscale() -> bool {
-        false
-    }
-
-    fn supports_transparency() -> bool {
-        true
-    }
-}
-
-impl AvifColorType {
-    pub(crate) fn bytes<'a>(&self, img: &'a DynamicImage) -> Cow<'a, [u8]> {
-        ColorType::from(*self).bytes(img)
-    }
-
-    forward_color_type_impls!();
-    forward_transparency_impls!();
 }
 
 impl From<AvifColorType> for image::ColorType {
@@ -79,27 +72,6 @@ impl From<AvifColorType> for image::ExtendedColorType {
         match color_type {
             AvifColorType::Rgb8 => image::ExtendedColorType::Rgb8,
             AvifColorType::Rgba8 => image::ExtendedColorType::Rgba8,
-        }
-    }
-}
-
-impl From<AvifColorType> for ColorType {
-    fn from(color_type: AvifColorType) -> Self {
-        match color_type {
-            AvifColorType::Rgb8 => ColorType::Rgb8,
-            AvifColorType::Rgba8 => ColorType::Rgba8,
-        }
-    }
-}
-
-impl TryFrom<ColorType> for AvifColorType {
-    type Error = ImageError;
-
-    fn try_from(color_type: ColorType) -> Result<Self, Self::Error> {
-        match color_type {
-            ColorType::Rgb8 => Ok(AvifColorType::Rgb8),
-            ColorType::Rgba8 => Ok(AvifColorType::Rgba8),
-            other => Err(ValidationError::UnsupportedColorType(other.into()).into()),
         }
     }
 }

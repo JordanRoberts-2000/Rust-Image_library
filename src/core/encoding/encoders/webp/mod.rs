@@ -5,7 +5,4 @@ mod types {
     pub mod config;
 }
 
-pub use {
-    core::WebpEncoder,
-    types::{color_type::WebpColorType, config::WebpConfig},
-};
+pub use {core::WebpEncoder, types::config::WebpConfig};

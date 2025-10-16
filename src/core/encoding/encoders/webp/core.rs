@@ -1,7 +1,7 @@
 use {
     crate::{
         constants::DEFAULT_WEBP_QUALITY,
-        encoding::{CompressionType, EncoderOps, EncodingError, Quality, WebpColorType},
+        encoding::{CompressionType, Encoder, EncodingError, Quality, WebpColorType},
     },
     std::io::Write,
 };
@@ -36,10 +36,16 @@ impl WebpEncoder {
     }
 
     pub fn encode(
-        &self, writer: impl Write, bytes: impl AsRef<[u8]>, w: u32, h: u32,
+        &self, mut writer: impl Write, bytes: impl AsRef<[u8]>, w: u32, h: u32,
         ct: impl Into<WebpColorType>,
     ) -> Result<(), EncodingError> {
-        <Self as EncoderOps>::encode(&self, writer, bytes, w, h, ct)
+        <Self as Encoder>::encode(&self, &mut writer, bytes.as_ref(), w, h, ct.into())
+    }
+
+    pub fn encode_to_vec(
+        &self, bytes: impl AsRef<[u8]>, w: u32, h: u32, ct: impl Into<WebpColorType>,
+    ) -> Result<Vec<u8>, EncodingError> {
+        <Self as Encoder>::encode_to_vec(&self, bytes.as_ref(), w, h, ct.into())
     }
 }
 

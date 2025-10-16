@@ -1,20 +1,20 @@
 use {
     crate::{
-        encoding::{AvifColorType, AvifEncoder, EncoderOps, EncodingErrorKind},
+        encoding::{AvifColorType, AvifEncoder, Encoder, EncodingErrorKind},
         ImageFormat,
     },
-    image::{codecs::avif::AvifEncoder as Encoder, ImageEncoder},
+    image::{codecs::avif::AvifEncoder as ImageAvifEncoder, ImageEncoder},
     std::io::Write,
 };
 
-impl EncoderOps for AvifEncoder {
+impl Encoder for AvifEncoder {
     type ColorType = AvifColorType;
     const IMAGE_FORMAT: ImageFormat = ImageFormat::Avif;
 
     fn encode_impl(
-        &self, writer: impl Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
+        &self, writer: &mut dyn Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
     ) -> Result<(), EncodingErrorKind> {
-        Encoder::new_with_speed_quality(writer, self.speed.into(), self.quality.into())
+        ImageAvifEncoder::new_with_speed_quality(writer, self.speed.into(), self.quality.into())
             .write_image(bytes, w, h, ct.into())
             .map_err(|e| EncodingErrorKind::Encode(Box::new(e)))
     }

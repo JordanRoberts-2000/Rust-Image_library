@@ -1,6 +1,6 @@
 use {
     crate::{
-        encoding::{CompressionType, EncoderOps, EncodingErrorKind, WebpColorType, WebpEncoder},
+        encoding::{CompressionType, Encoder, EncodingErrorKind, WebpColorType, WebpEncoder},
         ImageFormat,
     },
     image::codecs::webp::WebPEncoder as LosslessEncoder,
@@ -8,12 +8,12 @@ use {
     webp::Encoder as LossyEncoder,
 };
 
-impl EncoderOps for WebpEncoder {
+impl Encoder for WebpEncoder {
     type ColorType = WebpColorType;
     const IMAGE_FORMAT: ImageFormat = ImageFormat::WebP;
 
     fn encode_impl(
-        &self, mut writer: impl Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
+        &self, writer: &mut dyn Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
     ) -> Result<(), EncodingErrorKind> {
         match self.compression_type {
             CompressionType::Lossy => {

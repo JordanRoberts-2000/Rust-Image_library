@@ -1,18 +1,18 @@
 use {
     crate::{
-        encoding::{EncoderOps, EncodingErrorKind, TiffColorType, TiffEncoder},
+        encoding::{Encoder, EncodingErrorKind, TiffColorType, TiffEncoder},
         ImageFormat,
     },
     image::codecs::tiff::TiffEncoder as ImageEncoder,
     std::io::{Cursor, Write},
 };
 
-impl EncoderOps for TiffEncoder {
+impl Encoder for TiffEncoder {
     type ColorType = TiffColorType;
     const IMAGE_FORMAT: ImageFormat = ImageFormat::Tiff;
 
     fn encode_impl(
-        &self, mut writer: impl Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
+        &self, writer: &mut dyn Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,
     ) -> Result<(), EncodingErrorKind> {
         let mut buffer = Vec::new();
         ImageEncoder::new(Cursor::new(&mut buffer))

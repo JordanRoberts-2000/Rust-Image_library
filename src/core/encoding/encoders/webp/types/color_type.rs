@@ -1,44 +1,50 @@
 use {
-    crate::{
-        encoding::{
-            macros::{
-                forward_color_type_impls, forward_grayscale_impls, forward_transparency_impls,
-            },
-            AlphaChannelOps, ColorType, ColorTypeOps, GrayscaleOps,
-        },
-        ImageError, ValidationError,
-    },
-    image::DynamicImage,
-    std::borrow::Cow,
-    strum_macros::EnumIter,
+    crate::encoding::{AlphaChannelOps, ColorType, ColorTypeOps, GrayscaleOps, WebpColorType},
+    inherent::inherent,
     webp::PixelLayout,
 };
 
-#[derive(Debug, Clone, Default, Copy, Eq, PartialEq, EnumIter)]
-pub enum WebpColorType {
-    Grayscale8,
-    GrayscaleAlpha8,
-    Rgb8,
-    #[default]
-    Rgba8,
+impl WebpColorType {
+    pub fn from_color_type_lossy(ct: ColorType) -> Self {
+        match ct {
+            ColorType::Grayscale8 => WebpColorType::Grayscale8,
+            ColorType::Grayscale16 => WebpColorType::Grayscale8,
+            ColorType::GrayscaleAlpha8 => WebpColorType::GrayscaleAlpha8,
+            ColorType::GrayscaleAlpha16 => WebpColorType::GrayscaleAlpha8,
+            ColorType::Rgb8 => WebpColorType::Rgb8,
+            ColorType::Rgb16 => WebpColorType::Rgb8,
+            ColorType::Rgba8 => WebpColorType::Rgba8,
+            ColorType::Rgba16 => WebpColorType::Rgba8,
+        }
+    }
 }
 
-impl WebpColorType {
-    pub(crate) fn bytes<'a>(&self, img: &'a DynamicImage) -> Cow<'a, [u8]> {
-        ColorType::from(*self).bytes(img)
+#[inherent]
+impl ColorTypeOps for WebpColorType {
+    pub fn channels(&self) -> u8 {
+        ColorType::from(*self).channels()
     }
 
-    forward_grayscale_impls!();
-    forward_color_type_impls!();
-    forward_transparency_impls!();
+    pub fn bit_depth(&self) -> u8 {
+        ColorType::from(*self).bit_depth()
+    }
+
+    pub fn supports_grayscale() -> bool {
+        true
+    }
+
+    pub fn supports_transparency() -> bool {
+        true
+    }
 }
 
+#[inherent]
 impl GrayscaleOps for WebpColorType {
-    fn is_grayscale(&self) -> bool {
+    pub fn is_grayscale(&self) -> bool {
         ColorType::from(*self).is_grayscale()
     }
 
-    fn to_grayscale(self) -> Self {
+    pub fn to_grayscale(self) -> Self {
         match self {
             WebpColorType::Rgb8 => WebpColorType::Grayscale8,
             WebpColorType::Rgba8 => WebpColorType::GrayscaleAlpha8,
@@ -46,7 +52,7 @@ impl GrayscaleOps for WebpColorType {
         }
     }
 
-    fn to_color(self) -> Self {
+    pub fn to_color(self) -> Self {
         match self {
             WebpColorType::Grayscale8 => WebpColorType::Rgb8,
             WebpColorType::GrayscaleAlpha8 => WebpColorType::Rgba8,
@@ -55,30 +61,13 @@ impl GrayscaleOps for WebpColorType {
     }
 }
 
-impl ColorTypeOps for WebpColorType {
-    fn channels(&self) -> u8 {
-        ColorType::from(*self).channels()
-    }
-
-    fn bit_depth(&self) -> u8 {
-        ColorType::from(*self).bit_depth()
-    }
-
-    fn supports_grayscale() -> bool {
-        true
-    }
-
-    fn supports_transparency() -> bool {
-        true
-    }
-}
-
+#[inherent]
 impl AlphaChannelOps for WebpColorType {
-    fn has_alpha(&self) -> bool {
+    pub fn has_alpha(&self) -> bool {
         ColorType::from(*self).has_alpha()
     }
 
-    fn remove_alpha(self) -> Self {
+    pub fn remove_alpha(self) -> Self {
         match self {
             WebpColorType::GrayscaleAlpha8 => WebpColorType::Grayscale8,
             WebpColorType::Rgba8 => WebpColorType::Rgb8,
@@ -86,7 +75,7 @@ impl AlphaChannelOps for WebpColorType {
         }
     }
 
-    fn ensure_alpha(self) -> Self {
+    pub fn ensure_alpha(self) -> Self {
         match self {
             WebpColorType::Grayscale8 => WebpColorType::GrayscaleAlpha8,
             WebpColorType::Rgb8 => WebpColorType::Rgba8,
@@ -122,31 +111,6 @@ impl From<WebpColorType> for PixelLayout {
         match color_type {
             WebpColorType::Rgb8 | WebpColorType::Grayscale8 => PixelLayout::Rgb,
             WebpColorType::Rgba8 | WebpColorType::GrayscaleAlpha8 => PixelLayout::Rgba,
-        }
-    }
-}
-
-impl From<WebpColorType> for ColorType {
-    fn from(color_type: WebpColorType) -> Self {
-        match color_type {
-            WebpColorType::Grayscale8 => ColorType::Grayscale8,
-            WebpColorType::GrayscaleAlpha8 => ColorType::GrayscaleAlpha8,
-            WebpColorType::Rgb8 => ColorType::Rgb8,
-            WebpColorType::Rgba8 => ColorType::Rgba8,
-        }
-    }
-}
-
-impl TryFrom<ColorType> for WebpColorType {
-    type Error = ImageError;
-
-    fn try_from(color_type: ColorType) -> Result<Self, Self::Error> {
-        match color_type {
-            ColorType::Rgb8 => Ok(WebpColorType::Rgb8),
-            ColorType::Rgba8 => Ok(WebpColorType::Rgba8),
-            ColorType::Grayscale8 => Ok(WebpColorType::Grayscale8),
-            ColorType::GrayscaleAlpha8 => Ok(WebpColorType::GrayscaleAlpha8),
-            other => Err(ValidationError::UnsupportedColorType(other.into()).into()),
         }
     }
 }

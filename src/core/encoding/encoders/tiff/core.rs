@@ -1,5 +1,5 @@
 use {
-    crate::encoding::{EncoderOps, EncodingError, TiffColorType},
+    crate::encoding::{Encoder, EncodingError, TiffColorType},
     std::io::Write,
 };
 
@@ -8,8 +8,15 @@ pub struct TiffEncoder;
 
 impl TiffEncoder {
     pub fn encode(
-        writer: impl Write, bytes: impl AsRef<[u8]>, w: u32, h: u32, ct: impl Into<TiffColorType>,
+        &self, mut writer: impl Write, bytes: impl AsRef<[u8]>, w: u32, h: u32,
+        ct: impl Into<TiffColorType>,
     ) -> Result<(), EncodingError> {
-        <Self as EncoderOps>::encode(&TiffEncoder, writer, bytes, w, h, ct)
+        <Self as Encoder>::encode(&self, &mut writer, bytes.as_ref(), w, h, ct.into())
+    }
+
+    pub fn encode_to_vec(
+        &self, bytes: impl AsRef<[u8]>, w: u32, h: u32, ct: impl Into<TiffColorType>,
+    ) -> Result<Vec<u8>, EncodingError> {
+        <Self as Encoder>::encode_to_vec(&self, bytes.as_ref(), w, h, ct.into())
     }
 }

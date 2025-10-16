@@ -1,18 +1,18 @@
 use {
     crate::{
-        encoding::{EncoderOps, EncodingErrorKind, JpegColorType, JpegEncoder},
+        encoding::{Encoder, EncodingErrorKind, JpegColorType, JpegEncoder},
         ImageFormat,
     },
     image::codecs::jpeg::JpegEncoder as ImageEncoder,
     std::io::Write,
 };
 
-impl EncoderOps for JpegEncoder {
+impl Encoder for JpegEncoder {
     type ColorType = JpegColorType;
     const IMAGE_FORMAT: ImageFormat = ImageFormat::Jpeg;
 
     fn encode_impl(
-        &self, writer: impl Write, bytes: &[u8], width: u32, height: u32,
+        &self, writer: &mut dyn Write, bytes: &[u8], width: u32, height: u32,
         color_type: Self::ColorType,
     ) -> Result<(), EncodingErrorKind> {
         #[cfg(feature = "progressive-jpeg")]

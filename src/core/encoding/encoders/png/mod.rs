@@ -8,5 +8,5 @@ mod types {
 
 pub use {
     core::PngEncoder,
-    types::{color_type::PngColorType, compression::PngCompressionType, config::PngConfig},
+    types::{compression::PngCompressionType, config::PngConfig},
 };
