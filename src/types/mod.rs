@@ -1,12 +1,18 @@
 mod blur;
 mod crop_edge;
-mod format;
-mod image_format;
+mod formats {
+    pub mod encode_format;
+    pub mod format;
+    pub mod image_format;
+}
 mod image_src;
 pub mod pixels;
 mod rgb;
 
 pub use {
-    blur::Blur, crop_edge::CropEdge, format::Format, image_format::ImageFormat,
-    image_src::ImageSrc, rgb::Rgb,
+    blur::Blur,
+    crop_edge::CropEdge,
+    formats::format::{EncodeFormat, Format, ImageFormat},
+    image_src::ImageSrc,
+    rgb::Rgb,
 };
