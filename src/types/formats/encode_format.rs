@@ -1,12 +1,47 @@
 use {
-    crate::{utils::normalise_ext, EncodeFormat, Format, FormatOps, ImageError, ValidationError},
+    crate::{
+        constants::MAGIC_BYTES_READ_LIMIT,
+        format_detection::{Guessable, Guesser},
+        utils::normalise_ext,
+        EncodeFormat, Format, FormatOps, ImageError, ValidationError,
+    },
     inherent::inherent,
     std::{
         fmt,
+        io::BufRead,
         path::{Path, PathBuf},
         str,
     },
 };
+
+impl Guessable for EncodeFormat {
+    fn guess(&self, bytes: &[u8]) -> bool {
+        Format::from(*self).guess(bytes)
+    }
+
+    fn ext_guess(&self, ext: &str) -> bool {
+        Format::from(*self).ext_guess(ext)
+    }
+
+    fn read_limit(&self) -> usize {
+        MAGIC_BYTES_READ_LIMIT
+    }
+}
+
+impl EncodeFormat {
+    pub fn guesser() -> Guesser<Self> {
+        <Self as Guessable>::guesser()
+    }
+    pub fn guess_from_file(path: impl AsRef<Path>) -> Result<Option<Self>, ImageError> {
+        <Self as Guessable>::guess_from_file(path)
+    }
+    pub fn guess_from_bytes(bytes: &[u8]) -> Option<Self> {
+        <Self as Guessable>::guess_from_bytes(bytes)
+    }
+    pub fn guess_from_reader<R: BufRead>(r: &mut R) -> Result<Option<Self>, ImageError> {
+        <Self as Guessable>::guess_from_reader(r)
+    }
+}
 
 #[inherent]
 impl FormatOps for EncodeFormat {
@@ -41,7 +76,7 @@ impl TryFrom<&str> for EncodeFormat {
     fn try_from(ext: &str) -> Result<Self, Self::Error> {
         let e = normalise_ext(ext);
         let enc = match e.as_str() {
-            "webp" => EncodeFormat::WebP,
+            "webp" => EncodeFormat::Webp,
             "png" => EncodeFormat::Png,
             "jpg" | "jpeg" | "jpe" => EncodeFormat::Jpeg,
             "avif" => EncodeFormat::Avif,
@@ -88,7 +123,7 @@ impl TryFrom<image::ImageFormat> for EncodeFormat {
     fn try_from(fmt: image::ImageFormat) -> Result<Self, Self::Error> {
         use image::ImageFormat as I;
         match fmt {
-            I::WebP => Ok(EncodeFormat::WebP),
+            I::WebP => Ok(EncodeFormat::Webp),
             I::Png => Ok(EncodeFormat::Png),
             I::Jpeg => Ok(EncodeFormat::Jpeg),
             I::Avif => Ok(EncodeFormat::Avif),

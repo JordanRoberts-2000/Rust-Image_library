@@ -1,12 +1,100 @@
 use {
-    crate::{utils::normalise_ext, Format, FormatOps, ImageError, ImageFormat, ValidationError},
+    crate::{
+        constants::MAGIC_BYTES_READ_LIMIT,
+        format_detection::{Guessable, Guesser, Signature},
+        utils::normalise_ext,
+        Format, FormatOps, ImageError, ImageFormat, ValidationError,
+    },
     inherent::inherent,
     std::{
         fmt,
+        io::BufRead,
         path::{Path, PathBuf},
         str,
     },
 };
+
+impl ImageFormat {
+    pub(crate) fn signatures(&self) -> &'static [Signature] {
+        match self {
+            ImageFormat::Png => {
+                &[Signature { pattern: b"\x89PNG\r\n\x1A\n", mask: None, offset: 0 }]
+            }
+            ImageFormat::Jpeg => {
+                &[Signature { pattern: &[0xFF, 0xD8, 0xFF], mask: None, offset: 0 }]
+            }
+            ImageFormat::Gif => &[
+                Signature { pattern: b"GIF89a", mask: None, offset: 0 },
+                Signature { pattern: b"GIF87a", mask: None, offset: 0 },
+            ],
+            ImageFormat::Webp => &[Signature {
+                pattern: b"RIFF\x00\x00\x00\x00WEBP",
+                mask: Some(b"\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF"),
+                offset: 0,
+            }],
+            ImageFormat::Tiff => &[
+                Signature { pattern: b"II*\x00", mask: None, offset: 0 },
+                Signature { pattern: b"MM\x00*", mask: None, offset: 0 },
+            ],
+            ImageFormat::Avif => &[Signature {
+                pattern: b"\x00\x00\x00\x00ftypavif",
+                mask: Some(b"\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"),
+                offset: 0,
+            }],
+            ImageFormat::Pnm => &[
+                Signature { pattern: b"P1", mask: None, offset: 0 },
+                Signature { pattern: b"P2", mask: None, offset: 0 },
+                Signature { pattern: b"P3", mask: None, offset: 0 },
+                Signature { pattern: b"P4", mask: None, offset: 0 },
+                Signature { pattern: b"P5", mask: None, offset: 0 },
+                Signature { pattern: b"P6", mask: None, offset: 0 },
+                Signature { pattern: b"P7", mask: None, offset: 0 },
+            ],
+            ImageFormat::Tga => &[],
+            ImageFormat::Dds => &[Signature { pattern: b"DDS ", mask: None, offset: 0 }],
+            ImageFormat::Bmp => &[Signature { pattern: b"BM", mask: None, offset: 0 }],
+            ImageFormat::Ico => &[Signature { pattern: &[0, 0, 1, 0], mask: None, offset: 0 }],
+            ImageFormat::Hdr => &[Signature { pattern: b"#?RADIANCE", mask: None, offset: 0 }],
+            ImageFormat::OpenExr => {
+                &[Signature { pattern: &[0x76, 0x2F, 0x31, 0x01], mask: None, offset: 0 }]
+            }
+            ImageFormat::Farbfeld => &[Signature { pattern: b"farbfeld", mask: None, offset: 0 }],
+            ImageFormat::Qoi => &[Signature { pattern: b"qoif", mask: None, offset: 0 }],
+            ImageFormat::Pcx => {
+                &[Signature { pattern: &[0x0A, 0x00], mask: Some(&[0xFF, 0xF8]), offset: 0 }]
+            }
+        }
+    }
+}
+
+impl Guessable for ImageFormat {
+    fn guess(&self, bytes: &[u8]) -> bool {
+        Format::from(*self).guess(bytes)
+    }
+
+    fn ext_guess(&self, ext: &str) -> bool {
+        Format::from(*self).ext_guess(ext)
+    }
+
+    fn read_limit(&self) -> usize {
+        MAGIC_BYTES_READ_LIMIT
+    }
+}
+
+impl ImageFormat {
+    pub fn guesser() -> Guesser<Self> {
+        <Self as Guessable>::guesser()
+    }
+    pub fn guess_from_file(path: impl AsRef<Path>) -> Result<Option<Self>, ImageError> {
+        <Self as Guessable>::guess_from_file(path)
+    }
+    pub fn guess_from_bytes(bytes: &[u8]) -> Option<Self> {
+        <Self as Guessable>::guess_from_bytes(bytes)
+    }
+    pub fn guess_from_reader<R: BufRead>(r: &mut R) -> Result<Option<Self>, ImageError> {
+        <Self as Guessable>::guess_from_reader(r)
+    }
+}
 
 #[inherent]
 impl FormatOps for ImageFormat {
@@ -44,7 +132,7 @@ impl TryFrom<&str> for ImageFormat {
             "png" => ImageFormat::Png,
             "jpg" | "jpeg" | "jpe" => ImageFormat::Jpeg,
             "gif" => ImageFormat::Gif,
-            "webp" => ImageFormat::WebP,
+            "webp" => ImageFormat::Webp,
             "tiff" | "tif" => ImageFormat::Tiff,
             "avif" => ImageFormat::Avif,
             "pnm" | "pbm" | "pgm" | "ppm" => ImageFormat::Pnm,
@@ -102,7 +190,7 @@ impl TryFrom<image::ImageFormat> for ImageFormat {
             I::Png => Ok(ImageFormat::Png),
             I::Jpeg => Ok(ImageFormat::Jpeg),
             I::Gif => Ok(ImageFormat::Gif),
-            I::WebP => Ok(ImageFormat::WebP),
+            I::WebP => Ok(ImageFormat::Webp),
             I::Tiff => Ok(ImageFormat::Tiff),
             I::Avif => Ok(ImageFormat::Avif),
             I::Pnm => Ok(ImageFormat::Pnm),
@@ -127,7 +215,7 @@ impl From<ImageFormat> for image::ImageFormat {
             ImageFormat::Png => I::Png,
             ImageFormat::Jpeg => I::Jpeg,
             ImageFormat::Gif => I::Gif,
-            ImageFormat::WebP => I::WebP,
+            ImageFormat::Webp => I::WebP,
             ImageFormat::Tiff => I::Tiff,
             ImageFormat::Avif => I::Avif,
             ImageFormat::Pnm => I::Pnm,

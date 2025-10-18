@@ -1,8 +1,14 @@
 use {
-    crate::{utils::normalise_ext, ErrorKind, FormatOps, ImageError, ValidationError},
+    crate::{
+        constants::{MAGIC_BYTES_READ_LIMIT, TEXT_DETECTION_READ_LIMIT},
+        format_detection::{detect, Guessable, Guesser},
+        utils::normalise_ext,
+        ErrorKind, FormatOps, ImageError, ValidationError,
+    },
     inherent::inherent,
     std::{
         fmt,
+        io::BufRead,
         path::{Path, PathBuf},
         str,
     },
@@ -20,7 +26,7 @@ pub enum Format {
     #[subenum(ImageFormat, EncodeFormat)]
     Gif,
     #[subenum(ImageFormat, EncodeFormat)]
-    WebP,
+    Webp,
     #[subenum(ImageFormat, EncodeFormat)]
     Tiff,
     #[subenum(ImageFormat, EncodeFormat)]
@@ -49,6 +55,58 @@ pub enum Format {
     Pdf,
 }
 
+impl Guessable for Format {
+    fn guess(&self, bytes: &[u8]) -> bool {
+        use crate::ImageFormat as IF;
+        match self {
+            Format::Svg => detect::svg(bytes),
+            Format::Pdf => detect::pdf(bytes),
+            Format::Avif => IF::Avif.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Png => IF::Png.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Jpeg => IF::Jpeg.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Gif => IF::Gif.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Webp => IF::Webp.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Tiff => IF::Tiff.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Pnm => IF::Pnm.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Tga => IF::Tga.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Dds => IF::Dds.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Bmp => IF::Bmp.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Ico => IF::Ico.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Hdr => IF::Hdr.signatures().iter().any(|s| s.matches(bytes)),
+            Format::OpenExr => IF::OpenExr.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Farbfeld => IF::Farbfeld.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Qoi => IF::Qoi.signatures().iter().any(|s| s.matches(bytes)),
+            Format::Pcx => IF::Pcx.signatures().iter().any(|s| s.matches(bytes)),
+        }
+    }
+
+    fn ext_guess(&self, ext: &str) -> bool {
+        self.extensions().contains(&normalise_ext(ext).as_str())
+    }
+
+    fn read_limit(&self) -> usize {
+        match self {
+            Format::Svg | Format::Pdf => TEXT_DETECTION_READ_LIMIT,
+            _ => MAGIC_BYTES_READ_LIMIT,
+        }
+    }
+}
+
+impl Format {
+    pub fn guesser() -> Guesser<Self> {
+        <Self as Guessable>::guesser()
+    }
+    pub fn guess_from_file(path: impl AsRef<Path>) -> Result<Option<Self>, ImageError> {
+        <Self as Guessable>::guess_from_file(path)
+    }
+    pub fn guess_from_bytes(bytes: &[u8]) -> Option<Self> {
+        <Self as Guessable>::guess_from_bytes(bytes)
+    }
+    pub fn guess_from_reader<R: BufRead>(r: &mut R) -> Result<Option<Self>, ImageError> {
+        <Self as Guessable>::guess_from_reader(r)
+    }
+}
+
 #[inherent]
 impl FormatOps for Format {
     pub fn all() -> Vec<Self>;
@@ -64,7 +122,7 @@ impl FormatOps for Format {
             Format::Png => "image/png",
             Format::Jpeg => "image/jpeg",
             Format::Gif => "image/gif",
-            Format::WebP => "image/webp",
+            Format::Webp => "image/webp",
             Format::Tiff => "image/tiff",
             Format::Avif => "image/avif",
             Format::Bmp => "image/bmp",
@@ -87,7 +145,7 @@ impl FormatOps for Format {
             Format::Png => "png",
             Format::Jpeg => "jpeg",
             Format::Gif => "gif",
-            Format::WebP => "webp",
+            Format::Webp => "webp",
             Format::Tiff => "tiff",
             Format::Avif => "avif",
             Format::Pnm => "pnm",
@@ -110,7 +168,7 @@ impl FormatOps for Format {
             Format::Png => &["png"],
             Format::Jpeg => &["jpeg", "jpg", "jpe"],
             Format::Gif => &["gif"],
-            Format::WebP => &["webp"],
+            Format::Webp => &["webp"],
             Format::Tiff => &["tiff", "tif"],
             Format::Avif => &["avif"],
             Format::Pnm => &["pnm", "pbm", "pgm", "ppm"],
@@ -147,7 +205,7 @@ impl fmt::Display for Format {
             Format::Qoi => "qoi",
             Format::Tga => "tga",
             Format::Tiff => "tiff",
-            Format::WebP => "webp",
+            Format::Webp => "webp",
         };
         f.write_str(s)
     }
@@ -176,7 +234,7 @@ impl TryFrom<&str> for Format {
             "qoi" => Format::Qoi,
             "tga" => Format::Tga,
             "tiff" | "tif" => Format::Tiff,
-            "webp" => Format::WebP,
+            "webp" => Format::Webp,
 
             _ => return Err(ValidationError::UnsupportedExtension(ext.to_string()).into()),
         };
@@ -223,7 +281,7 @@ impl TryFrom<Format> for image::ImageFormat {
             Format::Png => Ok(IF::Png),
             Format::Jpeg => Ok(IF::Jpeg),
             Format::Gif => Ok(IF::Gif),
-            Format::WebP => Ok(IF::WebP),
+            Format::Webp => Ok(IF::WebP),
             Format::Tiff => Ok(IF::Tiff),
             Format::Avif => Ok(IF::Avif),
             Format::Pnm => Ok(IF::Pnm),

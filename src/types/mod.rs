@@ -1,6 +1,8 @@
 mod blur;
 mod crop_edge;
 mod formats {
+    mod Archive_format;
+    pub mod archive_format;
     pub mod encode_format;
     pub mod format;
     pub mod image_format;
