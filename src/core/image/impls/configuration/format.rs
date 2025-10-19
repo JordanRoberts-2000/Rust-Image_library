@@ -1,6 +1,6 @@
 use crate::{
     encoding::{AvifConfig, JpegConfig, WebpConfig},
-    Image, ImageFormat,
+    EncodeFormat, Image,
 };
 
 impl Image {
@@ -20,27 +20,27 @@ impl Image {
     }
 
     pub fn jpeg(&mut self) -> &mut Self {
-        self.metadata.format = ImageFormat::Jpeg;
+        self.config.encode_format = Some(EncodeFormat::Jpeg);
         self
     }
 
     pub fn png(&mut self) -> &mut Self {
-        self.metadata.format = ImageFormat::Png;
+        self.config.encode_format = Some(EncodeFormat::Png);
         self
     }
 
     pub fn webp(&mut self) -> &mut Self {
-        self.metadata.format = ImageFormat::WebP;
+        self.config.encode_format = Some(EncodeFormat::Webp);
         self
     }
 
     pub fn avif(&mut self) -> &mut Self {
-        self.metadata.format = ImageFormat::Avif;
+        self.config.encode_format = Some(EncodeFormat::Avif);
         self
     }
 
-    pub fn to_format(&mut self, format: ImageFormat) -> &mut Self {
-        self.metadata.format = format;
+    pub fn to_format(&mut self, format: EncodeFormat) -> &mut Self {
+        self.config.encode_format = Some(format);
         self
     }
 }

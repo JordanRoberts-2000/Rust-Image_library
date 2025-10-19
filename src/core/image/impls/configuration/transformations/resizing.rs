@@ -6,16 +6,8 @@ use crate::{
 impl Image {
     pub fn max_size(&mut self, size: u32) -> &mut Self {
         let size = to_nonzero_u32_with_context(size, "Max size");
-        let current_max = self.width().max(self.height());
-
-        if current_max <= size.get() {
-            return self;
-        }
 
         self.config.pipeline.borrow_mut().push(TransformOp::MaxSize(size));
-
-        let scale = size.get() as f32 / current_max as f32;
-        self.apply_scale(scale);
         self
     }
 
@@ -23,17 +15,7 @@ impl Image {
         let width = to_nonzero_u32_with_context(width, "Resize width");
         let height = to_nonzero_u32_with_context(height, "Resize height");
 
-        // Calculate proportional scale - fit within bounds while maintaining aspect ratio
-        let width_scale = width.get() as f32 / self.width() as f32;
-        let height_scale = height.get() as f32 / self.height() as f32;
-        let scale = width_scale.min(height_scale);
-
-        if (scale - 1.0).abs() < f32::EPSILON {
-            return self;
-        }
-
         self.config.pipeline.borrow_mut().push(TransformOp::Resize(width, height));
-        self.apply_scale(scale);
         self
     }
 
@@ -41,12 +23,7 @@ impl Image {
         let width = to_nonzero_u32_with_context(width, "Resize exact width");
         let height = to_nonzero_u32_with_context(height, "Resize exact height");
 
-        if self.width() == width.get() && self.height() == height.get() {
-            return self;
-        }
-
         self.config.pipeline.borrow_mut().push(TransformOp::ResizeExact(width, height));
-        self.set_size(width, height);
         self
     }
 
@@ -54,27 +31,7 @@ impl Image {
         let width = to_nonzero_u32_with_context(width, "Resize fill width");
         let height = to_nonzero_u32_with_context(height, "Resize fill height");
 
-        // Scale to fill the entire target area (may crop)
-        let width_scale = width.get() as f32 / self.width() as f32;
-        let height_scale = height.get() as f32 / self.height() as f32;
-        let scale = width_scale.max(height_scale);
-
-        if (scale - 1.0).abs() < f32::EPSILON {
-            return self;
-        }
-
         self.config.pipeline.borrow_mut().push(TransformOp::ResizeToFill(width, height));
-        self.apply_scale(scale);
         self
-    }
-
-    fn apply_scale(&mut self, scale: f32) {
-        let new_width = (self.width() as f32 * scale) as u32;
-        let new_height = (self.height() as f32 * scale) as u32;
-
-        let new_width = to_nonzero_u32_with_context(new_width, "Scaled width");
-        let new_height = to_nonzero_u32_with_context(new_height, "Scaled height");
-
-        self.set_size(new_width, new_height);
     }
 }
