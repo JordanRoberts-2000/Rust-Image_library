@@ -16,15 +16,16 @@ impl Image {
         Ok(buffer.len() as u64)
     }
 
-    pub fn pixel_data_size(&self) -> Result<u64> {
-        let img = self.processed_image();
+    pub fn decoded_size(&self) -> Result<u64> {
+        let decoded = self.processed_decode();
+        let img = decoded.get_static()?;
         Ok(img.as_bytes().len() as u64)
     }
 
     pub fn source_file_size(&self) -> Result<u64> {
         match &self.src {
             ImageSrc::File(path) => Ok(file::size(path).with_src(self.src())?),
-            _ => Err(ImageError::new(ErrorKind::SourceIsNotFile, Some(self.src()))),
+            _ => Err(ImageError::new(ErrorKind::SourceIsNotFile).with_src(self.src())),
         }
     }
 }

@@ -52,7 +52,6 @@ pub enum Format {
     #[subenum(ImageFormat)]
     Pcx,
     Svg,
-    Pdf,
 }
 
 impl Guessable for Format {
@@ -60,7 +59,6 @@ impl Guessable for Format {
         use crate::ImageFormat as IF;
         match self {
             Format::Svg => detect::svg(bytes),
-            Format::Pdf => detect::pdf(bytes),
             Format::Avif => IF::Avif.signatures().iter().any(|s| s.matches(bytes)),
             Format::Png => IF::Png.signatures().iter().any(|s| s.matches(bytes)),
             Format::Jpeg => IF::Jpeg.signatures().iter().any(|s| s.matches(bytes)),
@@ -86,7 +84,7 @@ impl Guessable for Format {
 
     fn read_limit(&self) -> usize {
         match self {
-            Format::Svg | Format::Pdf => TEXT_DETECTION_READ_LIMIT,
+            Format::Svg => TEXT_DETECTION_READ_LIMIT,
             _ => MAGIC_BYTES_READ_LIMIT,
         }
     }
@@ -118,7 +116,6 @@ impl FormatOps for Format {
     pub fn mime_type(&self) -> &'static str {
         match self {
             Format::Svg => "image/svg+xml",
-            Format::Pdf => "application/pdf",
             Format::Png => "image/png",
             Format::Jpeg => "image/jpeg",
             Format::Gif => "image/gif",
@@ -141,7 +138,6 @@ impl FormatOps for Format {
     pub fn primary_extension(&self) -> &'static str {
         match self {
             Format::Svg => "svg",
-            Format::Pdf => "pdf",
             Format::Png => "png",
             Format::Jpeg => "jpeg",
             Format::Gif => "gif",
@@ -164,7 +160,6 @@ impl FormatOps for Format {
     pub fn extensions(&self) -> &'static [&'static str] {
         match self {
             Format::Svg => &["svg"],
-            Format::Pdf => &["pdf"],
             Format::Png => &["png"],
             Format::Jpeg => &["jpeg", "jpg", "jpe"],
             Format::Gif => &["gif"],
@@ -188,7 +183,6 @@ impl FormatOps for Format {
 impl fmt::Display for Format {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            Format::Pdf => "pdf",
             Format::Svg => "svg",
             Format::Avif => "avif",
             Format::Bmp => "bmp",
@@ -217,7 +211,6 @@ impl TryFrom<&str> for Format {
     fn try_from(ext: &str) -> Result<Self, Self::Error> {
         let e = normalise_ext(ext);
         let fmt = match e.as_str() {
-            "pdf" => Format::Pdf,
             "svg" => Format::Svg,
             "avif" => Format::Avif,
             "bmp" => Format::Bmp,

@@ -12,7 +12,7 @@ mod internal {
     mod setters;
 }
 mod helpers;
-mod output;
+// mod output;
 mod configuration {
     mod format;
     mod io;

@@ -1,20 +1,29 @@
 use {
-    crate::{image::ImageConfig, utils::decode, Image, ImageMetadata, ImageSrc, Result, WithSrc},
-    image::GenericImageView,
-    std::cell::RefCell,
+    crate::{
+        image::{utils::decode, ImageConfig},
+        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
+    },
+    std::{
+        cell::RefCell,
+        io::{BufReader, Cursor},
+    },
 };
 
 impl Image {
     pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self> {
-        let (decoded, format) = decode::from_bytes(bytes).with_src(ImageSrc::Bytes)?;
-        let (w, h) = decoded.dimensions();
+        (|| -> Result<Self> {
+            let mut reader = BufReader::new(Cursor::new(bytes));
+            let format = Format::guess_from_reader(&mut reader)?.ok_or(ErrorKind::UnknownFormat)?;
+            let decoded = decode::from_reader(&mut reader, &format)?;
 
-        Ok(Self {
-            src: ImageSrc::Bytes,
-            decoded: RefCell::new(decoded),
-            config: ImageConfig::default(),
-            metadata: ImageMetadata::new(w, h, format).with_src(ImageSrc::Bytes)?,
-        })
+            Ok(Self {
+                src: ImageSrc::Bytes,
+                decoded: RefCell::new(decoded),
+                config: ImageConfig::default(),
+                format: Some(format),
+            })
+        })()
+        .with_src(ImageSrc::Bytes)
     }
 }
 

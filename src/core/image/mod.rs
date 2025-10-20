@@ -5,4 +5,4 @@ mod types;
 pub mod utils;
 
 pub use core::Image;
-pub(crate) use types::{ImageConfig, TransformOp};
+pub(crate) use types::{Decoded, ImageConfig, TransformOp};

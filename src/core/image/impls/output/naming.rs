@@ -7,12 +7,12 @@ impl Image {
             self.config.prefix.as_deref().unwrap_or(""),
             self.config.file_name,
             self.config.suffix.as_deref().unwrap_or(""),
-            self.metadata.format.extension()
+            self.format.extension()
         )
     }
 
     pub fn extension(&self) -> &str {
-        self.metadata.format.extension()
+        self.format.extension()
     }
 
     pub fn file_stem(&self) -> String {

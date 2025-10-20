@@ -7,9 +7,12 @@ impl ImageMetadata {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
         let url = Url::parse(url.as_ref())?;
 
-        let bytes = http::download_image(&url).with_src(&url)?;
+        let res: Result<Self> = (|| {
+            let bytes = http::download_image(&url)?;
+            Self::from_bytes(&bytes)
+        })();
 
-        Self::from_bytes(&bytes).with_src(&url)
+        res.with_src(&url)
     }
 }
 
@@ -81,7 +84,7 @@ mod tests {
         assert!(
             matches!(
                 err.kind(),
-                ErrorKind::DimensionsFailed(_) | ErrorKind::FormatDetectionFailed(_)
+                ErrorKind::PeakDimensionsFailed(_) | ErrorKind::FormatDetectionFailed(_)
             ),
             "unexpected error kind: {:?}",
             err.kind()

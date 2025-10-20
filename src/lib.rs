@@ -2,6 +2,7 @@ mod error;
 mod types;
 mod core {
     pub mod encoding;
+    pub mod format_detection;
     pub mod image;
     pub mod images;
     pub mod metadata;
@@ -18,16 +19,16 @@ pub(crate) mod test_utils;
 
 pub use {
     core::{
-        encoding,
+        encoding, format_detection,
         image::Image,
         images::{archive_formats, Archive, FormatFilter, FromFolderConfig, Images, ImagesBuilder},
         metadata::ImageMetadata,
     },
     error::{ErrorKind, ImageError, ValidationError},
-    types::{pixels, Blur, CropEdge, ImageFormat, ImageSrc, Rgb},
+    types::{pixels, Blur, CropEdge, EncodeFormat, Format, ImageFormat, ImageSrc, Rgb},
 };
 pub(crate) use {
-    core::{image, images, metadata},
+    core::{image, images},
     error::*,
-    traits::PixelFormat,
+    traits::{FormatOps, PixelFormat},
 };

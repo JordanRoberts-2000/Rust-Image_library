@@ -1,23 +1,29 @@
 use {
-    crate::{image::ImageConfig, utils::decode, Image, ImageMetadata, ImageSrc, Result, WithSrc},
-    image::GenericImageView,
-    std::{cell::RefCell, io::Read},
+    crate::{
+        image::{utils::decode, ImageConfig},
+        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
+    },
+    std::{
+        cell::RefCell,
+        io::{BufReader, Read, Seek},
+    },
 };
 
 impl Image {
-    pub fn from_reader(reader: &mut (impl Read + ?Sized)) -> Result<Self> {
-        let mut bytes = Vec::new();
-        reader.read_to_end(&mut bytes).with_src(ImageSrc::Reader)?;
+    pub fn from_reader<R: Read + Seek>(reader: &mut R) -> Result<Self> {
+        (|| -> Result<Self> {
+            let mut reader = BufReader::new(reader);
+            let format = Format::guess_from_reader(&mut reader)?.ok_or(ErrorKind::UnknownFormat)?;
+            let decoded = decode::from_reader(&mut reader, &format)?;
 
-        let (decoded, format) = decode::from_bytes(&bytes).with_src(ImageSrc::Reader)?;
-        let (w, h) = decoded.dimensions();
-
-        Ok(Self {
-            src: ImageSrc::Reader,
-            decoded: RefCell::new(decoded),
-            config: ImageConfig::default(),
-            metadata: ImageMetadata::new(w, h, format).with_src(ImageSrc::Reader)?,
-        })
+            Ok(Self {
+                src: ImageSrc::Reader,
+                decoded: RefCell::new(decoded),
+                config: ImageConfig::default(),
+                format: Some(format),
+            })
+        })()
+        .with_src(ImageSrc::Reader)
     }
 }
 

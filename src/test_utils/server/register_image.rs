@@ -8,7 +8,7 @@ use {
 
 pub fn register_image(server: &MockServer, format: ImageFormat) -> (Mock, String) {
     let payload = encoded_bytes(format);
-    let path = format!("/img.{}", format.extension());
+    let path = format!("/img.{}", format.primary_extension());
 
     let mock = server.mock(|when, then| {
         when.method(GET).path(&path);
@@ -21,7 +21,7 @@ pub fn register_image(server: &MockServer, format: ImageFormat) -> (Mock, String
 
 pub fn register_corrupted_header_image(server: &MockServer, format: ImageFormat) -> (Mock, String) {
     let payload = corrupted_header_bytes(format);
-    let path = format!("/img.{}", format.extension());
+    let path = format!("/img.{}", format.primary_extension());
 
     let mock = server.mock(|when, then| {
         when.method(GET).path(&path);

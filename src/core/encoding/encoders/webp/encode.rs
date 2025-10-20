@@ -10,7 +10,7 @@ use {
 
 impl Encoder for WebpEncoder {
     type ColorType = WebpColorType;
-    const IMAGE_FORMAT: ImageFormat = ImageFormat::WebP;
+    const IMAGE_FORMAT: ImageFormat = ImageFormat::Webp;
 
     fn encode_impl(
         &self, writer: &mut dyn Write, bytes: &[u8], w: u32, h: u32, ct: Self::ColorType,

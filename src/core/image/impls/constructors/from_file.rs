@@ -1,29 +1,37 @@
 use {
-    crate::{image::ImageConfig, utils::decode, Image, ImageMetadata, ImageSrc, Result, WithSrc},
-    fs_ext::{file, PathExt},
-    image::GenericImageView,
-    std::{cell::RefCell, path::Path},
+    crate::{
+        image::{utils::decode, ImageConfig},
+        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
+    },
+    fs_ext::PathExt,
+    std::{cell::RefCell, fs::File, io::BufReader, path::Path},
 };
 
 impl Image {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
-
-        file::assert_exists(path)?;
         let src: ImageSrc = path.into();
 
-        let (decoded, format) = decode::from_path(path).with_src(src.clone())?;
-        let (w, h) = decoded.dimensions();
+        let res: Result<Self> = (|| {
+            let mut reader = BufReader::new(File::open(path)?);
+            let format = Format::guesser()
+                .extension_hint(path.extension())
+                .from_reader(&mut reader)?
+                .ok_or(ErrorKind::UnknownFormat)?;
+            let decoded = decode::from_reader(&mut reader, &format)?;
 
-        let file_name = path.utf8_stem().with_src(src.clone())?.to_owned();
-        let parent_dir = path.parent_or_current();
+            let file_name = path.utf8_stem()?.to_owned();
+            let parent_dir = path.parent_or_current();
 
-        Ok(Self {
-            src: src.clone(),
-            decoded: RefCell::new(decoded),
-            config: ImageConfig { file_name, output_dir: parent_dir, ..Default::default() },
-            metadata: ImageMetadata::new(w, h, format).with_src(src)?,
-        })
+            Ok(Self {
+                src: src.clone(),
+                decoded: RefCell::new(decoded),
+                config: ImageConfig { file_name, output_dir: parent_dir, ..Default::default() },
+                format: Some(format),
+            })
+        })();
+
+        res.with_src(src)
     }
 }
 

@@ -1,16 +1,11 @@
-use {crate::Image, std::num::NonZeroU32};
+use {
+    crate::{image::Decoded, Image},
+    std::cell::RefCell,
+};
 
 impl Image {
-    pub(crate) fn set_width(&mut self, width: NonZeroU32) {
-        self.metadata.width = width;
-    }
-
-    pub(crate) fn set_height(&mut self, height: NonZeroU32) {
-        self.metadata.height = height;
-    }
-
-    pub(crate) fn set_size(&mut self, width: NonZeroU32, height: NonZeroU32) {
-        self.set_width(width);
-        self.set_height(height);
+    pub(crate) fn set_decoded(&mut self, decoded: Decoded) -> &mut Self {
+        self.decoded = RefCell::new(decoded);
+        self
     }
 }

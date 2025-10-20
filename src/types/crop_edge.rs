@@ -1,9 +1,10 @@
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, Copy, Eq)]
 pub enum CropEdge {
     Left,
     Right,
     Top,
     Bottom,
-    Horizontal, // same as x–axis inset
-    Vertical,   // same as y–axis inset
+    Horizontal,
+    Vertical,
+    All,
 }

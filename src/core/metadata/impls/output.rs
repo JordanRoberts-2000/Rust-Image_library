@@ -1,4 +1,4 @@
-use crate::{metadata::utils::gcd, ImageMetadata};
+use crate::{utils::gcd, ImageMetadata};
 
 impl ImageMetadata {
     pub fn width(&self) -> u32 {

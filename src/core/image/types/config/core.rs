@@ -3,7 +3,7 @@ use {
         constants::DEFAULT_IMAGE_FILE_NAME,
         encoding::{AvifConfig, CompressionType, JpegConfig, PngConfig, WebpConfig},
         image::TransformOp,
-        ImageFormat,
+        EncodeFormat,
     },
     std::{cell::RefCell, path::PathBuf},
 };
@@ -12,7 +12,6 @@ use {
 pub struct ImageConfig {
     pub pipeline: RefCell<Vec<TransformOp>>,
 
-    pub target_format: Option<ImageFormat>,
     pub file_name: String,
     pub output_dir: PathBuf,
     pub prefix: Option<String>,
@@ -20,8 +19,9 @@ pub struct ImageConfig {
 
     pub minimize_bit_depth: bool,
     pub remove_unused_transparency: bool,
-    pub remove_source: bool,
 
+    pub static_only: bool,
+    pub encode_format: Option<EncodeFormat>,
     pub quality: Option<u8>,
     pub compression: CompressionType,
     pub jpeg: Option<JpegConfig>,
@@ -35,9 +35,6 @@ impl Default for ImageConfig {
         Self {
             pipeline: RefCell::new(Vec::new()),
 
-            quality: None,
-            compression: CompressionType::Lossy,
-            target_format: None,
             file_name: DEFAULT_IMAGE_FILE_NAME.to_string(),
             output_dir: PathBuf::from("."),
             prefix: None,
@@ -45,8 +42,11 @@ impl Default for ImageConfig {
 
             minimize_bit_depth: false,
             remove_unused_transparency: false,
-            remove_source: false,
 
+            static_only: false,
+            encode_format: None,
+            quality: None,
+            compression: CompressionType::Lossy,
             jpeg: None,
             png: None,
             avif: None,

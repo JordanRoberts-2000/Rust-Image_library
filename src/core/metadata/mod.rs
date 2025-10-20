@@ -9,6 +9,5 @@ mod impls {
     mod internal;
     mod output;
 }
-pub(crate) mod utils;
 
 pub use core::ImageMetadata;

@@ -1,13 +1,15 @@
 use {
-    crate::{image::ImageConfig, ImageMetadata, ImageSrc},
-    image::DynamicImage,
+    crate::{
+        image::{Decoded, ImageConfig},
+        Format, ImageSrc,
+    },
     std::cell::RefCell,
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Image {
     pub(crate) src: ImageSrc,
     pub(crate) config: ImageConfig,
-    pub(crate) decoded: RefCell<DynamicImage>,
-    pub(crate) metadata: ImageMetadata,
+    pub(crate) decoded: RefCell<Decoded>,
+    pub(crate) format: Option<Format>,
 }

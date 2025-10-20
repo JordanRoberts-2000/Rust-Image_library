@@ -37,7 +37,7 @@ pub fn corrupted_header_bytes(format: ImageFormat) -> Vec<u8> {
 }
 
 pub fn corrupted_image_file(temp_dir: &TempDir, format: ImageFormat) -> PathBuf {
-    let file_path = temp_dir.path().join(format!("corrupted.{}", format.extension()));
+    let file_path = temp_dir.path().join(format!("corrupted.{}", format.primary_extension()));
 
     let bytes = corrupted_bytes(format);
     fs::write(&file_path, bytes).unwrap_or_else(|e| {
@@ -51,7 +51,7 @@ pub fn corrupted_image_file(temp_dir: &TempDir, format: ImageFormat) -> PathBuf 
 }
 
 pub fn corrupted_header_image_file(temp_dir: &TempDir, format: ImageFormat) -> PathBuf {
-    let file_path = temp_dir.path().join(format!("corrupted.{}", format.extension()));
+    let file_path = temp_dir.path().join(format!("corrupted.{}", format.primary_extension()));
 
     let bytes = corrupted_header_bytes(format);
     fs::write(&file_path, bytes).unwrap_or_else(|e| {

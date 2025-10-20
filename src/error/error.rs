@@ -10,8 +10,8 @@ pub struct ImageError {
 }
 
 impl ImageError {
-    pub fn new(kind: impl Into<ErrorKind>, src: Option<ImageSrc>) -> Self {
-        Self { kind: kind.into(), src }
+    pub fn new(kind: impl Into<ErrorKind>) -> Self {
+        Self { kind: kind.into(), src: None }
     }
 
     pub fn src(&self) -> Option<&ImageSrc> {

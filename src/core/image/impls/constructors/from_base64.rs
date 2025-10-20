@@ -1,34 +1,39 @@
 use {
     crate::{
-        image::ImageConfig, utils::decode, ErrorKind, Image, ImageMetadata, ImageSrc, Result,
-        WithSrc,
+        image::{utils::decode, ImageConfig},
+        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
     },
     base64::Engine,
-    image::GenericImageView,
-    std::cell::RefCell,
+    std::{
+        cell::RefCell,
+        io::{BufReader, Cursor},
+    },
 };
 
 impl Image {
     pub fn from_base64(base_64: impl AsRef<str>) -> Result<Self> {
         let base_64 = base_64.as_ref();
-
         let preview = base_64.chars().take(10).collect();
         let src = ImageSrc::Base64(preview);
 
-        let bytes = base64::engine::general_purpose::STANDARD
-            .decode(base_64)
-            .map_err(|e| ErrorKind::Base64DecodeFailed(e, base_64.to_string()))
-            .with_src(src.clone())?;
+        let res: Result<Self> = (|| {
+            let bytes = base64::engine::general_purpose::STANDARD
+                .decode(base_64)
+                .map_err(|e| ErrorKind::Base64DecodeFailed(e, base_64.to_string()))?;
 
-        let (decoded, format) = decode::from_bytes(&bytes).with_src(src.clone())?;
-        let (w, h) = decoded.dimensions();
+            let mut reader = BufReader::new(Cursor::new(bytes));
+            let format = Format::guess_from_reader(&mut reader)?.ok_or(ErrorKind::UnknownFormat)?;
+            let decoded = decode::from_reader(&mut reader, &format)?;
 
-        Ok(Self {
-            src: src.clone(),
-            decoded: RefCell::new(decoded),
-            config: ImageConfig::default(),
-            metadata: ImageMetadata::new(w, h, format).with_src(src)?,
-        })
+            Ok(Self {
+                src: src.clone(),
+                decoded: RefCell::new(decoded),
+                config: ImageConfig::default(),
+                format: Some(format),
+            })
+        })();
+
+        res.with_src(src)
     }
 }
 

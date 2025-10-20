@@ -1,6 +1,5 @@
 use {
     crate::{ErrorKind, ImageMetadata, Result, WithSrc},
-    fs_ext::file,
     image::ImageReader,
     std::path::Path,
 };
@@ -8,7 +7,6 @@ use {
 impl ImageMetadata {
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
-        file::assert_exists(&path)?;
 
         let reader = ImageReader::open(&path)
             .map_err(|e| ErrorKind::Open { source: e, path: path.to_path_buf() })

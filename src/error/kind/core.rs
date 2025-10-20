@@ -12,6 +12,9 @@ pub enum ErrorKind {
     #[error("Failed to join blocking task: {0}")]
     TaskJoinError(JoinError),
 
+    #[error("internal error: {0}")]
+    Internal(String),
+
     #[error("IO error: {0}")]
     Io(#[from] io::Error),
 
@@ -33,11 +36,8 @@ pub enum ErrorKind {
     #[error("Failed to open file '{path:?}': {source}")]
     Open { source: std::io::Error, path: PathBuf },
 
-    #[error("Failed to decode file '{path:?}': {source}")]
-    DecodeFile { source: image::ImageError, path: PathBuf },
-
-    #[error("Failed to decode from reader: {0}")]
-    DecodeReader(image::ImageError),
+    #[error("Failed to decode file '{0}'")]
+    Decode(image::ImageError),
 
     #[error("Failed to download from '{url}': {source}")]
     DownloadFailed { url: Url, source: reqwest::Error },
@@ -45,14 +45,14 @@ pub enum ErrorKind {
     #[error("Failed to read response bytes from '{url}': {source}")]
     ResponseReadFailed { url: Url, source: reqwest::Error },
 
-    #[error("Failed to detect image format from byte stream: {0}")]
+    #[error("Failed to detect format: {0}")]
     FormatDetectionFailed(std::io::Error),
 
     #[error("Unknown or unsupported image format")]
     UnknownFormat,
 
     #[error("Failed to read image dimensions: {0}")]
-    DimensionsFailed(image::ImageError),
+    PeakDimensionsFailed(image::ImageError),
 
     #[error("Failed to save to '{path:?}': {source}")]
     Save { source: image::ImageError, path: PathBuf },
@@ -71,6 +71,18 @@ pub enum ErrorKind {
 
     #[error("source is not a local file")]
     SourceIsNotFile,
+
+    #[error("could not rasterize svg")]
+    SvgRaster,
+
+    #[error("gif had no frames")]
+    EmptyGif,
+
+    #[error("Image is static, it has no frames")]
+    NotAnimated,
+
+    #[error("frame index {index} is out of bounds (len = {len})")]
+    FrameOutOfBounds { index: usize, len: usize },
 
     #[error("File name collision detected: '{0}'")]
     FileNameCollision(String),

@@ -1,30 +1,36 @@
 use {
     crate::{
-        image::ImageConfig,
-        utils::{decode, http},
-        Image, ImageMetadata, ImageSrc, Result, WithSrc,
+        image::{utils::decode, ImageConfig},
+        utils::http,
+        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
     },
-    image::GenericImageView,
-    std::cell::RefCell,
+    std::{
+        cell::RefCell,
+        io::{BufReader, Cursor},
+    },
     url::Url,
 };
 
 impl Image {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
         let src = ImageSrc::Url(url.as_ref().to_string());
-        let url = Url::parse(url.as_ref()).with_src(src.clone())?;
 
-        let bytes = http::download_image(&url).with_src(src.clone())?;
+        (|| -> Result<Self> {
+            let url = Url::parse(url.as_ref())?;
+            let bytes = http::download_image(&url)?;
 
-        let (decoded, format) = decode::from_bytes(bytes).with_src(src.clone())?;
-        let (w, h) = decoded.dimensions();
+            let mut reader = BufReader::new(Cursor::new(bytes));
+            let format = Format::guess_from_reader(&mut reader)?.ok_or(ErrorKind::UnknownFormat)?;
+            let decoded = decode::from_reader(&mut reader, &format)?;
 
-        Ok(Self {
-            src: src.clone(),
-            decoded: RefCell::new(decoded),
-            config: ImageConfig::default(),
-            metadata: ImageMetadata::new(w, h, format).with_src(src)?,
-        })
+            Ok(Self {
+                src: src.clone(),
+                decoded: RefCell::new(decoded),
+                config: ImageConfig::default(),
+                format: Some(format),
+            })
+        })()
+        .with_src(src)
     }
 }
 

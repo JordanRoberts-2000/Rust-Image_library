@@ -5,7 +5,7 @@ use {
 };
 
 pub fn image_file(temp_dir: &TempDir, format: ImageFormat) -> PathBuf {
-    let file_path = temp_dir.path().join(format!("test.{}", format.extension()));
+    let file_path = temp_dir.path().join(format!("test.{}", format.primary_extension()));
 
     write_encoded_bytes(&file_path, format);
 

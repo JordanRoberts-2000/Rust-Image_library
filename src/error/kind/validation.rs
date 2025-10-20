@@ -1,5 +1,5 @@
 use {
-    crate::{encoding::ColorType, ImageFormat},
+    crate::{encoding::ColorType, Format, ImageFormat},
     std::path::PathBuf,
 };
 
@@ -53,6 +53,12 @@ pub enum ValidationError {
     #[error("{}", format_unsupported_error(.0))]
     UnsupportedFormat(image::ImageFormat),
 
+    #[error("{}", image_format_unsupported_error(.0))]
+    UnsupportedImageFormat(image::ImageFormat),
+
+    #[error("Metadata is not supported for format {0:?}")]
+    UnsupportedMetadataFormat(Format),
+
     #[error("Missing file extension on path '{0:?}'")]
     MissingExtension(PathBuf),
 
@@ -66,6 +72,11 @@ fn ext_unsupported_error(ext: &String) -> String {
 }
 
 fn format_unsupported_error(format: &image::ImageFormat) -> String {
+    let supported = Format::supported_exts().join(",");
+    format!("unsupported format: '{format:?}'; supported formats are: {supported}")
+}
+
+fn image_format_unsupported_error(format: &image::ImageFormat) -> String {
     let supported = ImageFormat::supported_exts().join(",");
     format!("unsupported image format: '{format:?}'; supported formats are: {supported}")
 }

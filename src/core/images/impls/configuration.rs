@@ -1,6 +1,6 @@
 use crate::{
     encoding::{AvifConfig, JpegConfig, WebpConfig},
-    Blur, CropEdge, ImageFormat, Images,
+    Blur, CropEdge, EncodeFormat, Images,
 };
 
 impl Images {
@@ -60,7 +60,7 @@ impl Images {
         self
     }
 
-    pub fn to_format(&mut self, format: ImageFormat) -> &mut Self {
+    pub fn to_format(&mut self, format: EncodeFormat) -> &mut Self {
         for image in &mut self.inner {
             image.to_format(format);
         }

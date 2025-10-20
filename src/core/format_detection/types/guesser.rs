@@ -1,6 +1,7 @@
 use {
     crate::{format_detection::Guessable, utils::normalise_ext, Result},
     std::{
+        ffi::OsStr,
         fs::File,
         io::{BufRead, BufReader},
         path::Path,
@@ -30,8 +31,8 @@ impl<T: Guessable> Guesser<T> {
         self
     }
 
-    pub fn extension_hint(mut self, ext: Option<impl AsRef<str>>) -> Self {
-        self.extension_hint = ext.map(|e| normalise_ext(e.as_ref()));
+    pub fn extension_hint(mut self, ext: Option<&OsStr>) -> Self {
+        self.extension_hint = ext.map(|e| normalise_ext(&e.to_string_lossy()));
         self
     }
 

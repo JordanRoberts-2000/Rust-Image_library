@@ -1,5 +1,6 @@
 mod alpha_is_unused;
 mod clamp_ratio;
+pub mod decode;
 mod to_non_zero_u32;
 
 pub use {

@@ -18,7 +18,7 @@ impl ImageMetadata {
             .map_err(Into::into)
             .and_then(ImageFormat::try_from)?;
 
-        let (width, height) = reader.into_dimensions().map_err(ErrorKind::DimensionsFailed)?;
+        let (width, height) = reader.into_dimensions().map_err(ErrorKind::PeakDimensionsFailed)?;
 
         Ok(Self {
             format,
@@ -74,7 +74,7 @@ mod tests {
 
         let err = result.unwrap_err();
         assert!(
-            matches!(err.kind(), ErrorKind::DimensionsFailed(_)),
+            matches!(err.kind(), ErrorKind::PeakDimensionsFailed(_)),
             "Expected UnknownFormat, got {:?}",
             err.kind()
         );

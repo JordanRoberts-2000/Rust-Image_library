@@ -1,9 +1,8 @@
 use {
     crate::{
-        image::ImageConfig, Image, ImageFormat, ImageMetadata, ImageSrc, PixelFormat, Result,
-        WithSrc,
+        image::{Decoded, ImageConfig},
+        Image, ImageSrc, PixelFormat, Result, WithSrc,
     },
-    image::GenericImageView,
     std::{borrow::Cow, cell::RefCell},
 };
 
@@ -19,16 +18,15 @@ impl Image {
             Cow::Borrowed(s) => s.to_vec(),
         };
 
-        let decoded =
-            F::create_image_from_raw(pixels, width, height).with_src(ImageSrc::RawPixels)?;
-        let (w, h) = decoded.dimensions();
+        let decoded = Decoded::Static(
+            F::create_image_from_raw(pixels, width, height).with_src(ImageSrc::RawPixels)?,
+        );
 
         Ok(Self {
             src: ImageSrc::RawPixels,
             decoded: RefCell::new(decoded),
             config: ImageConfig::default(),
-            metadata: ImageMetadata::new(w, h, ImageFormat::default())
-                .with_src(ImageSrc::RawPixels)?,
+            format: None,
         })
     }
 }

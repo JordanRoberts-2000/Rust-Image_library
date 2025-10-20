@@ -5,7 +5,8 @@ use {
 
 impl Image {
     pub fn palette(&self) -> Result<Vec<Rgb>> {
-        let img = self.processed_image();
+        let decoded = self.processed_decode();
+        let img = decoded.get_static()?;
 
         let palette = if img.color().has_alpha() {
             let rgba_img = img.to_rgba8();
