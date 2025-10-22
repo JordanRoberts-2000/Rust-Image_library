@@ -1,7 +1,6 @@
 use {
-    crate::{image::Decoded, Image, ImageSrc, Result},
-    image::DynamicImage,
-    std::{borrow::Cow, cell::Ref},
+    crate::{image::Decoded, Image, ImageSrc},
+    std::cell::Ref,
 };
 
 impl Image {
@@ -9,7 +8,7 @@ impl Image {
         self.src.clone()
     }
 
-    pub(crate) fn processed_decode(&self) -> Ref<Decoded> {
+    pub(crate) fn decoded(&self) -> Ref<Decoded> {
         let mut decoded = self.decoded.borrow_mut();
 
         let mut ops = self.config.pipeline.borrow_mut();

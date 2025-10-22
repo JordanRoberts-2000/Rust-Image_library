@@ -1,5 +1,6 @@
 mod encoders {
     pub mod avif;
+    pub mod gif;
     pub mod jpeg;
     pub mod png;
     pub mod tiff;
@@ -19,7 +20,7 @@ mod traits {
 
 pub(crate) use traits::color_type_ops::{AlphaChannelOps, BitDepthOps, ColorTypeOps, GrayscaleOps};
 pub use {
-    encoders::{avif::*, jpeg::*, png::*, tiff::*, webp::*},
+    encoders::{avif::*, gif::*, jpeg::*, png::*, tiff::*, webp::*},
     error::{EncodingError, EncodingErrorKind, EncodingValidationError},
     traits::encoder::Encoder,
     types::{

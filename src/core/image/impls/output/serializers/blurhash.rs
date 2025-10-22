@@ -1,15 +1,11 @@
-use {
-    crate::{ErrorKind, Image, Result, WithSrc},
-    image::GenericImageView,
-};
+use crate::{pixels::Rgba, ErrorKind, Image, Result, WithSrc};
 
 impl Image {
     pub fn blurhash(&self) -> Result<String> {
-        let decoded = self.processed_decode();
-        let img = decoded.get_static()?;
-        let (w, h) = img.dimensions();
+        let decoded = self.decoded();
+        let (w, h) = decoded.dimensions();
 
-        blurhash::encode(4, 3, w, h, img.to_rgba8().as_raw())
+        blurhash::encode(4, 3, w, h, &decoded.as_bytes::<Rgba<u8>>())
             .map_err(ErrorKind::BlurHash)
             .with_src(self.src())
     }

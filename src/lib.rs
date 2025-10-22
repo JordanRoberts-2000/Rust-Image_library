@@ -8,7 +8,11 @@ mod core {
     pub mod metadata;
 }
 pub(crate) mod constants;
-mod traits;
+mod traits {
+    pub mod dynamic_img_ext;
+    pub mod format_ops;
+    pub mod pixel_format;
+}
 pub(crate) mod utils;
 
 #[cfg(feature = "tokio")]
@@ -30,5 +34,5 @@ pub use {
 pub(crate) use {
     core::{image, images},
     error::*,
-    traits::{FormatOps, PixelFormat},
+    traits::{dynamic_img_ext::DynamicImageExt, format_ops::FormatOps, pixel_format::PixelFormat},
 };

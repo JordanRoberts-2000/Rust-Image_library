@@ -17,12 +17,12 @@ impl AvifEncoder {
         Self { quality: DEFAULT_AVIF_QUALITY.into(), speed: DEFAULT_AVIF_SPEED.into() }
     }
 
-    pub fn with_quality(mut self, quality: u8) -> Self {
+    pub fn with_quality(mut self, quality: impl Into<Quality>) -> Self {
         self.quality = quality.into();
         self
     }
 
-    pub fn with_speed(mut self, speed: u8) -> Self {
+    pub fn with_speed(mut self, speed: impl Into<AvifSpeed>) -> Self {
         self.speed = speed.into();
         self
     }

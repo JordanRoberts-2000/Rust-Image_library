@@ -1,17 +1,13 @@
 use {
     crate::{
         encoding::{
-            AvifColorType, AvifEncoder, ColorType, JpegColorType, JpegEncoder, PngColorType,
-            PngEncoder, TiffColorType, TiffEncoder, WebpColorType, WebpEncoder,
+            AvifColorType, AvifEncoder, ColorType, GifEncoder, JpegColorType, JpegEncoder,
+            PngColorType, PngEncoder, TiffColorType, TiffEncoder, WebpColorType, WebpEncoder,
         },
         image::Decoded,
-        EncodeFormat, Image, Result, ValidationError,
+        DynamicImageExt, EncodeFormat, Image, Result, ValidationError,
     },
-    image::{
-        codecs::gif::{GifEncoder, Repeat},
-        Delay, Frame,
-    },
-    std::{io::Write, time::Duration},
+    std::io::Write,
 };
 
 impl Image {
@@ -48,30 +44,10 @@ impl Image {
                 TiffEncoder.encode(writer, bytes, w, h, ct)
             }
             EncodeFormat::Gif => {
-                let mut encoder = GifEncoder::new(writer);
-                encoder.set_repeat(Repeat::Infinite).unwrap();
+                let encoder = GifEncoder::new();
                 match &*decoded {
-                    Decoded::Static(img) => {
-                        let rgba = img.to_rgba8();
-                        let frame = Frame::from_parts(
-                            rgba,
-                            0,
-                            0,
-                            Delay::from_saturating_duration(Duration::from_millis(0)),
-                        );
-                        encoder.encode_frame(frame);
-                        Ok(())
-                    }
-
-                    Decoded::Animated { frames, .. } => {
-                        let (head, tail) = (frames.head.clone(), frames.tail.clone());
-
-                        encoder.encode_frame(head).unwrap();
-                        for fr in tail {
-                            encoder.encode_frame(fr).unwrap();
-                        }
-                        Ok(())
-                    }
+                    Decoded::Static(img) => encoder.encode(writer, [img.clone().into_frame()]),
+                    Decoded::Animated { frames, .. } => encoder.encode(writer, frames.clone()),
                 }
             }
         };

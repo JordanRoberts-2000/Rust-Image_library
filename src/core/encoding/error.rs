@@ -33,6 +33,9 @@ pub enum EncodingValidationError {
     #[error("buffer is empty: cannot encode an image with no data")]
     EmptyBuffer,
 
+    #[error("GIF requires at least one frame, but none were provided")]
+    EmptyFrames,
+
     #[error("width and height must be > 0 (got {width}x{height})")]
     InvalidDimensions { width: u32, height: u32 },
 

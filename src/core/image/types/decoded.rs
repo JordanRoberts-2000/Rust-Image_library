@@ -1,13 +1,14 @@
 use {
-    crate::{ErrorKind, Result},
+    crate::{ErrorKind, PixelFormat, Result},
     image::{DynamicImage, Frame, GenericImageView},
+    nonempty::NonEmpty,
     std::{borrow::Cow, fmt},
 };
 
 #[derive(Clone)]
 pub enum Decoded {
     Static(DynamicImage),
-    Animated { frames: Vec<Frame>, width: u32, height: u32 },
+    Animated { frames: NonEmpty<Frame>, width: u32, height: u32 },
 }
 
 impl Decoded {
@@ -25,30 +26,15 @@ impl Decoded {
         }
     }
 
-    pub fn get_static(&self) -> Result<Cow<'_, DynamicImage>> {
+    pub fn bytes(&self) -> &[u8] {
         match self {
-            Decoded::Static(img) => Ok(Cow::Borrowed(img)),
-            Decoded::Animated { frames, .. } => {
-                let first = frames.first().ok_or(ErrorKind::EmptyGif)?;
-                let di = DynamicImage::ImageRgba8(first.buffer().clone());
-                Ok(Cow::Owned(di))
-            }
+            Decoded::Static(img) => img.as_bytes(),
+            Decoded::Animated { frames, .. } => frames.first().buffer().as_raw(),
         }
     }
 
-    pub fn into_static(&mut self) -> Result<&mut Self> {
-        match self {
-            Decoded::Static(_) => Ok(self),
-            Decoded::Animated { frames, .. } => {
-                let mut frames_taken = std::mem::take(frames);
-                let first = frames_taken.drain(..).next().ok_or(ErrorKind::EmptyGif)?;
-
-                let img = DynamicImage::ImageRgba8(first.into_buffer());
-                *self = Decoded::Static(img);
-
-                Ok(self)
-            }
-        }
+    pub fn as_bytes<'a, P: PixelFormat>(&'a self) -> Cow<'a, [P::Channel]> {
+        P::from_decoded(self)
     }
 
     pub fn frames(&self) -> Result<Vec<DynamicImage>> {
@@ -68,8 +54,7 @@ impl Decoded {
         match self {
             Decoded::Static(_) => Err(ErrorKind::NotAnimated.into()),
             Decoded::Animated { frames, .. } => {
-                let fr = frames.first().ok_or(ErrorKind::EmptyGif)?;
-                *self = Decoded::Static(DynamicImage::ImageRgba8(fr.buffer().clone()));
+                *self = Decoded::Static(DynamicImage::ImageRgba8(frames.first().buffer().clone()));
                 Ok(self)
             }
         }
@@ -79,8 +64,7 @@ impl Decoded {
         match self {
             Decoded::Static(_) => Err(ErrorKind::NotAnimated.into()),
             Decoded::Animated { frames, .. } => {
-                let fr = frames.last().ok_or(ErrorKind::EmptyGif)?;
-                *self = Decoded::Static(DynamicImage::ImageRgba8(fr.buffer().clone()));
+                *self = Decoded::Static(DynamicImage::ImageRgba8(frames.last().buffer().clone()));
                 Ok(self)
             }
         }

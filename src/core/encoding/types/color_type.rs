@@ -1,9 +1,9 @@
 use {
     crate::{
         encoding::{AlphaChannelOps, BitDepthOps, ColorTypeOps, GrayscaleOps},
+        image::Decoded,
         ImageError, ValidationError,
     },
-    bytemuck::cast_slice,
     image::DynamicImage,
     inherent::inherent,
     std::{borrow::Cow, fmt},
@@ -177,68 +177,140 @@ impl GrayscaleOps for ColorType {
 }
 
 impl ColorType {
-    pub(crate) fn bytes<'a>(&self, img: &'a DynamicImage) -> Cow<'a, [u8]> {
+    pub(crate) fn bytes<'a>(&self, decoded: &'a Decoded) -> Cow<'a, [u8]> {
         match *self {
-            ColorType::Grayscale8 => {
-                if let DynamicImage::ImageLuma8(b) = img {
-                    Cow::Borrowed(b.as_raw())
-                } else {
-                    Cow::Owned(img.to_luma8().into_raw())
+            ColorType::Grayscale8 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageLuma8(b) = img {
+                        Cow::Borrowed(b.as_raw())
+                    } else {
+                        Cow::Owned(img.to_luma8().into_raw())
+                    }
                 }
-            }
-            ColorType::GrayscaleAlpha8 => {
-                if let DynamicImage::ImageLumaA8(b) = img {
-                    Cow::Borrowed(b.as_raw())
-                } else {
-                    Cow::Owned(img.to_luma_alpha8().into_raw())
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    DynamicImage::ImageRgba8(frames.first().buffer().clone()).to_luma8().into_raw(),
+                ),
+            },
+
+            ColorType::GrayscaleAlpha8 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageLumaA8(b) = img {
+                        Cow::Borrowed(b.as_raw())
+                    } else {
+                        Cow::Owned(img.to_luma_alpha8().into_raw())
+                    }
                 }
-            }
-            ColorType::Rgb8 => {
-                if let DynamicImage::ImageRgb8(b) = img {
-                    Cow::Borrowed(b.as_raw())
-                } else {
-                    Cow::Owned(img.to_rgb8().into_raw())
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    DynamicImage::ImageRgba8(frames.first().buffer().clone())
+                        .to_luma_alpha8()
+                        .into_raw(),
+                ),
+            },
+
+            ColorType::Rgb8 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageRgb8(b) = img {
+                        Cow::Borrowed(b.as_raw())
+                    } else {
+                        Cow::Owned(img.to_rgb8().into_raw())
+                    }
                 }
-            }
-            ColorType::Rgba8 => {
-                if let DynamicImage::ImageRgba8(b) = img {
-                    Cow::Borrowed(b.as_raw())
-                } else {
-                    Cow::Owned(img.to_rgba8().into_raw())
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    DynamicImage::ImageRgba8(frames.first().buffer().clone()).to_rgb8().into_raw(),
+                ),
+            },
+
+            ColorType::Rgba8 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageRgba8(b) = img {
+                        Cow::Borrowed(b.as_raw())
+                    } else {
+                        Cow::Owned(img.to_rgba8().into_raw())
+                    }
                 }
-            }
-            ColorType::Grayscale16 => {
-                if let DynamicImage::ImageLuma16(b) = img {
-                    Cow::Borrowed(cast_slice(b.as_raw()))
-                } else {
-                    let buf = img.to_luma16();
-                    Cow::Owned(cast_slice::<u16, u8>(buf.as_raw()).to_vec())
+                Decoded::Animated { frames, .. } => Cow::Borrowed(frames.first().buffer().as_raw()),
+            },
+
+            ColorType::Grayscale16 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageLuma16(b) = img {
+                        Cow::Borrowed(bytemuck::cast_slice(b.as_raw()))
+                    } else {
+                        Cow::Owned(
+                            bytemuck::cast_slice::<u16, u8>(img.to_luma16().as_raw()).to_vec(),
+                        )
+                    }
                 }
-            }
-            ColorType::GrayscaleAlpha16 => {
-                if let DynamicImage::ImageLumaA16(b) = img {
-                    Cow::Borrowed(cast_slice(b.as_raw()))
-                } else {
-                    let buf = img.to_luma_alpha16();
-                    Cow::Owned(cast_slice::<u16, u8>(buf.as_raw()).to_vec())
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    bytemuck::cast_slice::<u16, u8>(
+                        DynamicImage::ImageRgba8(frames.first().buffer().clone())
+                            .to_luma16()
+                            .as_raw(),
+                    )
+                    .to_vec(),
+                ),
+            },
+
+            ColorType::GrayscaleAlpha16 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageLumaA16(b) = img {
+                        Cow::Borrowed(bytemuck::cast_slice(b.as_raw()))
+                    } else {
+                        Cow::Owned(
+                            bytemuck::cast_slice::<u16, u8>(img.to_luma_alpha16().as_raw())
+                                .to_vec(),
+                        )
+                    }
                 }
-            }
-            ColorType::Rgb16 => {
-                if let DynamicImage::ImageRgb16(b) = img {
-                    Cow::Borrowed(cast_slice(b.as_raw()))
-                } else {
-                    let buf = img.to_rgb16();
-                    Cow::Owned(cast_slice::<u16, u8>(buf.as_raw()).to_vec())
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    bytemuck::cast_slice::<u16, u8>(
+                        DynamicImage::ImageRgba8(frames.first().buffer().clone())
+                            .to_luma_alpha16()
+                            .as_raw(),
+                    )
+                    .to_vec(),
+                ),
+            },
+
+            ColorType::Rgb16 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageRgb16(b) = img {
+                        Cow::Borrowed(bytemuck::cast_slice(b.as_raw()))
+                    } else {
+                        Cow::Owned(
+                            bytemuck::cast_slice::<u16, u8>(img.to_rgb16().as_raw()).to_vec(),
+                        )
+                    }
                 }
-            }
-            ColorType::Rgba16 => {
-                if let DynamicImage::ImageRgba16(b) = img {
-                    Cow::Borrowed(cast_slice(b.as_raw()))
-                } else {
-                    let buf = img.to_rgba16();
-                    Cow::Owned(cast_slice::<u16, u8>(buf.as_raw()).to_vec())
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    bytemuck::cast_slice::<u16, u8>(
+                        DynamicImage::ImageRgba8(frames.first().buffer().clone())
+                            .to_rgb16()
+                            .as_raw(),
+                    )
+                    .to_vec(),
+                ),
+            },
+
+            ColorType::Rgba16 => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageRgba16(b) = img {
+                        Cow::Borrowed(bytemuck::cast_slice(b.as_raw()))
+                    } else {
+                        Cow::Owned(
+                            bytemuck::cast_slice::<u16, u8>(img.to_rgba16().as_raw()).to_vec(),
+                        )
+                    }
                 }
-            }
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    bytemuck::cast_slice::<u16, u8>(
+                        DynamicImage::ImageRgba8(frames.first().buffer().clone())
+                            .to_rgba16()
+                            .as_raw(),
+                    )
+                    .to_vec(),
+                ),
+            },
         }
     }
 }
