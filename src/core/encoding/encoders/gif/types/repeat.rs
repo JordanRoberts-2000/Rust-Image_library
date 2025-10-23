@@ -1,6 +1,6 @@
 use image::codecs::gif as img_gif;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum GifRepeat {
     Finite(u16),
     Infinite,

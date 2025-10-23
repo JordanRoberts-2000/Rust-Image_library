@@ -44,7 +44,7 @@ impl Image {
                 TiffEncoder.encode(writer, bytes, w, h, ct)
             }
             EncodeFormat::Gif => {
-                let encoder = GifEncoder::new();
+                let encoder = GifEncoder::from(self.config.gif());
                 match &*decoded {
                     Decoded::Static(img) => encoder.encode(writer, [img.clone().into_frame()]),
                     Decoded::Animated { frames, .. } => encoder.encode(writer, frames.clone()),

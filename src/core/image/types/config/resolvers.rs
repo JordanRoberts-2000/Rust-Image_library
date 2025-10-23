@@ -1,6 +1,6 @@
 use crate::{
     constants::{DEFAULT_AVIF_QUALITY, DEFAULT_JPEG_QUALITY, DEFAULT_WEBP_QUALITY},
-    encoding::{AvifConfig, CompressionType, JpegConfig, PngConfig, WebpConfig},
+    encoding::{AvifConfig, CompressionType, GifConfig, JpegConfig, PngConfig, WebpConfig},
     image::ImageConfig,
 };
 
@@ -33,5 +33,9 @@ impl ImageConfig {
             quality: self.quality.map(|q| q.into()).unwrap_or(DEFAULT_AVIF_QUALITY.into()),
             ..Default::default()
         })
+    }
+
+    pub fn gif(&self) -> GifConfig {
+        self.gif.unwrap_or_else(GifConfig::default)
     }
 }

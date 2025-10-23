@@ -1,7 +1,7 @@
 use {
     crate::{
         constants::DEFAULT_IMAGE_FILE_NAME,
-        encoding::{AvifConfig, CompressionType, JpegConfig, PngConfig, WebpConfig},
+        encoding::{AvifConfig, CompressionType, GifConfig, JpegConfig, PngConfig, WebpConfig},
         image::TransformOp,
         EncodeFormat,
     },
@@ -28,6 +28,7 @@ pub struct ImageConfig {
     pub png: Option<PngConfig>,
     pub avif: Option<AvifConfig>,
     pub webp: Option<WebpConfig>,
+    pub gif: Option<GifConfig>,
 }
 
 impl Default for ImageConfig {
@@ -51,6 +52,7 @@ impl Default for ImageConfig {
             png: None,
             avif: None,
             webp: None,
+            gif: None,
         }
     }
 }
