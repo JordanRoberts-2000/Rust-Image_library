@@ -1,10 +1,12 @@
 use {
-    crate::encoding::{AlphaChannelOps, AvifColorType, ColorType, ColorTypeOps},
+    crate::encoding::{
+        AlphaChannelOps, AvifColorType, ColorType, ColorTypeOps, EncodeColorTypeOps,
+    },
     inherent::inherent,
 };
 
-impl AvifColorType {
-    pub fn from_color_type_lossy(ct: ColorType) -> Self {
+impl EncodeColorTypeOps for AvifColorType {
+    fn from_color_type_lossy(ct: ColorType) -> Self {
         match ct {
             ColorType::Rgb8 => AvifColorType::Rgb8,
             ColorType::Rgba8 => AvifColorType::Rgba8,
@@ -14,7 +16,21 @@ impl AvifColorType {
             ColorType::GrayscaleAlpha8 => AvifColorType::Rgba8,
             ColorType::Grayscale16 => AvifColorType::Rgb8,
             ColorType::GrayscaleAlpha16 => AvifColorType::Rgba8,
+            ColorType::Rgb32Float => AvifColorType::Rgb8,
+            ColorType::Rgba32Float => AvifColorType::Rgba8,
         }
+    }
+
+    fn to_minimal_bit_depth(self) -> Self {
+        self
+    }
+
+    fn remove_alpha(self) -> Self {
+        <Self as AlphaChannelOps>::remove_alpha(self)
+    }
+
+    fn has_alpha(&self) -> bool {
+        <Self as AlphaChannelOps>::has_alpha(&self)
     }
 }
 

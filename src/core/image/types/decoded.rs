@@ -1,5 +1,5 @@
 use {
-    crate::{ErrorKind, PixelFormat, Result},
+    crate::{encoding::ColorType, ErrorKind, PixelFormat, Result},
     image::{DynamicImage, Frame, GenericImageView},
     nonempty::NonEmpty,
     std::{borrow::Cow, fmt},
@@ -19,10 +19,19 @@ impl Decoded {
         }
     }
 
-    pub fn color(&self) -> image::ColorType {
+    pub fn color(&self) -> Result<ColorType> {
         match self {
-            Decoded::Static(img) => img.color(),
-            Decoded::Animated { .. } => image::ColorType::Rgba8,
+            Decoded::Static(img) => img.color().try_into(),
+            Decoded::Animated { .. } => image::ColorType::Rgba8.try_into(),
+        }
+    }
+
+    pub(crate) fn img(&self) -> Cow<'_, DynamicImage> {
+        match self {
+            Decoded::Static(img) => Cow::Borrowed(img),
+            Decoded::Animated { frames, .. } => {
+                Cow::Owned(DynamicImage::ImageRgba8(frames.first().buffer().clone()))
+            }
         }
     }
 

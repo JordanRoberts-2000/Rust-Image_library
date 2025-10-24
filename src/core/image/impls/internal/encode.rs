@@ -5,7 +5,7 @@ use {
             PngColorType, PngEncoder, TiffColorType, TiffEncoder, WebpColorType, WebpEncoder,
         },
         image::Decoded,
-        DynamicImageExt, EncodeFormat, Image, Result, ValidationError,
+        DynamicImageExt, EncodeFormat, Image, Result,
     },
     std::io::Write,
 };
@@ -14,32 +14,30 @@ impl Image {
     pub(crate) fn encode(&self, writer: impl Write, format: EncodeFormat) -> Result<()> {
         let decoded = self.decoded();
         let (w, h) = decoded.dimensions();
-        let ct = ColorType::try_from(decoded.color())
-            .map_err(|_| ValidationError::UnsupportedColorType(decoded.color()))?;
 
         match format {
             EncodeFormat::Jpeg => {
-                let ct = JpegColorType::from_color_type_lossy(ct);
+                let ct = self.resolve_color_type::<JpegColorType>(&decoded)?;
                 let bytes = ColorType::from(ct).bytes(&decoded);
                 JpegEncoder::from(self.config.jpeg()).encode(writer, bytes, w, h, ct)
             }
             EncodeFormat::Png => {
-                let ct = PngColorType::from_color_type_lossy(ct);
+                let ct = self.resolve_color_type::<PngColorType>(&decoded)?;
                 let bytes = ColorType::from(ct).bytes(&decoded);
                 PngEncoder::from(self.config.png()).encode(writer, bytes, w, h, ct)
             }
             EncodeFormat::Webp => {
-                let ct = WebpColorType::from_color_type_lossy(ct);
+                let ct = self.resolve_color_type::<WebpColorType>(&decoded)?;
                 let bytes = ColorType::from(ct).bytes(&decoded);
                 WebpEncoder::from(self.config.webp()).encode(writer, bytes, w, h, ct)
             }
             EncodeFormat::Avif => {
-                let ct = AvifColorType::from_color_type_lossy(ct);
+                let ct = self.resolve_color_type::<AvifColorType>(&decoded)?;
                 let bytes = ColorType::from(ct).bytes(&decoded);
                 AvifEncoder::from(self.config.avif()).encode(writer, bytes, w, h, ct)
             }
             EncodeFormat::Tiff => {
-                let ct = TiffColorType::from_color_type_lossy(ct);
+                let ct = self.resolve_color_type::<TiffColorType>(&decoded)?;
                 let bytes = ColorType::from(ct).bytes(&decoded);
                 TiffEncoder.encode(writer, bytes, w, h, ct)
             }

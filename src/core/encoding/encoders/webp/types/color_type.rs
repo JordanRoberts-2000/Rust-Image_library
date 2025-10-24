@@ -1,11 +1,13 @@
 use {
-    crate::encoding::{AlphaChannelOps, ColorType, ColorTypeOps, GrayscaleOps, WebpColorType},
+    crate::encoding::{
+        AlphaChannelOps, ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps, WebpColorType,
+    },
     inherent::inherent,
     webp::PixelLayout,
 };
 
-impl WebpColorType {
-    pub fn from_color_type_lossy(ct: ColorType) -> Self {
+impl EncodeColorTypeOps for WebpColorType {
+    fn from_color_type_lossy(ct: ColorType) -> Self {
         match ct {
             ColorType::Grayscale8 => WebpColorType::Grayscale8,
             ColorType::Grayscale16 => WebpColorType::Grayscale8,
@@ -15,7 +17,21 @@ impl WebpColorType {
             ColorType::Rgb16 => WebpColorType::Rgb8,
             ColorType::Rgba8 => WebpColorType::Rgba8,
             ColorType::Rgba16 => WebpColorType::Rgba8,
+            ColorType::Rgb32Float => WebpColorType::Rgb8,
+            ColorType::Rgba32Float => WebpColorType::Rgba8,
         }
+    }
+
+    fn to_minimal_bit_depth(self) -> Self {
+        self
+    }
+
+    fn remove_alpha(self) -> Self {
+        <Self as AlphaChannelOps>::remove_alpha(self)
+    }
+
+    fn has_alpha(&self) -> bool {
+        <Self as AlphaChannelOps>::has_alpha(&self)
     }
 }
 

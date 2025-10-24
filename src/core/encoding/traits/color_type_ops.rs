@@ -1,3 +1,5 @@
+use crate::encoding::ColorType;
+
 pub trait ColorTypeOps {
     fn channels(&self) -> u8;
     fn bit_depth(&self) -> u8;
@@ -9,6 +11,13 @@ pub trait ColorTypeOps {
     fn buffer_size(&self, w: u32, h: u32) -> u64 {
         (w as u64) * (h as u64) * (self.bytes_per_pixel() as u64)
     }
+}
+
+pub trait EncodeColorTypeOps: Sized {
+    fn from_color_type_lossy(ct: ColorType) -> Self;
+    fn to_minimal_bit_depth(self) -> Self;
+    fn has_alpha(&self) -> bool;
+    fn remove_alpha(self) -> Self;
 }
 
 pub trait AlphaChannelOps {

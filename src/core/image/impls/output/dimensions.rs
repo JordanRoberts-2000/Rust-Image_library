@@ -2,17 +2,17 @@ use crate::{utils::gcd, Image};
 
 impl Image {
     pub fn width(&self) -> u32 {
-        let decoded = self.processed_decode();
+        let decoded = self.decoded();
         decoded.dimensions().0
     }
 
     pub fn height(&self) -> u32 {
-        let decoded = self.processed_decode();
+        let decoded = self.decoded();
         decoded.dimensions().1
     }
 
     pub fn dimensions(&self) -> (u32, u32) {
-        let decoded = self.processed_decode();
+        let decoded = self.decoded();
         decoded.dimensions()
     }
 

@@ -1,69 +1,28 @@
-use {
-    crate::{
-        encoding::{
-            AvifColorType, ColorType, JpegColorType, PngColorType, TiffColorType, WebpColorType,
-        },
-        image::{types::ResolvedColorType, utils::alpha_is_unused},
-        Image, ImageFormat, Result,
-    },
-    image::DynamicImage,
+use crate::{
+    encoding::{ColorTypeOps, EncodeColorTypeOps},
+    image::{utils::alpha_is_unused, Decoded},
+    Image, Result,
 };
 
 impl Image {
-    pub(crate) fn resolve_color_type(
-        &self, img: &DynamicImage, format: ImageFormat,
-    ) -> Result<ResolvedColorType> {
-        let base: ColorType = img.color().try_into()?;
+    pub(crate) fn resolve_color_type<F: EncodeColorTypeOps + ColorTypeOps>(
+        &self, decoded: &Decoded,
+    ) -> Result<F> {
+        let ct = self.color_type()?;
 
-        match format {
-            ImageFormat::Png => {
-                let mut ct = PngColorType::from(base);
+        let mut format_ct = F::from_color_type_lossy(ct);
 
-                if self.config.minimize_bit_depth {
-                    ct = ct.to_minimal_bit_depth();
-                }
-
-                if self.config.remove_unused_transparency
-                    && base.has_alpha()
-                    && ct.has_alpha()
-                    && alpha_is_unused(img)
-                {
-                    ct = ct.remove_alpha();
-                }
-                Ok(ResolvedColorType::Png(ct))
-            }
-
-            ImageFormat::Jpeg => {
-                Ok(ResolvedColorType::Jpeg(JpegColorType::try_from(base).unwrap_or_default()))
-            }
-
-            ImageFormat::WebP => {
-                let mut ct = WebpColorType::try_from(base).unwrap_or_default();
-                if self.config.remove_unused_transparency
-                    && base.has_alpha()
-                    && ct.has_alpha()
-                    && alpha_is_unused(img)
-                {
-                    ct = ct.remove_alpha();
-                }
-                Ok(ResolvedColorType::Webp(ct))
-            }
-
-            ImageFormat::Avif => {
-                let mut ct = AvifColorType::try_from(base).unwrap_or_default();
-                if self.config.remove_unused_transparency
-                    && base.has_alpha()
-                    && ct.has_alpha()
-                    && alpha_is_unused(img)
-                {
-                    ct = ct.remove_alpha();
-                }
-                Ok(ResolvedColorType::Avif(ct))
-            }
-
-            ImageFormat::Tiff => {
-                Ok(ResolvedColorType::Tiff(TiffColorType::try_from(base).unwrap_or_default()))
-            }
+        if self.config.minimize_bit_depth {
+            format_ct = format_ct.to_minimal_bit_depth();
         }
+
+        if self.config.remove_unused_transparency
+            && format_ct.has_alpha()
+            && alpha_is_unused(&decoded.img())
+        {
+            format_ct = format_ct.remove_alpha();
+        }
+
+        Ok(format_ct)
     }
 }

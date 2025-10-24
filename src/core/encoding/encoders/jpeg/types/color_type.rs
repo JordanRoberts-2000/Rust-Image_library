@@ -1,23 +1,38 @@
 #[cfg(feature = "progressive-jpeg")]
 use mozjpeg::ColorSpace;
 use {
-    crate::encoding::{ColorType, ColorTypeOps, GrayscaleOps, JpegColorType},
+    crate::encoding::{ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps, JpegColorType},
     inherent::inherent,
     std::fmt,
 };
 
-impl JpegColorType {
-    pub fn from_color_type_lossy(ct: ColorType) -> Self {
+impl EncodeColorTypeOps for JpegColorType {
+    fn from_color_type_lossy(ct: ColorType) -> Self {
         match ct {
             ColorType::Grayscale8
             | ColorType::Grayscale16
             | ColorType::GrayscaleAlpha8
             | ColorType::GrayscaleAlpha16 => JpegColorType::Grayscale8,
 
-            ColorType::Rgb8 | ColorType::Rgb16 | ColorType::Rgba8 | ColorType::Rgba16 => {
-                JpegColorType::Rgb8
-            }
+            ColorType::Rgb8
+            | ColorType::Rgb16
+            | ColorType::Rgba8
+            | ColorType::Rgba16
+            | ColorType::Rgb32Float
+            | ColorType::Rgba32Float => JpegColorType::Rgb8,
         }
+    }
+
+    fn to_minimal_bit_depth(self) -> Self {
+        self
+    }
+
+    fn remove_alpha(self) -> Self {
+        self
+    }
+
+    fn has_alpha(&self) -> bool {
+        false
     }
 }
 

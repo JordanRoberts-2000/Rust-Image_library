@@ -7,7 +7,7 @@ impl Image {
 
     pub fn disable_animation(&mut self, disable: bool) -> &mut Self {
         if disable {
-            self.decoded.borrow_mut().into_static();
+            self.decoded.borrow_mut().first_frame();
         }
         self
     }

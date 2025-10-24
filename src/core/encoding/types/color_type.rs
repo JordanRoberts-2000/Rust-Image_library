@@ -31,6 +31,9 @@ pub enum ColorType {
     Grayscale16,
     #[subenum(PngColorType)]
     GrayscaleAlpha16,
+
+    Rgb32Float,
+    Rgba32Float,
 }
 
 #[inherent]
@@ -38,8 +41,8 @@ impl ColorTypeOps for ColorType {
     #[inline]
     pub fn channels(&self) -> u8 {
         match *self {
-            ColorType::Rgb8 | ColorType::Rgb16 => 3,
-            ColorType::Rgba8 | ColorType::Rgba16 => 4,
+            ColorType::Rgb8 | ColorType::Rgb16 | ColorType::Rgb32Float => 3,
+            ColorType::Rgba8 | ColorType::Rgba16 | ColorType::Rgba32Float => 4,
             ColorType::Grayscale8 | ColorType::Grayscale16 => 1,
             ColorType::GrayscaleAlpha8 | ColorType::GrayscaleAlpha16 => 2,
         }
@@ -57,6 +60,8 @@ impl ColorTypeOps for ColorType {
             | ColorType::Rgba16
             | ColorType::Grayscale16
             | ColorType::GrayscaleAlpha16 => 16,
+
+            ColorType::Rgb32Float | ColorType::Rgba32Float => 32,
         }
     }
 
@@ -74,21 +79,25 @@ impl ColorTypeOps for ColorType {
 #[inherent]
 impl BitDepthOps for ColorType {
     #[inline]
-    fn to_minimal_bit_depth(self) -> Self {
+    pub fn to_minimal_bit_depth(self) -> Self {
         match self {
             ColorType::Rgb16 => ColorType::Rgb8,
             ColorType::Rgba16 => ColorType::Rgba8,
             ColorType::Grayscale16 => ColorType::Grayscale8,
             ColorType::GrayscaleAlpha16 => ColorType::GrayscaleAlpha8,
+            ColorType::Rgb32Float => ColorType::Rgb8,
+            ColorType::Rgba32Float => ColorType::Rgba8,
             other => other,
         }
     }
 
     #[inline]
-    fn to_maximal_bit_depth(self) -> Self {
+    pub fn to_maximal_bit_depth(self) -> Self {
         match self {
-            ColorType::Rgb8 => ColorType::Rgb16,
-            ColorType::Rgba8 => ColorType::Rgba16,
+            ColorType::Rgb8 => ColorType::Rgb32Float,
+            ColorType::Rgba8 => ColorType::Rgba32Float,
+            ColorType::Rgb16 => ColorType::Rgb32Float,
+            ColorType::Rgba16 => ColorType::Rgba32Float,
             ColorType::Grayscale8 => ColorType::Grayscale16,
             ColorType::GrayscaleAlpha8 => ColorType::GrayscaleAlpha16,
             other => other,
@@ -104,6 +113,7 @@ impl AlphaChannelOps for ColorType {
             *self,
             ColorType::Rgba8
                 | ColorType::Rgba16
+                | ColorType::Rgba32Float
                 | ColorType::GrayscaleAlpha8
                 | ColorType::GrayscaleAlpha16
         )
@@ -114,6 +124,7 @@ impl AlphaChannelOps for ColorType {
         match self {
             ColorType::Rgba8 => ColorType::Rgb8,
             ColorType::Rgba16 => ColorType::Rgb16,
+            ColorType::Rgba32Float => ColorType::Rgb32Float,
             ColorType::GrayscaleAlpha8 => ColorType::Grayscale8,
             ColorType::GrayscaleAlpha16 => ColorType::Grayscale16,
             other => other,
@@ -125,10 +136,12 @@ impl AlphaChannelOps for ColorType {
         match self {
             ColorType::Rgb8 => ColorType::Rgba8,
             ColorType::Rgb16 => ColorType::Rgba16,
+            ColorType::Rgb32Float => ColorType::Rgba32Float,
             ColorType::Grayscale8 => ColorType::GrayscaleAlpha8,
             ColorType::Grayscale16 => ColorType::GrayscaleAlpha16,
             with_alpha @ (ColorType::Rgba8
             | ColorType::Rgba16
+            | ColorType::Rgba32Float
             | ColorType::GrayscaleAlpha8
             | ColorType::GrayscaleAlpha16) => with_alpha,
         }
@@ -153,8 +166,10 @@ impl GrayscaleOps for ColorType {
         match self {
             ColorType::Rgb8 => ColorType::Grayscale8,
             ColorType::Rgb16 => ColorType::Grayscale16,
+            ColorType::Rgb32Float => ColorType::Grayscale16, // No float grayscale variant
             ColorType::Rgba8 => ColorType::GrayscaleAlpha8,
             ColorType::Rgba16 => ColorType::GrayscaleAlpha16,
+            ColorType::Rgba32Float => ColorType::GrayscaleAlpha16, // No float grayscale variant
             gray @ (ColorType::Grayscale8
             | ColorType::Grayscale16
             | ColorType::GrayscaleAlpha8
@@ -169,9 +184,12 @@ impl GrayscaleOps for ColorType {
             ColorType::Grayscale16 => ColorType::Rgb16,
             ColorType::GrayscaleAlpha8 => ColorType::Rgba8,
             ColorType::GrayscaleAlpha16 => ColorType::Rgba16,
-            color @ (ColorType::Rgb8 | ColorType::Rgb16 | ColorType::Rgba8 | ColorType::Rgba16) => {
-                color
-            }
+            color @ (ColorType::Rgb8
+            | ColorType::Rgb16
+            | ColorType::Rgb32Float
+            | ColorType::Rgba8
+            | ColorType::Rgba16
+            | ColorType::Rgba32Float) => color,
         }
     }
 }
@@ -311,6 +329,45 @@ impl ColorType {
                     .to_vec(),
                 ),
             },
+            ColorType::Rgb32Float => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageRgb32F(b) = img {
+                        Cow::Borrowed(bytemuck::cast_slice(b.as_raw()))
+                    } else {
+                        Cow::Owned(
+                            bytemuck::cast_slice::<f32, u8>(img.to_rgb32f().as_raw()).to_vec(),
+                        )
+                    }
+                }
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    bytemuck::cast_slice::<f32, u8>(
+                        DynamicImage::ImageRgba8(frames.first().buffer().clone())
+                            .to_rgb32f()
+                            .as_raw(),
+                    )
+                    .to_vec(),
+                ),
+            },
+
+            ColorType::Rgba32Float => match decoded {
+                Decoded::Static(img) => {
+                    if let DynamicImage::ImageRgba32F(b) = img {
+                        Cow::Borrowed(bytemuck::cast_slice(b.as_raw()))
+                    } else {
+                        Cow::Owned(
+                            bytemuck::cast_slice::<f32, u8>(img.to_rgba32f().as_raw()).to_vec(),
+                        )
+                    }
+                }
+                Decoded::Animated { frames, .. } => Cow::Owned(
+                    bytemuck::cast_slice::<f32, u8>(
+                        DynamicImage::ImageRgba8(frames.first().buffer().clone())
+                            .to_rgba32f()
+                            .as_raw(),
+                    )
+                    .to_vec(),
+                ),
+            },
         }
     }
 }
@@ -320,8 +377,10 @@ impl fmt::Display for ColorType {
         let s = match self {
             ColorType::Rgb8 => "rgb8",
             ColorType::Rgb16 => "rgb16",
+            ColorType::Rgb32Float => "rgb32f",
             ColorType::Rgba8 => "rgba8",
             ColorType::Rgba16 => "rgba16",
+            ColorType::Rgba32Float => "rgba32f",
             ColorType::Grayscale8 => "grayscale8",
             ColorType::GrayscaleAlpha8 => "grayscale-alpha8",
             ColorType::Grayscale16 => "grayscale16",
@@ -336,8 +395,10 @@ impl From<ColorType> for image::ColorType {
         match ct {
             ColorType::Rgb8 => image::ColorType::Rgb8,
             ColorType::Rgb16 => image::ColorType::Rgb16,
+            ColorType::Rgb32Float => image::ColorType::Rgb32F,
             ColorType::Rgba8 => image::ColorType::Rgba8,
             ColorType::Rgba16 => image::ColorType::Rgba16,
+            ColorType::Rgba32Float => image::ColorType::Rgba32F,
             ColorType::Grayscale8 => image::ColorType::L8,
             ColorType::GrayscaleAlpha8 => image::ColorType::La8,
             ColorType::Grayscale16 => image::ColorType::L16,
@@ -359,6 +420,8 @@ impl TryFrom<image::ColorType> for ColorType {
             image::ColorType::La16 => ColorType::GrayscaleAlpha16,
             image::ColorType::Rgb16 => ColorType::Rgb16,
             image::ColorType::Rgba16 => ColorType::Rgba16,
+            image::ColorType::Rgb32F => ColorType::Rgb32Float,
+            image::ColorType::Rgba32F => ColorType::Rgba32Float,
             _ => return Err(ValidationError::UnsupportedColorType(ct).into()),
         })
     }

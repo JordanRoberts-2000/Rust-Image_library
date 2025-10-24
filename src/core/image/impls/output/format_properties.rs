@@ -1,4 +1,9 @@
-use crate::{encoding::ColorType, EncodeFormat, Format, Image, Result};
+use crate::{
+    encoding::{
+        AvifColorType, ColorType, JpegColorType, PngColorType, TiffColorType, WebpColorType,
+    },
+    EncodeFormat, Format, Image, Result,
+};
 
 impl Image {
     pub fn format(&self) -> Option<Format> {
@@ -12,13 +17,21 @@ impl Image {
     }
 
     pub fn color_type(&self) -> Result<ColorType> {
-        let decoded = self.processed_decode();
-        let img = decoded.get_static()?;
-        img.color().try_into()
-    }
+        let decoded = self.decoded();
+        let mut ct = decoded.color()?;
 
-    pub fn encoding_color_type(&self) -> Result<Option<ColorType>> {
-        todo!()
+        if let Some(fmt) = self.encoding_format() {
+            ct = match fmt {
+                EncodeFormat::Png => self.resolve_color_type::<PngColorType>(&decoded)?.into(),
+                EncodeFormat::Jpeg => self.resolve_color_type::<JpegColorType>(&decoded)?.into(),
+                EncodeFormat::Gif => ColorType::Rgba8,
+                EncodeFormat::Webp => self.resolve_color_type::<WebpColorType>(&decoded)?.into(),
+                EncodeFormat::Tiff => self.resolve_color_type::<TiffColorType>(&decoded)?.into(),
+                EncodeFormat::Avif => self.resolve_color_type::<AvifColorType>(&decoded)?.into(),
+            }
+        }
+
+        Ok(ct)
     }
 
     pub fn has_transparency(&self) -> Result<bool> {

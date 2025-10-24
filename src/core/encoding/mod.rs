@@ -18,7 +18,9 @@ mod traits {
     pub mod encoder;
 }
 
-pub(crate) use traits::color_type_ops::{AlphaChannelOps, BitDepthOps, ColorTypeOps, GrayscaleOps};
+pub(crate) use traits::color_type_ops::{
+    AlphaChannelOps, BitDepthOps, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps,
+};
 pub use {
     encoders::{avif::*, gif::*, jpeg::*, png::*, tiff::*, webp::*},
     error::{EncodingError, EncodingErrorKind, EncodingValidationError},

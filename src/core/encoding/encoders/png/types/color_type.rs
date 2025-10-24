@@ -1,12 +1,13 @@
 use {
     crate::encoding::{
-        AlphaChannelOps, BitDepthOps, ColorType, ColorTypeOps, GrayscaleOps, PngColorType,
+        AlphaChannelOps, BitDepthOps, ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps,
+        PngColorType,
     },
     inherent::inherent,
 };
 
-impl PngColorType {
-    pub fn from_color_type_lossy(ct: ColorType) -> Self {
+impl EncodeColorTypeOps for PngColorType {
+    fn from_color_type_lossy(ct: ColorType) -> Self {
         match ct {
             ColorType::Rgb8 => PngColorType::Rgb8,
             ColorType::Rgba8 => PngColorType::Rgba8,
@@ -16,7 +17,21 @@ impl PngColorType {
             ColorType::GrayscaleAlpha8 => PngColorType::GrayscaleAlpha8,
             ColorType::Grayscale16 => PngColorType::Grayscale16,
             ColorType::GrayscaleAlpha16 => PngColorType::GrayscaleAlpha16,
+            ColorType::Rgb32Float => PngColorType::Grayscale16,
+            ColorType::Rgba32Float => PngColorType::GrayscaleAlpha16,
         }
+    }
+
+    fn to_minimal_bit_depth(self) -> Self {
+        <Self as BitDepthOps>::to_maximal_bit_depth(self)
+    }
+
+    fn remove_alpha(self) -> Self {
+        <Self as AlphaChannelOps>::remove_alpha(self)
+    }
+
+    fn has_alpha(&self) -> bool {
+        <Self as AlphaChannelOps>::has_alpha(&self)
     }
 }
 
