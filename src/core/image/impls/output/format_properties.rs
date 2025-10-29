@@ -10,26 +10,21 @@ impl Image {
         self.format
     }
 
-    pub fn encoding_format(&self) -> Option<EncodeFormat> {
-        self.config
-            .encode_format
-            .or_else(|| self.format.and_then(|f| EncodeFormat::try_from(f).ok()))
+    pub fn encoding_format(&self) -> EncodeFormat {
+        self.config.encode_format.unwrap_or_default()
     }
 
     pub fn color_type(&self) -> Result<ColorType> {
         let decoded = self.decoded();
-        let mut ct = decoded.color()?;
 
-        if let Some(fmt) = self.encoding_format() {
-            ct = match fmt {
-                EncodeFormat::Png => self.resolve_color_type::<PngColorType>(&decoded)?.into(),
-                EncodeFormat::Jpeg => self.resolve_color_type::<JpegColorType>(&decoded)?.into(),
-                EncodeFormat::Gif => ColorType::Rgba8,
-                EncodeFormat::Webp => self.resolve_color_type::<WebpColorType>(&decoded)?.into(),
-                EncodeFormat::Tiff => self.resolve_color_type::<TiffColorType>(&decoded)?.into(),
-                EncodeFormat::Avif => self.resolve_color_type::<AvifColorType>(&decoded)?.into(),
-            }
-        }
+        let ct = match self.encoding_format() {
+            EncodeFormat::Png => self.resolve_color_type::<PngColorType>(&decoded)?.into(),
+            EncodeFormat::Jpeg => self.resolve_color_type::<JpegColorType>(&decoded)?.into(),
+            EncodeFormat::Gif => ColorType::Rgba8,
+            EncodeFormat::Webp => self.resolve_color_type::<WebpColorType>(&decoded)?.into(),
+            EncodeFormat::Tiff => self.resolve_color_type::<TiffColorType>(&decoded)?.into(),
+            EncodeFormat::Avif => self.resolve_color_type::<AvifColorType>(&decoded)?.into(),
+        };
 
         Ok(ct)
     }

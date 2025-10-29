@@ -1,9 +1,17 @@
 use {
-    crate::encoding::{
-        AlphaChannelOps, AvifColorType, ColorType, ColorTypeOps, EncodeColorTypeOps,
+    crate::{
+        encoding::{AlphaChannelOps, AvifColorType, ColorType, ColorTypeOps, EncodeColorTypeOps},
+        image::Decoded,
     },
     inherent::inherent,
+    std::borrow::Cow,
 };
+
+impl AvifColorType {
+    pub(crate) fn bytes<'a>(&self, decoded: &'a Decoded) -> Cow<'a, [u8]> {
+        ColorType::from(*self).bytes(decoded)
+    }
+}
 
 impl EncodeColorTypeOps for AvifColorType {
     fn from_color_type_lossy(ct: ColorType) -> Self {

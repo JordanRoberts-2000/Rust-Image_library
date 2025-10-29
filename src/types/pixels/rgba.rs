@@ -49,3 +49,26 @@ impl PixelFormat for Rgba<u16> {
         Ok(Decoded::Static(DynamicImage::ImageRgba16(buffer)))
     }
 }
+
+impl PixelFormat for Rgba<f32> {
+    type Channel = f32;
+
+    fn from_decoded<'a>(decoded: &'a Decoded) -> Cow<'a, [Self::Channel]> {
+        match decoded {
+            Decoded::Static(img) => match img {
+                DynamicImage::ImageRgba32F(rgba32f_img) => Cow::Borrowed(rgba32f_img.as_raw()),
+                _ => Cow::Owned(img.to_rgba32f().into_raw()),
+            },
+            Decoded::Animated { frames, .. } => Cow::Owned(
+                DynamicImage::ImageRgba8(frames.first().buffer().clone()).to_rgba32f().into_raw(),
+            ),
+        }
+    }
+
+    fn into_decoded(pixels: Vec<Self::Channel>, width: u32, height: u32) -> Result<Decoded> {
+        let buffer = ImageBuffer::<image::Rgba<Self::Channel>, _>::from_raw(width, height, pixels)
+            .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Rgba32Float))?;
+
+        Ok(Decoded::Static(DynamicImage::ImageRgba32F(buffer)))
+    }
+}

@@ -1,10 +1,21 @@
 use {
-    crate::encoding::{
-        AlphaChannelOps, ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps, WebpColorType,
+    crate::{
+        encoding::{
+            AlphaChannelOps, ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps,
+            WebpColorType,
+        },
+        image::Decoded,
     },
     inherent::inherent,
+    std::borrow::Cow,
     webp::PixelLayout,
 };
+
+impl WebpColorType {
+    pub(crate) fn bytes<'a>(&self, decoded: &'a Decoded) -> Cow<'a, [u8]> {
+        ColorType::from(*self).bytes(decoded)
+    }
+}
 
 impl EncodeColorTypeOps for WebpColorType {
     fn from_color_type_lossy(ct: ColorType) -> Self {

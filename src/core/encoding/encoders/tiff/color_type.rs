@@ -1,10 +1,20 @@
 use {
-    crate::encoding::{
-        AlphaChannelOps, BitDepthOps, ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps,
-        TiffColorType,
+    crate::{
+        encoding::{
+            AlphaChannelOps, BitDepthOps, ColorType, ColorTypeOps, EncodeColorTypeOps,
+            GrayscaleOps, TiffColorType,
+        },
+        image::Decoded,
     },
     inherent::inherent,
+    std::borrow::Cow,
 };
+
+impl TiffColorType {
+    pub(crate) fn bytes<'a>(&self, decoded: &'a Decoded) -> Cow<'a, [u8]> {
+        ColorType::from(*self).bytes(decoded)
+    }
+}
 
 impl EncodeColorTypeOps for TiffColorType {
     fn from_color_type_lossy(ct: ColorType) -> Self {

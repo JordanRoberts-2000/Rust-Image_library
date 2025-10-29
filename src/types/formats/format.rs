@@ -17,9 +17,10 @@ use {
 };
 
 #[subenum(ImageFormat, EncodeFormat)]
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, EnumIter)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, EnumIter, Default)]
 pub enum Format {
     #[subenum(ImageFormat, EncodeFormat)]
+    #[default]
     Png,
     #[subenum(ImageFormat, EncodeFormat)]
     Jpeg,

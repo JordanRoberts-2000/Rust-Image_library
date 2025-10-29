@@ -5,6 +5,6 @@ use {
 
 impl Image {
     pub fn to_writer(&self, writer: impl Write) -> Result<()> {
-        self.encode(writer, self.format())
+        self.encode(writer, self.encoding_format())
     }
 }

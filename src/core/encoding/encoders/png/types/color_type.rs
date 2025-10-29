@@ -1,10 +1,20 @@
 use {
-    crate::encoding::{
-        AlphaChannelOps, BitDepthOps, ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps,
-        PngColorType,
+    crate::{
+        encoding::{
+            AlphaChannelOps, BitDepthOps, ColorType, ColorTypeOps, EncodeColorTypeOps,
+            GrayscaleOps, PngColorType,
+        },
+        image::Decoded,
     },
     inherent::inherent,
+    std::borrow::Cow,
 };
+
+impl PngColorType {
+    pub(crate) fn bytes<'a>(&self, decoded: &'a Decoded) -> Cow<'a, [u8]> {
+        ColorType::from(*self).bytes(decoded)
+    }
+}
 
 impl EncodeColorTypeOps for PngColorType {
     fn from_color_type_lossy(ct: ColorType) -> Self {

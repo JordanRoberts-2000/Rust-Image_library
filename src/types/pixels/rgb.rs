@@ -50,3 +50,26 @@ impl PixelFormat for Rgb<u16> {
         Ok(Decoded::Static(DynamicImage::ImageRgb16(buffer)))
     }
 }
+
+impl PixelFormat for Rgb<f32> {
+    type Channel = f32;
+
+    fn from_decoded<'a>(decoded: &'a Decoded) -> Cow<'a, [Self::Channel]> {
+        match decoded {
+            Decoded::Static(img) => match img {
+                DynamicImage::ImageRgb32F(rgb32f_img) => Cow::Borrowed(rgb32f_img.as_raw()),
+                _ => Cow::Owned(img.to_rgb32f().into_raw()),
+            },
+            Decoded::Animated { frames, .. } => Cow::Owned(
+                DynamicImage::ImageRgba8(frames.first().buffer().clone()).to_rgb32f().into_raw(),
+            ),
+        }
+    }
+
+    fn into_decoded(pixels: Vec<Self::Channel>, width: u32, height: u32) -> Result<Decoded> {
+        let buffer = ImageBuffer::<image::Rgb<Self::Channel>, _>::from_raw(width, height, pixels)
+            .ok_or_else(|| ValidationError::InvalidBuffer(ColorType::Rgb32Float))?;
+
+        Ok(Decoded::Static(DynamicImage::ImageRgb32F(buffer)))
+    }
+}

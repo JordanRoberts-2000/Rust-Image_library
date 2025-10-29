@@ -1,10 +1,19 @@
 #[cfg(feature = "progressive-jpeg")]
 use mozjpeg::ColorSpace;
 use {
-    crate::encoding::{ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps, JpegColorType},
+    crate::{
+        encoding::{ColorType, ColorTypeOps, EncodeColorTypeOps, GrayscaleOps, JpegColorType},
+        image::Decoded,
+    },
     inherent::inherent,
-    std::fmt,
+    std::{borrow::Cow, fmt},
 };
+
+impl JpegColorType {
+    pub(crate) fn bytes<'a>(&self, decoded: &'a Decoded) -> Cow<'a, [u8]> {
+        ColorType::from(*self).bytes(decoded)
+    }
+}
 
 impl EncodeColorTypeOps for JpegColorType {
     fn from_color_type_lossy(ct: ColorType) -> Self {

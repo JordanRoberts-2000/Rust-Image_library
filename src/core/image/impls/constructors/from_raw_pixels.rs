@@ -1,8 +1,5 @@
 use {
-    crate::{
-        image::{Decoded, ImageConfig},
-        Image, ImageSrc, PixelFormat, Result, WithSrc,
-    },
+    crate::{image::ImageConfig, Image, ImageSrc, PixelFormat, Result, WithSrc},
     std::{borrow::Cow, cell::RefCell},
 };
 
@@ -12,16 +9,13 @@ impl Image {
     ) -> Result<Self>
     where
         F: PixelFormat,
+        F::Channel: 'a,
     {
         let pixels: Vec<F::Channel> = match pixels.into() {
             Cow::Owned(v) => v,
             Cow::Borrowed(s) => s.to_vec(),
         };
-
-        let decoded = Decoded::Static(
-            F::create_image_from_raw(pixels, width, height).with_src(ImageSrc::RawPixels)?,
-        );
-
+        let decoded = F::into_decoded(pixels, width, height).with_src(ImageSrc::RawPixels)?;
         Ok(Self {
             src: ImageSrc::RawPixels,
             decoded: RefCell::new(decoded),

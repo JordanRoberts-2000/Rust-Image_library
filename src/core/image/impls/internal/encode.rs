@@ -1,8 +1,8 @@
 use {
     crate::{
         encoding::{
-            AvifColorType, AvifEncoder, ColorType, GifEncoder, JpegColorType, JpegEncoder,
-            PngColorType, PngEncoder, TiffColorType, TiffEncoder, WebpColorType, WebpEncoder,
+            AvifColorType, CompressionType, GifEncoder, JpegColorType, PngColorType, TiffColorType,
+            TiffEncoder, WebpColorType,
         },
         image::Decoded,
         DynamicImageExt, EncodeFormat, Image, Result,
@@ -18,34 +18,34 @@ impl Image {
         match format {
             EncodeFormat::Jpeg => {
                 let ct = self.resolve_color_type::<JpegColorType>(&decoded)?;
-                let bytes = ColorType::from(ct).bytes(&decoded);
-                JpegEncoder::from(self.config.jpeg()).encode(writer, bytes, w, h, ct)
+                self.config.jpeg().encode(writer, ct.bytes(&decoded), w, h, ct)?;
             }
             EncodeFormat::Png => {
                 let ct = self.resolve_color_type::<PngColorType>(&decoded)?;
-                let bytes = ColorType::from(ct).bytes(&decoded);
-                PngEncoder::from(self.config.png()).encode(writer, bytes, w, h, ct)
+                self.config.png().encode(writer, ct.bytes(&decoded), w, h, ct)?;
             }
             EncodeFormat::Webp => {
-                let ct = self.resolve_color_type::<WebpColorType>(&decoded)?;
-                let bytes = ColorType::from(ct).bytes(&decoded);
-                WebpEncoder::from(self.config.webp()).encode(writer, bytes, w, h, ct)
+                let encoder = self.config.webp();
+                let mut ct = self.resolve_color_type::<WebpColorType>(&decoded)?;
+                if matches!(encoder.compression_type, CompressionType::Lossy) {
+                    ct = ct.ensure_alpha();
+                }
+
+                self.config.webp().encode(writer, ct.bytes(&decoded), w, h, ct)?;
             }
             EncodeFormat::Avif => {
                 let ct = self.resolve_color_type::<AvifColorType>(&decoded)?;
-                let bytes = ColorType::from(ct).bytes(&decoded);
-                AvifEncoder::from(self.config.avif()).encode(writer, bytes, w, h, ct)
+                self.config.avif().encode(writer, ct.bytes(&decoded), w, h, ct)?;
             }
             EncodeFormat::Tiff => {
                 let ct = self.resolve_color_type::<TiffColorType>(&decoded)?;
-                let bytes = ColorType::from(ct).bytes(&decoded);
-                TiffEncoder.encode(writer, bytes, w, h, ct)
+                TiffEncoder.encode(writer, ct.bytes(&decoded), w, h, ct)?;
             }
             EncodeFormat::Gif => {
                 let encoder = GifEncoder::from(self.config.gif());
                 match &*decoded {
-                    Decoded::Static(img) => encoder.encode(writer, [img.clone().into_frame()]),
-                    Decoded::Animated { frames, .. } => encoder.encode(writer, frames.clone()),
+                    Decoded::Static(img) => encoder.encode(writer, [img.clone().into_frame()])?,
+                    Decoded::Animated { frames, .. } => encoder.encode(writer, frames.clone())?,
                 }
             }
         };

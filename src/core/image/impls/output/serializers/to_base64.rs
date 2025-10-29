@@ -6,7 +6,7 @@ use {
 impl Image {
     pub fn to_base64(&self) -> Result<String> {
         let mut buffer = Vec::new();
-        self.encode(&mut buffer, self.format())?;
+        self.encode(&mut buffer, self.encoding_format())?;
 
         Ok(BASE64.encode(buffer))
     }

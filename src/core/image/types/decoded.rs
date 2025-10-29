@@ -26,6 +26,15 @@ impl Decoded {
         }
     }
 
+    pub fn memory_bytes(&self) -> usize {
+        match self {
+            Decoded::Static(img) => img.as_bytes().len(),
+            Decoded::Animated { frames, .. } => {
+                frames.iter().map(|f| f.buffer().as_raw().len()).sum()
+            }
+        }
+    }
+
     pub(crate) fn img(&self) -> Cow<'_, DynamicImage> {
         match self {
             Decoded::Static(img) => Cow::Borrowed(img),
