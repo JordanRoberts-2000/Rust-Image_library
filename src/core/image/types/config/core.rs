@@ -5,6 +5,7 @@ use {
         image::TransformOp,
         EncodeFormat,
     },
+    fs_ext::CollisionStrategy,
     std::{cell::RefCell, path::PathBuf},
 };
 
@@ -16,11 +17,11 @@ pub struct ImageConfig {
     pub output_dir: PathBuf,
     pub prefix: Option<String>,
     pub suffix: Option<String>,
+    pub collision_strategy: Option<CollisionStrategy>,
 
     pub minimize_bit_depth: bool,
     pub remove_unused_transparency: bool,
 
-    pub static_only: bool,
     pub encode_format: Option<EncodeFormat>,
     pub quality: Option<u8>,
     pub compression: CompressionType,
@@ -40,11 +41,10 @@ impl Default for ImageConfig {
             output_dir: PathBuf::from("."),
             prefix: None,
             suffix: None,
-
+            collision_strategy: None,
             minimize_bit_depth: false,
             remove_unused_transparency: false,
 
-            static_only: false,
             encode_format: None,
             quality: None,
             compression: CompressionType::Lossy,

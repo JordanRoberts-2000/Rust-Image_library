@@ -1,5 +1,5 @@
 use {
-    crate::{Image, ImageFormat, ImageSrc, Result, ValidationError, WithSrc},
+    crate::{EncodeFormat, Image, Result, ValidationError, WithSrc},
     fs_ext::file,
     std::{io, path::Path},
 };
@@ -10,7 +10,7 @@ impl Image {
 
         let ext = match path.extension() {
             None => {
-                let ext = self.format().extension();
+                let ext = self.encoding_format().primary_extension();
                 path.set_extension(ext);
                 ext
             }
@@ -20,19 +20,17 @@ impl Image {
                 .with_src(self.src())?,
         };
 
-        let format = ImageFormat::try_from(ext).with_src(self.src())?;
+        let format = EncodeFormat::try_from(ext).with_src(self.src())?;
 
-        file::atomic::overwrite(&path, |file| {
-            self.encode(file, format)
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))
-        })
+        file::atomic::create_with(
+            &path,
+            |file| {
+                self.encode(file, format)
+                    .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))
+            },
+            self.write_options(),
+        )
         .with_src(self.src())?;
-
-        if self.config.remove_source {
-            if let ImageSrc::File(path) = &self.src {
-                file::trash_or_remove(path).with_src(self.src())?;
-            }
-        }
 
         Ok(())
     }

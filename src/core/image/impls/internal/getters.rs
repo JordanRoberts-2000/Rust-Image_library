@@ -1,5 +1,6 @@
 use {
     crate::{image::Decoded, Image, ImageSrc},
+    fs_ext::{CollisionStrategy, ParentPolicy, RenameOptions, WriteOptions},
     std::cell::Ref,
 };
 
@@ -20,5 +21,16 @@ impl Image {
         drop(decoded);
 
         self.decoded.borrow()
+    }
+
+    pub(crate) fn write_options(&self) -> WriteOptions {
+        WriteOptions {
+            parent: ParentPolicy::RequireExists,
+            collision: self
+                .config
+                .collision_strategy
+                .clone()
+                .unwrap_or(CollisionStrategy::Rename(RenameOptions::Counter)),
+        }
     }
 }

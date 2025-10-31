@@ -1,8 +1,14 @@
-// use crate::Image;
+use {
+    crate::{Image, ImageSrc, Result, WithSrc},
+    fs_ext::file,
+};
 
-// impl Image {
-//     pub fn remove_source_file(&mut self) -> &mut Self {
-//         self.config.remove_source = true;
-//         self
-//     }
-// }
+impl Image {
+    pub fn delete_src(&self) -> Result<()> {
+        if let ImageSrc::File(path) = &self.src {
+            file::trash_or_remove(path).with_src(self.src())?;
+        }
+
+        Ok(())
+    }
+}
