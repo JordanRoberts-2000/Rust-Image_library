@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{utils::decode, ImageConfig},
-        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
+        image::{utils::decode, ImageConfig, ImageOrigin},
+        ErrorKind, Format, Image, Result, WithOrigin,
     },
     fs_ext::PathExt,
     std::{cell::RefCell, fs::File, io::BufReader, path::Path},
@@ -10,7 +10,7 @@ use {
 impl Image {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
-        let src: ImageSrc = path.into();
+        let origin: ImageOrigin = path.into();
 
         let res: Result<Self> = (|| {
             let mut reader = BufReader::new(File::open(path)?);
@@ -24,14 +24,14 @@ impl Image {
             let parent_dir = path.parent_or_current();
 
             Ok(Self {
-                src: src.clone(),
+                origin: origin.clone(),
                 decoded: RefCell::new(decoded),
                 config: ImageConfig { file_name, output_dir: parent_dir, ..Default::default() },
                 format: Some(format),
             })
         })();
 
-        res.with_src(src)
+        res.with_origin(origin)
     }
 }
 

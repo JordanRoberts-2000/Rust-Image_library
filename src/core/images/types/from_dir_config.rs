@@ -1,6 +1,6 @@
 use {crate::FormatFilter, fs_ext::DirQueryOptions};
 
-pub struct FromFolderConfig {
+pub struct FromDirConfig {
     pub(crate) recursive: bool,
     pub(crate) max_depth: Option<usize>,
     pub(crate) limit: Option<usize>,
@@ -8,7 +8,7 @@ pub struct FromFolderConfig {
     pub(crate) skip_errors: bool,
 }
 
-impl Default for FromFolderConfig {
+impl Default for FromDirConfig {
     fn default() -> Self {
         Self {
             recursive: true,
@@ -20,8 +20,8 @@ impl Default for FromFolderConfig {
     }
 }
 
-impl From<FromFolderConfig> for DirQueryOptions {
-    fn from(cfg: FromFolderConfig) -> DirQueryOptions {
+impl From<FromDirConfig> for DirQueryOptions {
+    fn from(cfg: FromDirConfig) -> DirQueryOptions {
         DirQueryOptions {
             include_files: true,
             include_dirs: false,
@@ -33,8 +33,8 @@ impl From<FromFolderConfig> for DirQueryOptions {
     }
 }
 
-impl From<&FromFolderConfig> for DirQueryOptions {
-    fn from(cfg: &FromFolderConfig) -> DirQueryOptions {
+impl From<&FromDirConfig> for DirQueryOptions {
+    fn from(cfg: &FromDirConfig) -> DirQueryOptions {
         DirQueryOptions {
             include_files: true,
             include_dirs: false,

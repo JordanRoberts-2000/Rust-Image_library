@@ -8,7 +8,7 @@ mod traits;
 pub use {
     error::ImageError,
     kind::{core::ErrorKind, validation::ValidationError},
-    traits::WithSrc,
+    traits::WithOrigin,
 };
 
 pub type Result<T> = std::result::Result<T, ImageError>;

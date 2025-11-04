@@ -1,5 +1,8 @@
 use {
-    crate::{image::ImageConfig, Image, ImageSrc, PixelFormat, Result, WithSrc},
+    crate::{
+        image::{ImageConfig, ImageOrigin},
+        Image, PixelFormat, Result, WithOrigin,
+    },
     std::{borrow::Cow, cell::RefCell},
 };
 
@@ -15,9 +18,9 @@ impl Image {
             Cow::Owned(v) => v,
             Cow::Borrowed(s) => s.to_vec(),
         };
-        let decoded = F::into_decoded(pixels, width, height).with_src(ImageSrc::RawPixels)?;
+        let decoded = F::into_decoded(pixels, width, height).with_origin(ImageOrigin::RawPixels)?;
         Ok(Self {
-            src: ImageSrc::RawPixels,
+            origin: ImageOrigin::RawPixels,
             decoded: RefCell::new(decoded),
             config: ImageConfig::default(),
             format: None,

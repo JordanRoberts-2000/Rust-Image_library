@@ -1,5 +1,5 @@
 use {
-    crate::{EncodeFormat, Image, Result, ValidationError, WithSrc},
+    crate::{EncodeFormat, Image, Result, ValidationError, WithOrigin},
     fs_ext::file,
     std::{io, path::Path},
 };
@@ -17,10 +17,10 @@ impl Image {
             Some(os_str) => os_str
                 .to_str()
                 .ok_or_else(|| ValidationError::MissingExtension(path.to_path_buf()))
-                .with_src(self.src())?,
+                .with_origin(self.origin())?,
         };
 
-        let format = EncodeFormat::try_from(ext).with_src(self.src())?;
+        let format = EncodeFormat::try_from(ext).with_origin(self.origin())?;
 
         file::atomic::create_with(
             &path,
@@ -30,7 +30,7 @@ impl Image {
             },
             self.write_options(),
         )
-        .with_src(self.src())?;
+        .with_origin(self.origin())?;
 
         Ok(())
     }

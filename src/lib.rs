@@ -25,7 +25,7 @@ pub use {
     core::{
         encoding, format_detection,
         image::Image,
-        images::{archive_formats, Archive, FormatFilter, FromFolderConfig, Images, ImagesBuilder},
+        images::{archive_formats, Archive, FormatFilter, FromDirConfig, Images, ImagesBuilder},
         metadata::ImageMetadata,
     },
     error::{ErrorKind, ImageError, ValidationError},

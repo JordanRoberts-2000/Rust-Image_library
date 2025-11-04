@@ -1,8 +1,8 @@
 use {
     crate::{
-        image::{utils::decode, ImageConfig},
+        image::{utils::decode, ImageConfig, ImageOrigin},
         utils::http,
-        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
+        ErrorKind, Format, Image, Result, WithOrigin,
     },
     std::{
         cell::RefCell,
@@ -13,7 +13,7 @@ use {
 
 impl Image {
     pub fn from_url(url: impl AsRef<str>) -> Result<Self> {
-        let src = ImageSrc::Url(url.as_ref().to_string());
+        let origin = ImageOrigin::Url(url.as_ref().to_string());
 
         (|| -> Result<Self> {
             let url = Url::parse(url.as_ref())?;
@@ -24,13 +24,13 @@ impl Image {
             let decoded = decode::from_reader(&mut reader, &format)?;
 
             Ok(Self {
-                src: src.clone(),
+                origin: origin.clone(),
                 decoded: RefCell::new(decoded),
                 config: ImageConfig::default(),
                 format: Some(format),
             })
         })()
-        .with_src(src)
+        .with_origin(origin)
     }
 }
 

@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{utils::decode, ImageConfig},
-        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
+        image::{utils::decode, ImageConfig, ImageOrigin},
+        ErrorKind, Format, Image, Result, WithOrigin,
     },
     base64::Engine,
     std::{
@@ -14,7 +14,7 @@ impl Image {
     pub fn from_base64(base_64: impl AsRef<str>) -> Result<Self> {
         let base_64 = base_64.as_ref();
         let preview = base_64.chars().take(10).collect();
-        let src = ImageSrc::Base64(preview);
+        let origin = ImageOrigin::Base64(preview);
 
         let res: Result<Self> = (|| {
             let bytes = base64::engine::general_purpose::STANDARD
@@ -26,14 +26,14 @@ impl Image {
             let decoded = decode::from_reader(&mut reader, &format)?;
 
             Ok(Self {
-                src: src.clone(),
+                origin: origin.clone(),
                 decoded: RefCell::new(decoded),
                 config: ImageConfig::default(),
                 format: Some(format),
             })
         })();
 
-        res.with_src(src)
+        res.with_origin(origin)
     }
 }
 

@@ -1,5 +1,5 @@
 use {
-    crate::{utils::http, ImageMetadata, Result, WithSrc},
+    crate::{utils::http, ImageMetadata, Result, WithOrigin},
     url::Url,
 };
 
@@ -12,7 +12,7 @@ impl ImageMetadata {
             Self::from_bytes(&bytes)
         })();
 
-        res.with_src(&url)
+        res.with_origin(&url)
     }
 }
 
@@ -21,8 +21,9 @@ mod tests {
     use {
         super::*,
         crate::{
+            image::ImageOrigin,
             test_utils::{server, MOCK_IMAGE_DIMENSIONS},
-            ErrorKind, ImageFormat, ImageSrc,
+            ErrorKind, ImageFormat,
         },
         httpmock::MockServer,
         strum::IntoEnumIterator,
@@ -59,8 +60,8 @@ mod tests {
             other => panic!("expected FailedRequest {{..}}, got {:?}", other),
         }
 
-        if let Some(src) = err.src() {
-            assert!(matches!(src, ImageSrc::Url(u) if u.as_str() == url));
+        if let Some(src) = err.origin() {
+            assert!(matches!(src, ImageOrigin::Url(u) if u.as_str() == url));
         }
 
         mock.assert();
@@ -90,8 +91,8 @@ mod tests {
             err.kind()
         );
 
-        if let Some(src) = err.src() {
-            assert!(matches!(src, ImageSrc::Url(u) if u.as_str() == url));
+        if let Some(src) = err.origin() {
+            assert!(matches!(src, ImageOrigin::Url(u) if u.as_str() == url));
         }
 
         mock.assert();
@@ -107,8 +108,8 @@ mod tests {
             other => panic!("expected DownloadFailed {{..}}, got {:?}", other),
         }
 
-        if let Some(src) = err.src() {
-            assert!(matches!(src, ImageSrc::Url(u) if u.as_str() == url));
+        if let Some(src) = err.origin() {
+            assert!(matches!(src, ImageOrigin::Url(u) if u.as_str() == url));
         }
     }
 }

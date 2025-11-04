@@ -1,5 +1,5 @@
 use {
-    crate::{Image, Result, WithSrc},
+    crate::{Image, Result, WithOrigin},
     fs_ext::file,
     std::{io, path::Path},
 };
@@ -16,7 +16,7 @@ impl Image {
             },
             self.write_options(),
         )
-        .with_src(self.src())?;
+        .with_origin(self.origin())?;
 
         Ok(())
     }

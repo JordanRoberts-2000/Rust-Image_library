@@ -1,14 +1,14 @@
 use {
     crate::{
-        image::{Decoded, ImageConfig},
-        Format, ImageSrc,
+        image::{Decoded, ImageConfig, ImageOrigin},
+        Format,
     },
     std::cell::RefCell,
 };
 
 #[derive(Debug, Clone)]
 pub struct Image {
-    pub(crate) src: ImageSrc,
+    pub(crate) origin: ImageOrigin,
     pub(crate) config: ImageConfig,
     pub(crate) decoded: RefCell<Decoded>,
     pub(crate) format: Option<Format>,

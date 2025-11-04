@@ -4,11 +4,11 @@ mod traits;
 mod types;
 mod utils;
 
-pub(crate) use utils::*;
+pub(crate) use {core::ImageEntry, utils::*};
 pub use {
     core::Images,
     traits::Archive,
-    types::{FormatFilter, FromFolderConfig, ImagesBuilder},
+    types::{FormatFilter, FromDirConfig, ImagesBuilder},
 };
 
 pub mod archive_formats {

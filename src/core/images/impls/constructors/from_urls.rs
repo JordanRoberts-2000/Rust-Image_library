@@ -1,4 +1,4 @@
-use crate::{Image, Images, Result};
+use crate::{ImageSrc, Images, Result};
 
 impl Images {
     pub fn from_urls<I, U>(urls: I) -> Result<Self>
@@ -6,13 +6,12 @@ impl Images {
         I: IntoIterator<Item = U>,
         U: AsRef<str>,
     {
-        let mut images = Vec::new();
+        let mut src_vec = Vec::new();
 
         for url in urls {
-            let image = Image::from_url(url)?;
-            images.push(image);
+            src_vec.push(ImageSrc::Url(url.as_ref().to_string()));
         }
 
-        Ok(Self::from_vec(images))
+        Ok(Self::from_src_vec(src_vec))
     }
 }

@@ -1,7 +1,7 @@
 use {
     crate::{
-        image::{utils::decode, ImageConfig},
-        ErrorKind, Format, Image, ImageSrc, Result, WithSrc,
+        image::{utils::decode, ImageConfig, ImageOrigin},
+        ErrorKind, Format, Image, Result, WithOrigin,
     },
     std::{
         cell::RefCell,
@@ -17,13 +17,13 @@ impl Image {
             let decoded = decode::from_reader(&mut reader, &format)?;
 
             Ok(Self {
-                src: ImageSrc::Reader,
+                origin: ImageOrigin::Reader,
                 decoded: RefCell::new(decoded),
                 config: ImageConfig::default(),
                 format: Some(format),
             })
         })()
-        .with_src(ImageSrc::Reader)
+        .with_origin(ImageOrigin::Reader)
     }
 }
 

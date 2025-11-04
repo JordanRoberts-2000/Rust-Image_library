@@ -1,17 +1,23 @@
 use {
-    crate::{FromFolderConfig, Images, Result},
+    crate::{FromDirConfig, Image, Images, Result},
     std::path::{Path, PathBuf},
 };
 
 pub struct ImagesBuilder {
     folders: Vec<PathBuf>,
     files: Vec<PathBuf>,
-    config: FromFolderConfig,
+    config: FromDirConfig,
+    images: Vec<Image>,
 }
 
 impl ImagesBuilder {
     pub fn new() -> Self {
-        Self { folders: Vec::new(), files: Vec::new(), config: FromFolderConfig::default() }
+        Self {
+            folders: Vec::new(),
+            files: Vec::new(),
+            images: Vec::new(),
+            config: FromDirConfig::default(),
+        }
     }
 
     pub fn add_folder(mut self, path: impl AsRef<Path>) -> Self {
@@ -42,7 +48,20 @@ impl ImagesBuilder {
         self
     }
 
-    pub fn config(mut self, config: FromFolderConfig) -> Self {
+    pub fn add_image(mut self, image: Image) -> Self {
+        self.images.push(image);
+        self
+    }
+
+    pub fn add_images<I>(mut self, images: I) -> Self
+    where
+        I: IntoIterator<Item = Image>,
+    {
+        self.images.extend(images);
+        self
+    }
+
+    pub fn config(mut self, config: FromDirConfig) -> Self {
         self.config = config;
         self
     }
@@ -53,18 +72,19 @@ impl ImagesBuilder {
     }
 
     pub fn build(self) -> Result<Images> {
-        let mut all_images = Vec::new();
+        let mut entry_vec = Vec::new();
 
         if !self.folders.is_empty() {
-            let folder_images = Images::from_folders_with_config(self.folders, self.config)?;
-            all_images.extend(folder_images.inner);
+            for folder in self.folders {
+                entry_vec.extend(Images::from_dir_with_config(folder, &self.config)?.entry_vec);
+            }
         }
 
         if !self.files.is_empty() {
             let file_images = Images::from_files(self.files)?;
-            all_images.extend(file_images.inner);
+            entry_vec.extend(file_images.entry_vec);
         }
 
-        Ok(Images::from_vec(all_images))
+        Ok(Images { entry_vec, image_vec: self.images })
     }
 }

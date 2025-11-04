@@ -1,5 +1,5 @@
 use {
-    crate::{Image, Images, Result},
+    crate::{ImageSrc, Images, Result},
     std::path::Path,
 };
 
@@ -9,13 +9,12 @@ impl Images {
         I: IntoIterator<Item = P>,
         P: AsRef<Path>,
     {
-        let mut images = Vec::new();
+        let mut src_vec = Vec::new();
 
         for path in paths {
-            let image = Image::from_file(path)?;
-            images.push(image);
+            src_vec.push(ImageSrc::File(path.as_ref().to_path_buf()));
         }
 
-        Ok(Self::from_vec(images))
+        Ok(Self::from_src_vec(src_vec))
     }
 }

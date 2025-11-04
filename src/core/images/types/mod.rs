@@ -1,5 +1,5 @@
 mod format_filter;
-mod from_folder_config;
+mod from_dir_config;
 mod images_builder;
 mod archive_formats {
     pub mod tar;
@@ -10,6 +10,6 @@ mod archive_formats {
 pub use {
     archive_formats::{tar::Tar, tar_gz::TarGz, zip::Zip},
     format_filter::FormatFilter,
-    from_folder_config::FromFolderConfig,
+    from_dir_config::FromDirConfig,
     images_builder::ImagesBuilder,
 };

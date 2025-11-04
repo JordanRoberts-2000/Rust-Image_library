@@ -1,5 +1,5 @@
 use {
-    crate::{ErrorKind, ImageMetadata, ImageSrc, Result, WithSrc},
+    crate::{image::ImageOrigin, ErrorKind, ImageMetadata, Result, WithOrigin},
     image::ImageReader,
     std::io::{BufRead, Seek},
 };
@@ -12,7 +12,7 @@ impl ImageMetadata {
         let reader = ImageReader::new(reader)
             .with_guessed_format()
             .map_err(ErrorKind::FormatDetectionFailed)
-            .with_src(ImageSrc::Reader)?;
+            .with_origin(ImageOrigin::Reader)?;
 
         Self::from_image_reader(reader)
     }

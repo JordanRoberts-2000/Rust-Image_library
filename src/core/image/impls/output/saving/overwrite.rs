@@ -1,5 +1,5 @@
 use {
-    crate::{Image, Result, WithSrc},
+    crate::{Image, Result, WithOrigin},
     fs_ext::file,
 };
 
@@ -8,7 +8,7 @@ impl Image {
         let path = self.config.output_dir.join(self.file_name());
 
         file::atomic::overwrite(&path, |file| self.encode(file, self.encoding_format()))
-            .with_src(self.src())?;
+            .with_origin(self.origin())?;
 
         Ok(())
     }

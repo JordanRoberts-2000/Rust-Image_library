@@ -1,5 +1,5 @@
 use {
-    crate::{ErrorKind, ImageMetadata, Result, WithSrc},
+    crate::{ErrorKind, ImageMetadata, Result, WithOrigin},
     image::ImageReader,
     std::path::Path,
 };
@@ -10,7 +10,7 @@ impl ImageMetadata {
 
         let reader = ImageReader::open(&path)
             .map_err(|e| ErrorKind::Open { source: e, path: path.to_path_buf() })
-            .with_src(path)?;
+            .with_origin(path)?;
 
         Self::from_image_reader(reader)
     }

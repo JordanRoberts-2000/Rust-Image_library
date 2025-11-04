@@ -1,12 +1,15 @@
 use {
-    crate::{image::Decoded, Image, ImageSrc},
+    crate::{
+        image::{Decoded, ImageOrigin},
+        Image,
+    },
     fs_ext::{CollisionStrategy, ParentPolicy, RenameOptions, WriteOptions},
     std::cell::Ref,
 };
 
 impl Image {
-    pub(crate) fn src(&self) -> ImageSrc {
-        self.src.clone()
+    pub(crate) fn origin(&self) -> ImageOrigin {
+        self.origin.clone()
     }
 
     pub(crate) fn decoded(&self) -> Ref<Decoded> {

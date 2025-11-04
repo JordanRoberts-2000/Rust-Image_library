@@ -46,6 +46,6 @@ impl Image {
             })
             .collect();
 
-        Ok(Images::from_vec(images))
+        Ok(Images::from_image_vec(images))
     }
 }

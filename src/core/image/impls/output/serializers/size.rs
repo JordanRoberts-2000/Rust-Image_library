@@ -1,5 +1,5 @@
 use {
-    crate::{EncodeFormat, ErrorKind, Image, ImageError, ImageSrc, Result, WithSrc},
+    crate::{image::ImageOrigin, EncodeFormat, ErrorKind, Image, ImageError, Result, WithOrigin},
     fs_ext::file,
 };
 
@@ -22,9 +22,9 @@ impl Image {
     }
 
     pub fn source_file_size(&self) -> Result<u64> {
-        match &self.src {
-            ImageSrc::File(path) => Ok(file::size(path).with_src(self.src())?),
-            _ => Err(ImageError::new(ErrorKind::SourceIsNotFile).with_src(self.src())),
+        match &self.origin {
+            ImageOrigin::File(path) => Ok(file::size(path).with_origin(self.origin())?),
+            _ => Err(ImageError::new(ErrorKind::SourceIsNotFile).with_origin(self.origin())),
         }
     }
 }
